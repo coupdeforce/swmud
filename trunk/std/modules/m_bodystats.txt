@@ -1,4 +1,4 @@
-// Last edited by deforce on 11-14-2007
+// Last edited by deforce on 12-22-2007
 // Created by Deathblade 08-13-1995
 
 #include <classes.h>
@@ -37,6 +37,11 @@ nomask int query_points_remaining()
 
 nomask void set_points_remaining(int n)
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set creation points remaining for " + this_object()->short() + " to " + n + ".\n");
+   }
+
    points_remaining = n;
 }
 
@@ -64,54 +69,99 @@ nomask int query_for() { return cur_for; }
 
 nomask void set_str(int n)
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set strength for " + this_object()->short() + " to " + n + ".\n");
+   }
+
    stat_str = n;
    refresh_stats();
 }
 
 nomask void set_con(int n)
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set constitution for " + this_object()->short() + " to " + n + ".\n");
+   }
+
    stat_con = n;
    refresh_stats();
 }
 
 nomask void set_agi(int n)
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set agility for " + this_object()->short() + " to " + n + ".\n");
+   }
+
    stat_agi = n;
    refresh_stats();
 }
 
 nomask void set_dex(int n)
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set dexterity for " + this_object()->short() + " to " + n + ".\n");
+   }
+
    stat_dex = n;
    refresh_stats();
 }
 
 nomask void set_per(int n)
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set perception for " + this_object()->short() + " to " + n + ".\n");
+   }
+
    stat_per = n;
    refresh_stats();
 }
 
 nomask void set_int(int n)
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set intelligence for " + this_object()->short() + " to " + n + ".\n");
+   }
+
    stat_int = n;
    refresh_stats();
 }
 
 nomask void set_cha(int n)
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set charisma for " + this_object()->short() + " to " + n + ".\n");
+   }
+
    stat_cha = n;
    refresh_stats();
 }
 
 nomask void set_luc(int n)
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set luck for " + this_object()->short() + " to " + n + ".\n");
+   }
+
    stat_luc = n;
    refresh_stats();
 }
 
 nomask void set_for(int n)
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set force for " + this_object()->short() + " to " + n + ".\n");
+   }
+
    stat_for = n;
    refresh_stats();
 }
@@ -172,6 +222,11 @@ void refresh_stats()
 // This is later modified by race
 nomask void init_stats()
 {
+   if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to reset " + this_object()->short() + "'s stats to racial minimums.\n");
+   }
+
    stat_str = this_object()->query_race_str_min();
    stat_con = this_object()->query_race_con_min();
    stat_agi = this_object()->query_race_agi_min();

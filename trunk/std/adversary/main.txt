@@ -1,5 +1,6 @@
 // Last edited by deforce on 10-12-2009
 #include <hooks.h>
+#include <playerflags.h>
 
 mixed call_hooks(string, int);
 string query_random_limb();
@@ -14,7 +15,7 @@ int check_condition(int);
 int query_stunned();
 void simple_action(string);
 void my_action(string);
-int query_damage_bonus();
+mapping query_damage_bonuses();
 int query_ghost();
 int query_agi();
 int test_skill(string skill);
@@ -26,21 +27,37 @@ void perform_combat_action();
 int start_fight(object who);
 varargs int check_wimpy(object target);
 
-private nosave int speed_bonus = 0;
+mapping randomize_damage(mapping damage_types)
+{
+   foreach (string type in keys(damage_types))
+   {
+      damage_types[type] = random(damage_types[type]) + 1;
+   }
+
+   return damage_types;
+}
 
 void take_a_swing(object target)
 {
-   if (check_wimpy() || this_body()->query_stunned())
+   int slowed = this_body()->query_slowed() && (this_body()->query_agi() * 100 / 200 < random(100)) ? 1 : 0;
+   int speed_bonus = 0;
+
+   if ((environment() != environment(target)) || check_wimpy() || this_object()->query_stunned())
    {
       return;
    }
 
-//   speed_bonus = random(((this_body()->query_agi() * 2) / 5) + 21) > 55 ? 1 : 0;
-   speed_bonus = (query_agi() * (20 + call_hooks("combat_speed_bonus", HOOK_SUM))) > random(5000) ? 1 : 0;
+   if (!slowed)
+   {
+//      speed_bonus = random(((this_body()->query_agi() * 2) / 5) + 21) > 55 ? 1 : 0;
+      speed_bonus = (query_agi() * (20 + call_hooks("combat_speed_bonus", HOOK_SUM))) > random(5000) ? 1 : 0;
+   }
+
+   speed_bonus += call_hooks("force_speed", HOOK_SUM);
 
    foreach (object weapon in query_weapons())
    {
-      for (int count = 0; count < (weapon->query_weapon_speed() + speed_bonus); count++)
+      for (int count = 0; count < (slowed ? 1 : (weapon->query_weapon_speed()) + speed_bonus); count++)
       {
          if (query_ghost() || !(target = get_target()))
          {
@@ -48,13 +65,13 @@ void take_a_swing(object target)
             return;
          }
 
-         if (!test_skill(weapon->query_skill_used()) && (random(251) > (weapon->query_to_hit_bonus() + call_hooks("to_hit_bonus", HOOK_SUM))))
+         if (!test_skill(weapon->query_skill_used()) && (random(251) > (weapon->query_to_hit_bonus(target) + call_hooks("to_hit_bonus", HOOK_SUM))))
          {
             add_event(target, weapon, query_random_limb(), "miss", this_object());
          }
          else
          {
-            add_event(target, weapon, query_random_limb(), random(weapon->query_weapon_class() + query_damage_bonus()) + 1, this_object());
+            add_event(target, weapon, query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
 
             handle_events();
          }
@@ -71,18 +88,15 @@ void take_a_swing(object target)
 
 int check_wimpy(object target)
 {
-   string array room_exits = ({ });
-
    if (!target) { target = this_object(); }
-
-   room_exits = environment(target)->query_exit_directions(wizardp(target));
-
-   if (!sizeof(room_exits)) { return; }
 
    if (target->query_health() < target->query_wimpy_threshold())
    {
+      string array room_exits = environment(target)->query_exit_directions(wizardp(target));
       string direction = target->query_wimpy_dir();
       object previous_target = query_target();
+
+      if (!sizeof(room_exits)) { return; }
 
       if (direction != "out")
       {
