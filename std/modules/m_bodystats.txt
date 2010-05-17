@@ -1,4 +1,4 @@
-// Last edited by deforce on 12-22-2007
+// Last edited by deforce on 03-16-2008
 // Created by Deathblade 08-13-1995
 
 #include <classes.h>
@@ -37,10 +37,12 @@ nomask int query_points_remaining()
 
 nomask void set_points_remaining(int n)
 {
+/*
    if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set creation points remaining for " + this_object()->short() + " to " + n + ".\n");
    }
+*/
 
    points_remaining = n;
 }
@@ -69,10 +71,12 @@ nomask int query_for() { return cur_for; }
 
 nomask void set_str(int n)
 {
+/*
    if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set strength for " + this_object()->short() + " to " + n + ".\n");
    }
+*/
 
    stat_str = n;
    refresh_stats();
@@ -80,10 +84,12 @@ nomask void set_str(int n)
 
 nomask void set_con(int n)
 {
+/*
    if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set constitution for " + this_object()->short() + " to " + n + ".\n");
    }
+*/
 
    stat_con = n;
    refresh_stats();
@@ -91,10 +97,12 @@ nomask void set_con(int n)
 
 nomask void set_agi(int n)
 {
+/*
    if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set agility for " + this_object()->short() + " to " + n + ".\n");
    }
+*/
 
    stat_agi = n;
    refresh_stats();
@@ -102,10 +110,12 @@ nomask void set_agi(int n)
 
 nomask void set_dex(int n)
 {
+/*
    if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set dexterity for " + this_object()->short() + " to " + n + ".\n");
    }
+*/
 
    stat_dex = n;
    refresh_stats();
@@ -113,10 +123,12 @@ nomask void set_dex(int n)
 
 nomask void set_per(int n)
 {
+/*
    if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set perception for " + this_object()->short() + " to " + n + ".\n");
    }
+*/
 
    stat_per = n;
    refresh_stats();
@@ -124,10 +136,12 @@ nomask void set_per(int n)
 
 nomask void set_int(int n)
 {
+/*
    if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set intelligence for " + this_object()->short() + " to " + n + ".\n");
    }
+*/
 
    stat_int = n;
    refresh_stats();
@@ -135,10 +149,12 @@ nomask void set_int(int n)
 
 nomask void set_cha(int n)
 {
+/*
    if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set charisma for " + this_object()->short() + " to " + n + ".\n");
    }
+*/
 
    stat_cha = n;
    refresh_stats();
@@ -146,10 +162,12 @@ nomask void set_cha(int n)
 
 nomask void set_luc(int n)
 {
+/*
    if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set luck for " + this_object()->short() + " to " + n + ".\n");
    }
+*/
 
    stat_luc = n;
    refresh_stats();
@@ -157,10 +175,12 @@ nomask void set_luc(int n)
 
 nomask void set_for(int n)
 {
+/*
    if ((this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set force for " + this_object()->short() + " to " + n + ".\n");
    }
+*/
 
    stat_for = n;
    refresh_stats();
@@ -205,10 +225,11 @@ void refresh_stats()
    cur_for = stat_for + (adj_for = call_hooks("for_bonus", HOOK_SUM));
 
 //   this_object()->set_max_capacity(cur_str * 3);
-   this_object()->set_max_capacity(((cur_str + 100) * (1.25 * (cur_str / 100.0))) + 50);
-   this_object()->set_weapon_class(cur_str ? to_int(cur_str / 3.3) : 9);
-   this_object()->set_armor_class(cur_con ? to_int(cur_con / 4) : 10);
-   this_object()->set_to_hit_bonus((cur_agi / 2) - 35);  // Unarmed to-hit penalty or bonus
+   this_object()->set_max_capacity(to_int(floor((cur_str + 100) * (1.25 * (cur_str / 100.0)))) + 50);
+   this_object()->set_weapon_class(cur_str ? to_int(floor(cur_str / 3.3)) : 9);
+   this_object()->set_armor_class(cur_con ? to_int(floor(cur_con / 4)) : 10);
+   this_object()->set_to_hit_bonus(to_int(ceil(cur_agi / 2)) - 35);  // Unarmed to-hit penalty or bonus
+   this_object()->set_weapon_speed(random(cur_agi + 1) > 50 ? 2 : 1);  // One or two punches/kicks
 
    // Recalculate limb health
    limb_health = (this_object()->query_max_health() * (((cur_con / 3) + (cur_con * (cur_con / 300))) / (133.3 - (cur_con / 3)))) + (this_object()->query_max_health() / 3);
@@ -238,4 +259,43 @@ nomask void init_stats()
    stat_for = this_object()->query_race_for_min();
 
    refresh_stats();
+}
+
+varargs int get_hp_gain(int primary)
+{
+   int bonus = (primary ? 3 : 2);
+   int gain = 0;
+
+   switch (stat_con)
+   {
+      case 0..9: bonus *= 10; break;
+      case 10..14: bonus *= 11; break;
+      case 15..19: bonus *= 12; break;
+      case 20..24: bonus *= 13; break;
+      case 25..29: bonus *= 14; break;
+      case 30..34: bonus *= 15; break;
+      case 35..39: bonus *= 16; break;
+      case 40..44: bonus *= 18; break;
+      case 45..49: bonus *= 20; break;
+      case 50..54: bonus *= 22; break;
+      case 55..59: bonus *= 24; break;
+      case 60..64: bonus *= 26; break;
+      case 65..69: bonus *= 28; break;
+      case 70..74: bonus *= 31; break;
+      case 75..79: bonus *= 34; break;
+      case 80..84: bonus *= 37; break;
+      case 85..89: bonus *= 40; break;
+      case 90..94: bonus *= 43; break;
+      case 95..99: bonus *= 46; break;
+      case 100..999999: bonus *= 50;
+   }
+
+   gain += (primary ? 8 : 2);
+   gain += random(((primary ? 6 : 3) * (to_float(stat_luc) / 100)) + 1);
+   gain += random((8 * (to_float(bonus) / 100)) + 1);
+
+   if (primary && (gain > 20)) { gain = 20; }
+   else if (!primary && (gain > 10)) { gain = 10; }
+
+   return gain;
 }
