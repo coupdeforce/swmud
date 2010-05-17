@@ -1,0 +1,218 @@
+// Last edited by deforce on 12-24-2007
+
+private nosave mapping skills = ([ ]);
+private int skill_delay = 0;
+private mapping skill_delays = ([ ]);
+
+int set_skill(string skill, int skill_points)
+{
+   skills[skill] = skill_points;
+
+   return 1;
+}
+
+int get_stat_bonus(string skill)
+{
+   int bonus; // starts at 0
+   int player_stat;
+   int stat_weight;
+   mixed skill_data;
+
+   skill_data = SKILL_D->query_skill(skill);
+
+   if (!skill_data)
+   {
+      error("can't find skill " + skill);
+      return 0;
+   }
+
+   // Strength
+   stat_weight = skill_data[2];
+   player_stat = this_body()->query_str();
+
+   if (stat_weight != 0)
+   {
+      player_stat *= stat_weight;
+      player_stat /= 100;
+
+      bonus += player_stat;
+   }
+
+   // Constitution
+   stat_weight = skill_data[3];
+   player_stat = this_body()->query_con();
+
+   if (stat_weight != 0)
+   {
+      player_stat *= stat_weight;
+      player_stat /= 100;
+
+      bonus += player_stat;
+   }
+
+   // Agility
+   stat_weight = skill_data[4];
+   player_stat = this_body()->query_agi();
+
+   if (stat_weight != 0)
+   {
+      player_stat *= stat_weight;
+      player_stat /= 100;
+
+      bonus += player_stat;
+   }
+
+   // Dexterity
+   stat_weight = skill_data[5];
+   player_stat = this_body()->query_dex();
+
+   if (stat_weight != 0)
+   {
+      player_stat *= stat_weight;
+      player_stat /= 100;
+
+      bonus += player_stat;
+   }
+
+   // Perception
+   stat_weight = skill_data[6];
+   player_stat = this_body()->query_per();
+
+   if (stat_weight != 0)
+   {
+      player_stat *= stat_weight;
+      player_stat /= 100;
+
+      bonus += player_stat;
+   }
+
+   // Intelligence
+   stat_weight = skill_data[7];
+   player_stat = this_body()->query_int();
+   if (stat_weight != 0)
+   {
+      player_stat *= stat_weight;
+      player_stat /= 100;
+
+      bonus += player_stat;
+   }
+
+   // Charisma
+   stat_weight = skill_data[8];
+   player_stat = this_body()->query_cha();
+
+   if (stat_weight != 0)
+   {
+      player_stat *= stat_weight;
+      player_stat /= 100;
+
+      bonus += player_stat;
+   }
+
+   // Luck
+   stat_weight = skill_data[9];
+   player_stat = this_body()->query_luc();
+
+   if (stat_weight != 0)
+   {
+      player_stat *= stat_weight;
+      player_stat /= 100;
+
+      bonus += player_stat;
+   }
+
+   // Force
+   stat_weight = skill_data[10];
+   player_stat = this_body()->query_for();
+
+   if (stat_weight != 0)
+   {
+      player_stat *= stat_weight;
+      player_stat /= 100;
+
+      bonus += player_stat;
+   }
+
+   return bonus;
+}
+
+mapping get_skills()
+{
+   return skills;
+}
+
+int query_skill(string skill)
+{
+   return skills[skill];
+}
+
+//:FUNCTION add_skill_delay
+// Adds a specificed skill delay in seconds
+void add_skill_delay(int delay)
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to add skill delay of " + delay + " to " + this_object()->short() + ".\n");
+   }
+*/
+
+   skill_delay = time() + delay;
+}
+
+//:FUNCTION has_skill_delay
+// Returns 0 if the player can use skills again, the remaing time if not
+int has_skill_delay()
+{
+   if (time() < skill_delay)
+   {
+      return skill_delay - time();
+   }
+
+   skill_delay = 0;
+
+   return 0;
+}
+
+//:FUNCTION query_skill_delays
+// Returns a mapping of any special skill delays
+mapping query_skill_delays()
+{
+   foreach (string skill in keys(skill_delays))
+   {
+      if (skill_delays[skill] < time())
+      {
+         map_delete(skill_delays, skill);
+      }
+   }
+
+   return skill_delays;
+}
+
+//:FUNCTION add_special_skill_delay
+// Adds a specificed skill delay in seconds to the specified skill
+void add_special_skill_delay(string skill, int delay)
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to add special skill delay of " + delay + " to " + this_object()->short() + " for " + skill + ".\n");
+   }
+*/
+
+   skill_delays[skill] = time() + delay;
+}
+
+//:FUNCTION has_special_skill_delay
+// Returns 0 if the player can use the specified skill again, the remaing time if not
+int has_special_skill_delay(string skill)
+{
+   if (skill_delays[skill] && (time() < skill_delays[skill]))
+   {
+      return skill_delays[skill] - time();
+   }
+
+   map_delete(skill_delays, skill);
+
+   return 0;
+}
