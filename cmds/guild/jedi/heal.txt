@@ -1,13 +1,16 @@
-// Last edited by deforce on 12-03-2007
+// Last edited by deforce on 12-05-2007
 inherit VERB_OB;
 
 void perform_healing(object body);
+void lose_focus();
+
+object this_body = this_body();
 
 void do_heal_liv(object living)
 {
-   if (this_body()->query_guild_level("jedi"))
+   if (this_body->query_guild_level("jedi"))
    {
-      if (this_body()->query_guild_level("assassin"))
+      if (this_body->query_guild_level("assassin"))
       {
          write("You are too dedicated to the Dark side of the Force to use it for healing.\n");
       }
@@ -17,37 +20,37 @@ void do_heal_liv(object living)
       }
       else if (living->query_health() >= living->query_max_health())
       {
-         if (living == this_body())
+         if (living == this_body)
          {
-            tell(this_body(), "You are already at full health.\n");
+            tell(this_body, "You are already at full health.\n");
          }
          else
          {
-            tell(this_body(), living->short() + " is already at full health.\n");
+            tell(this_body, living->short() + " is already at full health.\n");
          }
       }
-      else if (this_body()->has_skill_delay())
+      else if (this_body->has_skill_delay())
       {
          write("You are too busy to concentrate on healing.\n");
       }
       else
       {
-         if (living == this_body())
+         if (living == this_body)
          {
             this_body->simple_action("$N $vconcentrate for a moment on healing $r with the Force...\n");
          }
          else
          {
-            this_body->targetted_action("$N $vconcentrate momentarily on healing $t with the Force...\n", body);
+            this_body->targetted_action("$N $vconcentrate momentarily on healing $t with the Force...\n", living);
          }
 
-         if (this_body()->test_skill("healing", this_body()->query_jedi_alignment() * 10))
+         if (this_body->test_skill("healing", this_body->query_jedi_alignment() * 10))
          {
-            perform_healing(living);
+            call_out("perform_healing", 2, living);
          }
          else
          {
-            this_body->simple_action("$N $vconcentrate for a moment on healing $r with the Force.\n");
+            call_out("lose_focus", 2);
          }
       }
    }
@@ -59,31 +62,42 @@ void do_heal_liv(object living)
 
 void do_heal()
 {
-   do_heal_liv(this_body());
+   do_heal_liv(this_body);
 }
 
 void perform_healing(object body)
 {
-   object this_body = this_body();
-   int force = this_body->query_for();
-   int level = this_body->query_guild_level("jedi");
-   int skill = this_body->query_skill("healing");
-   float modifier = (skill >= 800 ? 100 : (skill >= 200 ? 200 : 400));
-   int amount = ((force / 100.0) * (level / 50.0) * 50.0) + (force * (force / modifier));
+   int force;
+   int level;
+   int skill;
+   float modifier;
+   int amount;
 
-   if (body == this_body)
+   if (!this_body || !body) { return; }
+   else if (environment(this_body) != environment(body))
    {
-      this_body->simple_action("$N $vconcentrate for a moment on healing $r with the Force.\n");
-   }
-   else
-   {
-      this_body->targetted_action("$N $vconcentrate momentarily on healing $t with the Force.\n", body);
+      tell(this_body, body->short() + " left before the healing was complete.\n");
+
+      return;
    }
 
+   force = this_body->query_for();
+   level = this_body->query_guild_level("jedi");
+   skill = this_body->query_skill("healing");
+   modifier = (skill >= 800 ? 100 : (skill >= 200 ? 200 : 400));
+   amount = ((force / 100.0) * (level / 50.0) * 50.0) + (force * (force / modifier));
+
+   body->other_action("$N $vare surrounded by a faint blue glow.\n");
    body->heal_us(amount);
+
    tell(body, "HP: " + body->query_health() + "/" + body->query_max_health() + "\n\n");
 
    this_body->add_skill_delay(8);
+}
+
+void lose_focus()
+{
+   this_body->simple_action("$N $vlose focus.\n");
 }
 
 void create()

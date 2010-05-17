@@ -30,6 +30,14 @@ void main(string arg)
       {
          write("You are not experienced enough to know how to create Force storms.\n");
       }
+      else if (!this_body->has_learned_skill("force storm"))
+      {
+         out("You have not learned how to create Force storms.\n");
+      }
+      else if (this_body->has_blocked_skill("force storm"))
+      {
+         out("Your ability to use this command has been disabled.\n");
+      }
       else if (this_body->has_skill_delay())
       {
          out("You are too busy to concentrate on manipulating the Force.\n");

@@ -1,4 +1,4 @@
-// Last edited by deforce on 11-20-2007
+// Last edited by deforce on 02-11-2008
 // channel.h -- defines for the channel system
 // Created by Deathblade on 01-15-1996
 
@@ -17,5 +17,6 @@
 #define CHANNEL_PK_ONLY         0x0200
 
 #define CHANNEL_PERMANENT       0x1000
+#define PLAYER_SILENT           0x2000
 
 #endif /* __CHANNEL_H__ */
