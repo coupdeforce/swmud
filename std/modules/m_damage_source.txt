@@ -1,12 +1,11 @@
-// Last edited by deforce on 03-23-2010
+// Last edited by deforce on 05-12-2010
 /* The concept is a bit abstract, so the name isn't entirely correct.  This
  * is an abstraction of the concept of something that one attacks with;
  * either a weapon or one's self.  It controls the combat messages, and
  * modifies the result based on the target, etc.
  *
  * This means that when you fight with a weapon, the _weapon_ is really
- * attacking, not you.  Some of the names in this are a bit backwards compat,
- * though.
+ * attacking, not you.  Some of the names in this are a bit backwards compat, though.
  *
  * April, 1998: Iizuka made significant changes and updated for adversary. */
 // On repair, clear the damaged flag and set new class/durability if necessary
@@ -17,15 +16,21 @@ int test_flag(int);
 void clear_flag(int);
 void assign_flag(int, int);
 
-private int weapon_class = 1;
-private int max_weapon_class = 1;
 private int weapon_speed = 1;
-private int to_hit_bonus;
+private int to_hit_base = 0;
+private int to_hit_bonus = 0;
+private int stun_bonus = 0;
+private int slow_bonus = 0;
+private int tear_bonus = 0;
+private int critical_chance_bonus = 0;
+private int critical_multiplier_bonus = 0;
+private int lightsaber_deflection_bonus = 0;
 private int durability = 1;
 private int max_durability = 1;
 private int chance_to_be_damaged = 2;
-private string skill_used = "unarmed";
-private string array damage_type = ({ "combat-unarmed" });
+private string skill_used = "";
+private mapping damage_types = ([ ]);
+private mapping damage_bonuses = ([ ]);
 private nosave string backstab_message = "";
 private nosave string death_message = "";
 private nosave mapping def_combat_messages = ([]);
@@ -33,7 +38,7 @@ private mapping combat_messages = ([]);
 
 void internal_setup()
 {
-   this_object()->add_save( ({ "weapon_class", "max_weapon_class", "durability", "max_durability", "persist_flags" }) );
+   this_object()->add_save( ({ "damage_types", "damage_bonuses", "durability", "max_durability", "critical_chance_bonus", "critical_multiplier_bonus", "persist_flags" }) );
 }
 
 int can_swing()
@@ -46,9 +51,14 @@ mixed adjust_my_result(mixed result)
    return result;
 }
 
-int query_to_hit_bonus(object target)
+void set_to_hit_base(int x)
 {
-   return to_hit_bonus;
+   to_hit_base = x;
+}
+
+int query_to_hit_base(object target)
+{
+   return to_hit_base;
 }
 
 void set_to_hit_bonus(int x)
@@ -56,14 +66,109 @@ void set_to_hit_bonus(int x)
    to_hit_bonus = x;
 }
 
-string array query_damage_type()
+void add_to_hit_bonus(int x)
 {
-   return damage_type;
+   to_hit_bonus += x;
 }
 
-void set_damage_type(string array str...)
+int query_to_hit_bonus(object target)
 {
-   damage_type = str;
+   return to_hit_bonus;
+}
+
+void reset_to_hit_bonus()
+{
+   to_hit_bonus = 0;
+}
+
+void add_stun_bonus(int x)
+{
+   stun_bonus += x;
+}
+
+int query_stun_bonus()
+{
+   return stun_bonus;
+}
+
+void reset_stun_bonus()
+{
+   stun_bonus = 0;
+}
+
+void add_slow_bonus(int x)
+{
+   slow_bonus += x;
+}
+
+int query_slow_bonus()
+{
+   return slow_bonus;
+}
+
+void reset_slow_bonus()
+{
+   slow_bonus = 0;
+}
+
+void add_tear_bonus(int x)
+{
+   tear_bonus += x;
+}
+
+int query_tear_bonus()
+{
+   return tear_bonus;
+}
+
+void reset_tear_bonus()
+{
+   tear_bonus = 0;
+}
+
+void add_critical_chance_bonus(int x)
+{
+   critical_chance_bonus += x;
+}
+
+int query_critical_chance_bonus()
+{
+   return critical_chance_bonus;
+}
+
+void reset_critical_chance_bonus()
+{
+   critical_chance_bonus = 0;
+}
+
+void add_critical_multiplier_bonus(int x)
+{
+   critical_multiplier_bonus += x;
+}
+
+int query_critical_multiplier_bonus()
+{
+   return critical_multiplier_bonus;
+}
+
+void reset_critical_multiplier_bonus()
+{
+   critical_multiplier_bonus = 0;
+}
+
+void add_lightsaber_deflection_bonus(int x)
+{
+   lightsaber_deflection_bonus += x;
+}
+
+int query_lightsaber_deflection_bonus()
+{
+   return lightsaber_deflection_bonus;
+}
+
+void reset_lightsaber_deflection_bonus()
+{
+   lightsaber_deflection_bonus = 0;
 }
 
 int is_weapon()
@@ -143,7 +248,17 @@ mixed query_combat_message(string type)
 
 mixed query_combat_messages()
 {
-   return combat_messages;
+   if (sizeof(combat_messages))
+   {
+      return combat_messages;
+   }
+
+   if (sizeof(def_combat_messages))
+   {
+      return def_combat_messages;
+   }
+
+   return MESSAGES_D->get_messages("combat-blunt");
 }
 
 private mixed merge_lists(mixed list, mixed item, mixed def)
@@ -159,61 +274,109 @@ void add_combat_message(string type, string msg)
    combat_messages[type] = merge_lists(combat_messages[type], msg, def_combat_messages[type]);
 }
 
-//:FUNCTION set_weapon_class
-// Set the damage potential for the weapon
-void set_weapon_class(int x)
+//:FUNCTION set_damage_type
+// Set a damage type for the weapon
+void set_damage_type(string type, int amount)
 {
-   if (x > 0)
-   {
-      weapon_class = x;
-      max_weapon_class = x;
-      durability = x;
-      max_durability = x;
-   }
+   damage_types[type] = amount;
 }
 
-void decrease_class(int x)
+mapping query_damage_types()
 {
-   if (!this_object()->is_living())
+   if (sizeof(damage_types))
    {
-      object owner = this_object()->query_wielded_by();
-      weapon_class -= x;
-      durability -= x;
+      mapping types = ([ ]);
 
-      assign_flag(F_DAMAGED, 1);
-
-      if (owner)
+      foreach (string type in keys(damage_types) + keys(damage_bonuses))
       {
-         tell(owner, "%^ITEM_DAMAGE%^You notice your " + terminal_colour(this_object()->short(), ANSI_D->query_translations()[1]) + " becomes damaged.%^RESET%^\n");
+         if (floor((damage_types[type] + damage_bonuses[type]) * durability / max_durability) > 0)
+         {
+            types[type] = to_int(floor((damage_types[type] + damage_bonuses[type]) * durability / max_durability));
+         }
       }
 
-      if ((weapon_class <= 0) || (durability <= 0))
-      {
-         this_object()->unwield();
-
-         weapon_class = 0;
-         durability = 0;
-
-         assign_flag(F_BROKEN, 1);
-      }
+      return types;
    }
+
+   return ([ "striking" : 1 ]);
+}
+
+//:FUNCTION set_damage_bonus
+// Set an overall modifier of weapon class on the object.  The bonus
+// does not get saved, so should only be used for temporary bonuses. (i.e. buffs)
+void set_damage_bonus(string type, int bonus)
+{
+   damage_bonuses[type] = bonus;
+}
+
+void add_damage_bonus(string type, int value)
+{
+   damage_bonuses[type] += value;
+}
+
+void reset_damage_bonuses()
+{
+   damage_bonuses = ([ ]);
+}
+
+mapping query_damage_bonuses()
+{
+   return damage_bonuses;
 }
 
 int query_weapon_class()
 {
-   return weapon_class;
+   if (sizeof(damage_types))
+   {
+      mapping types = ([ ]);
+      int total = 0;
+
+      foreach (string type in keys(damage_types) - keys(damage_bonuses) + keys(damage_bonuses))
+      {
+         if (floor((damage_types[type] + damage_bonuses[type]) * durability / max_durability) > 0)
+         {
+            total += to_int(floor((damage_types[type] + damage_bonuses[type]) * durability / max_durability));
+         }
+      }
+
+      return total;
+   }
+
+   return 0;
+}
+
+void decrease_class(int x)
+{
+   object owner = this_object()->query_wielded_by();
+   durability -= x;
+
+   assign_flag(F_DAMAGED, 1);
+
+   if (owner)
+   {
+      tell(owner, "%^ITEM_DAMAGE%^You notice your " + terminal_colour(this_object()->short(), ANSI_D->query_translations()[1]) + " becomes damaged.%^RESET%^\n");
+   }
+
+   if (durability <= 0)
+   {
+      this_object()->unwield();
+
+      durability = 0;
+
+      assign_flag(F_BROKEN, 1);
+   }
 }
 
 //:FUNCTION set_durability
-// Set the durability equal to or lower than weapon class, which is independent
-// Must be used after set_weapon_class()
-void set_durability(int x)
+void set_durability(int amount)
 {
-   if (x <= weapon_class)
-   {
-      durability = x;
-      max_durability = x;
-   }
+   durability = amount;
+}
+
+//:FUNCTION set_max_durability
+void set_max_durability(int amount)
+{
+   max_durability = amount;
 }
 
 //:FUNCTION query_durability
@@ -247,11 +410,6 @@ int query_chance_to_be_damaged()
    return chance_to_be_damaged;
 }
 
-int query_max_weapon_class()
-{
-   return max_weapon_class;
-}
-
 void set_weapon_speed(int x)
 {
    weapon_speed = x;
@@ -283,22 +441,18 @@ void do_adjust(int amount)
 
    if (!test_flag(F_BROKEN))
    {
-      max_weapon_class += amount;
+      max_durability += amount;
 
-      if (max_weapon_class < 1)
-      {
-         max_weapon_class = 1;
-      }
-
-      if (max_durability > max_weapon_class)
-      {
-         max_durability = max_weapon_class;
-      }
-
-      weapon_class = max_weapon_class;
       durability = max_durability;
 
       clear_flag(F_DAMAGED);
+
+      foreach (string type in keys(damage_types))
+      {
+         damage_types[type] += amount;
+
+         if (damage_types[type] < 1) { map_delete(damage_types, type); }
+      }
    }
 }
 
@@ -308,26 +462,32 @@ void do_repair()
 
    if (!test_flag(F_BROKEN))
    {
-      int skill_delay = body->has_skill_delay();
-
-      if ((weapon_class < max_weapon_class) || (durability < max_durability))
+      if (durability < max_durability)
       {
-         if (!skill_delay)
+         if (!body->has_skill_delay())
          {
-            int skill_test = body->test_skill("melee_repair", 1);
-            int max_repair = (body->query_skill("melee_repair") / 200) + 1;
-
             body->add_skill_delay(4);
 
-            if (skill_test > 0)
+            if (body->test_skill("melee_repair", 1))
             {
-               if ((max_durability - durability) > max_repair)
+               int max_repair = (body->query_skill("melee_repair") / 100) + 1;
+
+               if ((max_repair < 11) && ((max_durability - durability) > max_repair))
                {
+                  int permanent_damage = max_durability - (durability + max_repair);
+
+                  this_object()->set_value(this_object()->query_value_pure() * (durability + max_repair) / max_durability);
+
                   max_durability = durability + max_repair;
-                  max_weapon_class = weapon_class + max_repair;
+
+                  foreach (string type in keys(damage_types))
+                  {
+                     damage_types[type] -= permanent_damage;
+
+                     if (damage_types[type] < 1) { map_delete(damage_types, type); }
+                  }
                }
 
-               weapon_class = max_weapon_class;
                durability = max_durability;
 
                clear_flag(F_DAMAGED);
@@ -341,17 +501,17 @@ void do_repair()
          }
          else
          {
-            tell(body, "You must wait at least " + skill_delay + " more second" + (skill_delay > 1 ? "s" : "") + " before attempting to repair.\n");
+            tell(body, "You are too busy to repair something.\n");
          }
       }
       else
       {
-         tell(body, this_object()->short() + " does not need to be repaired.\n");
+         tell(body, capitalize(this_object()->the_short()) + " does not need to be repaired.\n");
       }
    }
    else
    {
-      tell(body, this_object()->short() + " is broken and cannot be repaired.\n");
+      tell(body, capitalize(this_object()->the_short()) + " is broken and cannot be repaired.\n");
    }
 }
 

@@ -6,29 +6,8 @@ inherit CLASS_SKILL;
 #define MAX_SKILL_VALUE 1000
 
 private mapping skills = ([ ]);
-private string* initial_skills = ({ });
 private int skill_delay = 0;
 private mapping skill_delays = ([ ]);
-
-void set_initial_skills(string* s)
-{
-   initial_skills = s;
-}
-
-string* query_initial_skills()
-{
-   return initial_skills;
-}
-
-void set_initial_skill(int index, string sk)
-{
-   if (sizeof(initial_skills) < 3)
-   {
-      initial_skills = allocate(3);
-   }
-
-   initial_skills[index] = sk;
-}
 
 int set_skill(string skill, int skill_points)
 {
@@ -238,12 +217,12 @@ int test_skill(string skill, int adjustment)
    if (destination_value < 10) { destination_value = 10; }
 
    // Debug code for skillrolls
-//   tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill roll for " + skill + ": Is " + roll + " less than " + destination_value + "?\n");
+   tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill roll for " + skill + ": Is " + destination_valie + " more than " + roll + "?\n");
 
    // semi-hack.. return 1 if roll == 0, 1 in 1000 chance of success
    if (roll == 0) { return 1; }
 
-   return destination_value - roll;
+   return (destination_value > roll);
 }
 
 //:FUNCTION query_evaluation

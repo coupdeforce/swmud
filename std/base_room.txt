@@ -1,4 +1,4 @@
-// a room.c
+// Last edited by deforce on 11-07-2009
 // Rust@ZorkMUD,   Jan 12, 1994
 // Nevyn@GUE       1-14-94
 // Cleave@ZorkMUD 2-25-94 Added long(), long default.
@@ -24,12 +24,15 @@ inherit M_GETTABLE;
 inherit M_EXIT;
 inherit __DIR__ "room/roomdesc";
 inherit __DIR__ "room/state";
+inherit __DIR__ "room/tracking";
 
 private nosave string array area_names = ({ });
-private string listen, smell;
 private nosave mixed chat_msg;
 private nosave int chat_period = 15;
 private nosave int tag;
+
+void departure(object who);
+void arrival(object who);
 
 //:FUNCTION stat_me
 //Returns some debugging info about the object.  Shows the container info,
@@ -51,6 +54,11 @@ void set_brief(string str)
 //Return 1 if the object can hold water.
 // by default, rooms can hold water
 int can_hold_water()
+{
+   return 1;
+}
+
+int is_room()
 {
    return 1;
 }
@@ -128,13 +136,13 @@ void possible_light_change(int old_light, int new_light)
 {
    if (old_light && !new_light)
    {
-      tell_from_inside(this_object(), "The room goes dark.\n");
+      tell_from_inside(this_object(), "There is no longer enough light to see.\n");
    }
    else
    {
       if (!old_light && new_light)
       {
-         tell_from_inside(this_object(), "You can see again.\n");
+         tell_from_inside(this_object(), "There is now enough light to see.\n");
       }
    }
 }
@@ -154,7 +162,7 @@ void adjust_light(int x)
 
    ::adjust_light(x);
 
-   possible_light_change(old, query_light());
+   (old && !query_light()) ? call_out("possible_light_change", 1, old, query_light()) : possible_light_change(old, query_light());
 }
 
 mixed direct_get_obj(object ob)
@@ -165,17 +173,6 @@ mixed direct_get_obj(object ob)
    }
 
    return ::direct_get_obj(ob);
-}
-
-mapping lpscript_attributes()
-{
-   return ([
-      "area" : ({ LPSCRIPT_STRING, "setup", "set_area" }),
-      "brief" : ({ LPSCRIPT_STRING, "setup", "set_brief" }),
-      "exits" : ({ LPSCRIPT_MAPPING, "setup", "set_exits" }),
-      "state" : ({ LPSCRIPT_TWO, (: ({ "setup", "set_state_description(\"" + $1 + "\", \"" + $2[0] + "\")" }) :) }),
-      "item" : ({ LPSCRIPT_SPECIAL, (: ({ "setup", "add_item(\"" + $1[0] + "\", \"" + implode($1[1..], " ") + "\")" }) :) })
-   ]);
 }
 
 // tweak the base long description to add the state stuff
@@ -204,21 +201,12 @@ string get_base_long()
    return base;
 }
 
-
 string long()
 {
-#ifdef OBVIOUS_EXITS_BOTTOM
-   string objtally = show_objects();
-   if (sizeof(objtally))
-   {
-      objtally = "You also see:\n" + objtally;
-   }
-
-   return sprintf("%sObvious Exits: %%^ROOM_EXIT%%^%s%%^RESET%%^\n%s",
-      (dont_show_long() ? "" : simple_long()), show_exits(), objtally);
-#else
-   return sprintf("%s%s", (dont_show_long() ? "" : simple_long()), show_objects());
-#endif
+//   return sprintf("%s\nObvious exits: %%^ROOM_EXIT%%^%s%%^RESET%%^\n%s\n",
+//      (dont_show_long() ? "" : simple_long()), show_exits(), show_objects());
+   return sprintf("%s%s\nObvious exits: %%^ROOM_EXIT%%^%s%%^RESET%%^\n\n",
+      (dont_show_long() ? "" : simple_long()), show_objects(), show_exits());
 }
 
 //:FUNCTION long_without_object
@@ -226,46 +214,8 @@ string long()
 //same long as the room, but not see itself in the description.
 string long_without_object(object o)
 {
-#ifdef OBVIOUS_EXITS_BOTTOM
-   return sprintf("%sObvious Exits: %%^ROOM_EXIT%%^%s%%^RESET%%^\n%s",
-      simple_long(), show_exits(), show_objects(o));
-#else
-   return sprintf("%s%s", simple_long(), show_objects(o));
-#endif
-}
-
-void set_listen(string str) { listen = str; }
-
-string query_listen() { return listen; }
-
-void set_smell(string str) { smell = str; }
-
-string query_smell() { return smell; }
-
-void do_listen()
-{
-   if (listen)
-   {
-      write(listen);
-   }
-   else
-   {
-      write("You hear nothing unusual.\n");
-   }
-}
-
-void do_pray() { write("Nothing special happens.\n"); }
-
-void do_smell()
-{
-   if (smell)
-   {
-      write(smell);
-   }
-   else
-   {
-      write("You smell nothing unusual.\n");
-   }
+   return sprintf("%s%s\nObvious exits: %%^ROOM_EXIT%%^%s%%^RESET%%^\n\n",
+      (dont_show_long() ? "" : simple_long()), show_objects(o), show_exits());
 }
 
 int listeners()
@@ -323,14 +273,14 @@ void set_room_chat(mixed chat, int interval)
    chat_msg = chat;
    chat_period = interval;
 
-   add_hook("object_arrived", (: arrival :) );
-   add_hook("object_left", (: departure :) );
-
    if (tag)
    {
       remove_call_out(tag);
       tag = 0;
    }
+
+   add_hook("object_arrived", (: arrival :) );
+   add_hook("object_left", (: departure :) );
 
    call_out("check_anybody_here", 0);
 }

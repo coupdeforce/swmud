@@ -1,4 +1,5 @@
-string query_random_armor_slot();
+// Last edited by deforce on 12-03-2007
+string query_random_limb();
 object query_weapon();
 object query_target();
 object get_target();
@@ -19,11 +20,11 @@ void take_a_swing(object target)
 
    if (random(101) > 95)
    {
-      add_event(target, weapon, 0, "miss");
+      add_event(target, weapon, query_random_limb(), "miss");
    }
    else
    {
-      add_event(target, weapon, query_random_armor_slot(), 1);
+      add_event(target, weapon, query_random_limb(), random(weapon->query_weapon_class() + 1));
    }
 }
 

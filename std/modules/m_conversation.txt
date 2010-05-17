@@ -1,4 +1,4 @@
-// Last modified by deforce on 01-04-2007
+// Last modified by deforce on 12-03-2007
 // By Beek.  Merged in some functionality written by Valentino.
 
 inherit M_ACTIONS;
@@ -84,6 +84,7 @@ void do_action(object ob, mixed action)
          }
 
          if (action[0] == '!') { do_game_command(action[1..]); }
+         else if (action[0] == '&') { call_other(this_object(), action[1..]); }
          else { do_game_command("say " + action); }
       }
       else

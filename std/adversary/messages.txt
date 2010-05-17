@@ -1,8 +1,8 @@
-// Last edited by deforce on 11-29-2007
+// Last edited by deforce on 07-08-2008
 void simple_action(string msg, array obs...);
 varargs mixed *action(mixed *, mixed, object, object);
 void inform(mixed *, mixed, object);
-string query_combat_message(string);
+mapping query_combat_messages();
 
 string damage_message(int percent)
 {
@@ -10,45 +10,44 @@ string damage_message(int percent)
 
    switch (percent)
    {
-      case 1..4: return "!dam1";
-      case 5..8: return "!dam2";
-      case 9..12: return "!dam3";
-      case 13..16: return "!dam4";
-      case 17..20: return "!dam5";
-      case 21..24: return "!dam6";
-      case 25..28: return "!dam7";
-      case 29..32: return "!dam8";
-      case 33..36: return "!dam9";
-      case 37..40: return "!dam10";
-      case 41..44: return "!dam11";
-      case 45..48: return "!dam12";
-      case 49..52: return "!dam13";
-      case 53..56: return "!dam14";
-      case 57..60: return "!dam15";
-      case 61..64: return "!dam16";
-      case 65..68: return "!dam17";
-      case 69..72: return "!dam18";
-      case 73..76: return "!dam19";
-      case 77..80: return "!dam20";
-      default: return "!dam21";
+      case 1..3: return "!dam1";
+      case 4..7: return "!dam2";
+      case 8..11: return "!dam3";
+      case 12..15: return "!dam4";
+      case 16..19: return "!dam5";
+      case 20..23: return "!dam6";
+      case 24..27: return "!dam7";
+      case 28..31: return "!dam8";
+      case 32..35: return "!dam9";
+      case 36..39: return "!dam10";
+      case 40..43: return "!dam11";
+      case 44..47: return "!dam12";
+      case 48..51: return "!dam13";
+      case 52..55: return "!dam14";
+      case 56..59: return "!dam15";
+      case 60..79: return "!dam16";
+      case 80..99: return "!dam17";
+      case 100..119: return "!dam18";
+      case 120..139: return "!dam19";
+      case 140..159: return "!dam20";
+      case 160..99999: return "!dam21";
+      default: return "!dam22";
    }
 }
 
 void handle_message(string mess, object target, object weapon, object limb)
 {
-   array combat_who, messages;
-
    if (mess[0] == '!')
    {
       string tmp;
 
       if (weapon)
       {
-         tmp = weapon->query_combat_message(mess[1..]);
+         tmp = weapon->query_combat_messages()[mess[1..]];
       }
       else
       {
-         tmp = query_combat_message(mess[1..]);
+         tmp = query_combat_messages()[mess[1..]];
       }
 
       if (!tmp)
@@ -61,8 +60,8 @@ void handle_message(string mess, object target, object weapon, object limb)
       mess = tmp;
    }
 
-   combat_who = ({ this_object(), target });
-   messages = action(combat_who, mess, weapon, target->query_weapon(), limb);
-
-   inform(combat_who, messages, environment());
+   if (strlen(mess))
+   {
+      inform(({ this_object(), target }), action(({ this_object(), target }), mess, weapon, target->query_weapon(), limb), environment());
+   }
 }

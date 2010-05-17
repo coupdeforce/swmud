@@ -1,4 +1,4 @@
-// Last edited by deforce on 11-27-2007
+// Last edited by deforce on 06-24-2008
 #include <mudlib.h>
 #include <setbit.h>
 
@@ -14,6 +14,10 @@ private nosave mixed in_room_desc;
 private nosave string plural_in_room_desc;
 // Our description when we haven't been touched.  Really an in_room_desc, not a long
 private string untouched_long;
+private nosave string listen_desc;
+private nosave string smell_desc;
+private nosave string feel_desc;
+private nosave string force_desc;
 
 // these are somewhere else...
 int test_flag(int);
@@ -88,6 +92,70 @@ protected string array discarded_message, plural_discarded_message;
 string untouched_long()
 {
    return untouched_long;
+}
+
+void set_listen(string str) { listen_desc = str; }
+
+string query_listen() { return listen_desc; }
+
+void set_smell(string str) { smell_desc = str; }
+
+string query_smell() { return smell_desc; }
+
+void set_feel(string str) { feel_desc = str; }
+
+string query_feel() { return feel_desc; }
+
+void set_force(string str) { force_desc = str; }
+
+string query_force() { return force_desc; }
+
+void do_listen()
+{
+   if (listen_desc)
+   {
+      write(listen_desc);
+   }
+   else
+   {
+      write("You hear nothing unusual.\n");
+   }
+}
+
+void do_smell()
+{
+   if (smell_desc)
+   {
+      write(smell_desc);
+   }
+   else
+   {
+      write("You smell nothing unusual.\n");
+   }
+}
+
+void do_feel()
+{
+   if (feel_desc)
+   {
+      write(feel_desc);
+   }
+   else
+   {
+      write("You feel nothing unusual.\n");
+   }
+}
+
+void do_force()
+{
+   if (force_desc)
+   {
+      write(force_desc);
+   }
+   else
+   {
+      write("You sense nothing unusual.\n");
+   }
 }
 
 //:FUNCTION show_in_room

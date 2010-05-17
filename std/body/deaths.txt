@@ -1,8 +1,20 @@
-// Last edited by deforce on 12-22-2007
+// Last edited by deforce on 07-05-2008
 #include <daemons.h>
 
 int has_status_line();
 void update_status_line();
+int query_experience();
+void set_experience(int value);
+void set_primary_level(int value);
+int query_primary_level();
+int get_experience_to_advance_guild(string guild_name);
+string query_primary_guild();
+string array query_guild_names();
+int query_guild_level(string guild_name);
+void set_guild_level(string guild_name, int guild_level);
+void remove_guild(string guild_name);
+string query_name();
+void receive_private_msg(string message);
 
 int deaths;
 mapping killed_by = ([ ]);
@@ -23,6 +35,129 @@ protected void add_a_death()
    save_me();
 
    if (has_status_line()) { update_status_line(); }
+}
+
+protected void death_penalty()
+{
+   int experience = query_experience();
+   int new_exp;
+   int level = query_primary_level();
+   object killer = previous_object();
+   string killed_message = "";
+
+   if (killer && killer->is_body() && (killer != this_object()) && (environment(killer) != this_object()))
+   {
+      int killer_level = killer->query_primary_level();
+      string killer_message = "You have killed " + capitalize(query_name()) + ", who is ";
+      killed_message += "You were killed by " + killer->short() + ", who is ";
+
+      if (killer_level > level)
+      {
+         int percent_lost = 50 - ((killer_level - level) * 5);
+
+         killed_message += (killer_level - level) + " levels higher than you.\n";
+         killer_message += (killer_level - level) + " levels lower than you.\n";
+
+         if (percent_lost < 1) { percent_lost = 1; }
+
+         new_exp = floor(experience * ((100.0 - percent_lost) / 100.0));
+
+         killer->add_experience(experience - new_exp);
+      }
+      else if (killer_level < level)
+      {
+         int percent_lost = 50 + ((level - killer_level) * 5);
+
+         killed_message += (level - killer_level) + " levels lower than you.\n";
+         killer_message += (level - killer_level) + " levels higher than you.\n";
+
+         if (percent_lost > 100) { percent_lost = 100; }
+
+         new_exp = floor(experience * ((100.0 - percent_lost) / 100.0));
+
+         killer->add_experience(experience - new_exp);
+      }
+      else
+      {
+         killed_message += "equal in level.\n";
+         killer_message += "equal in level.\n";
+
+         new_exp = experience / 2;
+
+         killer->add_experience(experience - new_exp);
+      }
+
+      killer_message += "You have gained " + (experience - new_exp) + " experience points.\n\n";
+      tell(killer, killer_message);
+   }
+   else if (killer && (killer != this_object()) && (environment(killer) != this_object()))
+   {
+      killed_message += "You were killed by " + killer->short() + ".\n";
+
+      if (level > 1)
+      {
+         int needed_exp;
+         int exp_penalty = 50;
+         int kept_exp;
+         new_exp = experience;
+
+         set_primary_level(level - 1);
+
+         killed_message += "Your primary guild, " + capitalize(query_primary_guild()) + ", has been decreased to level " + (level - 1) + ".\n";
+
+         foreach (string guild in query_guild_names())
+         {
+            if (query_guild_level(guild) >= level)
+            {
+               set_guild_level(guild, level - 1);
+
+               killed_message += "Your " + capitalize(guild) + " level has been decreased to " + (level - 1) + ".\n";
+            }
+         }
+
+         if ((sizeof(query_guild_names()) == 4) && (level <= 30))
+         {
+            foreach (string guild in query_guild_names())
+            {
+               if (query_guild_level(guild) <= 10)
+               {
+                  remove_guild(guild);
+
+                  killed_message += "Your membership in the " + capitalize(guild) + " guild has been lost.\n";
+               }
+            }
+         }
+
+         needed_exp = get_experience_to_advance_guild(query_primary_guild());
+
+         if (level >= 20)
+         {
+            exp_penalty += level;
+         }
+
+         kept_exp = floor(needed_exp * ((100.0 - exp_penalty) / 100.0));
+
+         if (new_exp > kept_exp)
+         {
+            new_exp = kept_exp;
+         }
+      }
+      else
+      {
+         new_exp = experience;
+
+         if (new_exp > 500)
+         {
+            new_exp = 500;
+         }
+      }
+   }
+
+   set_experience(new_exp);
+
+   killed_message += "You had " + experience + " experience points and are left with " + new_exp + ", losing " + (experience - new_exp) + ".\n\n";
+
+   receive_private_msg(killed_message);
 }
 
 int query_deaths()

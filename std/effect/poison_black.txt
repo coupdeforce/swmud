@@ -1,6 +1,5 @@
-// Last edited by deforce on 09-24-2008
+// Last edited by deforce on 09-28-2008
 inherit "/std/effect";
-inherit CLASS_EVENT_INFO;
 
 int poison_strength = 1;
 
@@ -30,15 +29,12 @@ void setup(object target, object source, object apparatus, int rank, int level)
    int damage = (rank * 2) + random(ceil(level / 5.0) + 5);
    poison_strength = rank + ceil(level / 10.0) + 2;
 
-//   target->do_damage_event(new(class event_info, me: source, target: target, weapon: apparatus, data: ({ "", damage }), target_extra: "none"));
-//   target->hurt_us(damage);
-
    if (!present("inject_damage", source))
    {
-      new("/d/obj/inject_damage", apparatus->short(), "inject_damage")->move(target);
+      new("/d/obj/inject_damage", apparatus->short(), "inject_damage")->move(source);
    }
 
-   source->add_event(target, present("inject_damage", source), "none", damage);
+   source->add_event(target, present("inject_damage", source), target->query_random_armor_slot(), damage);
 
    source->start_fight(target);
    source->handle_events();

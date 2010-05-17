@@ -1,4 +1,4 @@
-// Last edited by deforce on 06-09-2008
+// Last edited by deforce on 06-24-2008
 #include <playerflags.h>
 
 private nosave string remote_desc;
@@ -7,6 +7,8 @@ int query_light();
 string short();
 string show_exits();
 string long();
+
+private nosave int this_look_is_forced;
 
 //:FUNCTION show_objects
 //Return a string describing the objects in the room
@@ -92,9 +94,6 @@ varargs string show_objects(object except)
    return obj_show;
 }
 
-//### major hack
-private nosave int this_look_is_forced;
-
 protected int dont_show_long()
 {
    return !this_look_is_forced && this_body()->test_flag(F_BRIEF);
@@ -104,35 +103,30 @@ protected int dont_show_long()
 //print out the description of the current room
 varargs void do_looking(int force_long_desc, object who)
 {
-   // How to use force_long_desc ??
-
-   if (wizardp(who) && who->query_link()->query_shell_ob()->get_variable("show_loc"))
-   {
-      tell(who, sprintf("[%s]\n", file_name(this_object())));
-   }
-
    if (query_light() < 1)
    {
-      tell(who, "It is dark here.\n");
+      tell(who, "It is too dark to see anything.\n");
+   }
+   if (query_light() > 9)
+   {
+      tell(who, "It is too bright to see anything.\n");
    }
    else
    {
-      tell(who, sprintf("%%^ROOM_SHORT%%^%s%%^RESET%%^ [exits: %%^ROOM_EXIT%%^%s%%^RESET%%^]\n", short(), show_exits()));
-
-       //### for now, hack a global
-       this_look_is_forced = force_long_desc;
-       tell(who, long());
-       this_look_is_forced = 0;
+      if (force_long_desc || !who->test_flag(F_BRIEF))
+      {
+         this_look_is_forced = force_long_desc;
+         tell(who, long());
+         this_look_is_forced = 0;
+      }
+      else
+      {
+         tell(who, sprintf("%%^ROOM_SHORT%%^%s%%^RESET%%^\n[%%^ROOM_EXIT%%^%s%%^RESET%%^]\n", short(), show_exits()));
+      }
    }
 }
 
-//### I think this should be torched :-)
-// I don't.
-// This should be overloaded if you want to be able to give different
-// descs from different rooms
-// Hmm, I know who made each of these comments.  Who else does? :-)
-// I do =)
-// Your mom.
+// This should be overloaded if you want to be able to give different descs from different rooms
 void remote_look(object o)
 {
    if (remote_desc)

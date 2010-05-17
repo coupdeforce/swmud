@@ -1,53 +1,49 @@
 // Last edited by deforce on 12-23-2007
 #include <classes.h>
 
-inherit CLASS_SKILL;
-
 int get_stat_bonus(string skill);
 int query_skill_evaluation();
+int query_int();
+int get_skill_point_minimum(int adv_rate);
 
 private mapping skills = ([ ]);
+private string array learned_skills = ({ });
+private string array blocked_skills = ({ });
 
-class skill set_skill(string skill, int skill_points, int training_points)
+int set_skill(string skill, int skill_points, int training_points)
 {
-   class skill cs = skills[skill];
-
    if (member_array(skill, SKILL_D->query_skills()) == -1)
    {
-      error("illegal skill; cannot set new skill value for " + skill + ".\n");
+      error("Illegal skill; cannot set new skill value for " + skill + " for " + this_object()->short() + ".\n");
    }
 
+/*
    if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to set " + this_object()->short() + "'s skill in " + skill + " to " + skill_points + ".\n");
    }
+*/
 
-   if (!cs)
+   if (skill_points < 1)
    {
-      cs = skills[skill] = new(class skill, skill_points : skill_points, training_points : training_points);
+      map_delete(skills, skill);
    }
    else
    {
-      if (skill_points < 1)
-      {
-         map_delete(skills, skill);
-      }
-      else
-      {
-         cs->skill_points = skill_points;
-         cs->training_points = training_points;
-      }
+      skills[skill] = ({ skill_points, training_points });
    }
 
-   return cs;
+   return 1;
 }
 
 void remove_skill(string skill)
 {
+/*
    if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to remove " + this_object()->short() + "'s skill in " + skill + ".\n");
    }
+*/
 
    if (skills[skill])
    {
@@ -57,10 +53,12 @@ void remove_skill(string skill)
 
 void reset_skills()
 {
+/*
    if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to reset " + this_object()->short() + "'s skills.\n");
    }
+*/
 
    skills = ([ ]);
 }
@@ -70,28 +68,39 @@ mapping get_skills()
    return skills;
 }
 
-class skill get_skill(string skill)
+int array get_skill(string skill)
 {
    return skills[skill];
 }
 
+int array query_skill(string skill)
+{
+   if (skills[skill] && (sizeof(skills[skill]) == 2))
+   {
+      return skills[skill][0];
+   }
+
+   return 0;
+}
+
 //:FUNCTION learn_skill
 // Add some number of skill points to the given skill, propogating skill
-// values up through the parent skills.  Training points are also assigned
-// as appropriate.
+// values up through the parent skills.  Training points are also assigned as appropriate.
 void learn_skill(string skill, int value)
 {
-   class skill my_skill;
+   int array my_skill;
    int skill_value;
    int advrate;
    mixed skill_data;
    int roll;
    float chance;
 
+/*
    if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to use learn_skill on  " + this_object()->short() + ".\n");
    }
+*/
 
    skill_data = SKILL_D->query_skill(skill);
 
@@ -102,13 +111,12 @@ void learn_skill(string skill, int value)
 
    my_skill = skills[skill];
 
-   if (!my_skill)
+   if (sizeof(my_skill) != 2)
    {
-      skills[skill] = new(class skill, skill_points : 0, training_points : 0);
-      my_skill = skills[skill];
+      my_skill = ({ 0, 0 });
    }
 
-   skill_value = my_skill->skill_points;
+   skill_value = my_skill[0];
 
    if (skill_value < 1000)
    {
@@ -124,23 +132,26 @@ void learn_skill(string skill, int value)
       chance /= 10;
 
       // Debug code for advance roll
-      tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " advance roll for " + skill + ": Is " + roll + " (" + (skill_value * 10) + ") less than " + to_int(ceil(chance)) + "?\n");
+//      tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " advance roll for " + skill + ": Is " + roll + " (" + (skill_value * 10) + ") less than " + to_int(ceil(chance)) + "?\n");
+//      tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill points for " + skill + ": Is " + my_skill[1] + " >= " + get_skill_point_minimum(advrate) + "?\n");
 
-      if ((roll < ceil(chance)) || (my_skill->training_points >= advrate))
+      if (((roll < ceil(chance)) && (my_skill[1] >= get_skill_point_minimum(advrate))) || (my_skill[1] >= advrate))
       {
          // Advance
-         my_skill->skill_points += 1;
-         my_skill->training_points = 0;
+         my_skill[0] += 1;
+         my_skill[1] = 0;
 
-         if (skills[skill] % 100)
+         if (my_skill[0] % 100)
          {
             tell(this_object(), "%^SKILL_IMPROVE%^You notice improvement in " + skill_data[0] + ".%^RESET%^\n");
          }
          else
          {
-            tell(this_object(), "%^SKILL_IMPROVE%^You have acheived Rank " +  (skills[skill] / 100) + " in " + skill_data[0] + ".%^RESET%^\n");
+            tell(this_object(), "%^SKILL_IMPROVE%^You have acheived Rank " +  (my_skill[0] / 100) + " in " + skill_data[0] + ".%^RESET%^\n");
          }
       }
+
+      skills[skill] = my_skill;
    }
 }
 
@@ -150,15 +161,24 @@ void learn_skill(string skill, int value)
 int test_skill(string skill, int adjustment)
 {
    int roll = random(1000);
-   class skill my_skill = skills[skill];
+   int array my_skill = skills[skill];
    int skill_value;
    int destination_value;
    int stat_bonus = get_stat_bonus(skill);
 
+/*
    if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
       error("Invalid attempt to use test_skill on  " + this_object()->short() + ".\n");
    }
+*/
+
+   if (sizeof(my_skill) != 2)
+   {
+      my_skill = ({ 0, 0 });
+   }
+
+   skill_value = my_skill[0];
 
    destination_value = skill_value + stat_bonus + adjustment;
 
@@ -166,7 +186,7 @@ int test_skill(string skill, int adjustment)
    else if (destination_value < 10) { destination_value = 10; }
 
    // Debug code for skillrolls
-   tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill roll for " + skill + ": Is " + destination_value + " more than " + roll + "?\n");
+//   tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill roll for " + skill + ": Is " + destination_value + " more than " + roll + "?\n");
 
    // semi-hack.. return 1 if roll == 0, 1 in 1000 chance of success
    if (roll == 0) { return 1; }
@@ -175,7 +195,7 @@ int test_skill(string skill, int adjustment)
    {
       if (destination_value > roll)
       {
-         my_skill->training_points += 1;
+         my_skill[1] += 1;
       }
       else
       {
@@ -183,13 +203,19 @@ int test_skill(string skill, int adjustment)
 
          if (evaluation < 50)
          {
-            my_skill->training_points += 2;
+            my_skill[1] += 2;
          }
          else if (evaluation < 75)
          {
-            my_skill->training_points += 1;
+            my_skill[1] += 1 + random(2);
+         }
+         else
+         {
+            my_skill[1] += random(2);
          }
       }
+
+      skills[skill] = my_skill;
 
       learn_skill(skill, stat_bonus + adjustment);
    }
@@ -206,10 +232,103 @@ int query_skill_evaluation()
 
    foreach (string skill in keys(skills))
    {
-      class skill my_skill = skills[skill];
+      int array my_skill = skills[skill];
 
-      total += my_skill->skill_points;
+      total += my_skill[0];
    }
 
-   return floor(total / (1000 * sizeof(skills)));
+   return to_int(floor(total / (10 * sizeof(skills))));
+}
+
+void add_learned_skill(string skill)
+{
+   if (member_array(skill, learned_skills) == -1)
+   {
+      learned_skills += ({ skill });
+   }
+}
+
+void remove_learned_skill(string skill)
+{
+   if (member_array(skill, learned_skills) > -1)
+   {
+      learned_skills -= ({ skill });
+   }
+}
+
+int has_learned_skill(string skill)
+{
+   if (member_array(skill, learned_skills) > -1)
+   {
+      return 1;
+   }
+
+   return 0;
+}
+
+string array query_learned_skills()
+{
+   return sort_array(learned_skills, 1);
+}
+
+void add_blocked_skill(string skill)
+{
+   if (member_array(skill, blocked_skills) == -1)
+   {
+      blocked_skills += ({ skill });
+   }
+}
+
+void remove_blocked_skill(string skill)
+{
+   if (member_array(skill, blocked_skills) > -1)
+   {
+      blocked_skills -= ({ skill });
+   }
+}
+
+int has_blocked_skill(string skill)
+{
+   if (member_array(skill, blocked_skills) > -1)
+   {
+      return 1;
+   }
+
+   return 0;
+}
+
+string array query_blocked_skills()
+{
+   return sort_array(blocked_skills, 1);
+}
+
+int get_skill_point_minimum(int adv_rate)
+{
+   float min = adv_rate;
+
+   switch (query_int())
+   {
+      case 0..9: min *= 0.60; break;
+      case 10..14: min *= 0.59; break;
+      case 15..19: min *= 0.58; break;
+      case 20..24: min *= 0.57; break;
+      case 25..29: min *= 0.56; break;
+      case 30..34: min *= 0.55; break;
+      case 35..39: min *= 0.54; break;
+      case 40..44: min *= 0.52; break;
+      case 45..49: min *= 0.50; break;
+      case 50..54: min *= 0.48; break;
+      case 55..59: min *= 0.46; break;
+      case 60..64: min *= 0.44; break;
+      case 65..69: min *= 0.42; break;
+      case 70..74: min *= 0.39; break;
+      case 75..79: min *= 0.36; break;
+      case 80..84: min *= 0.33; break;
+      case 85..89: min *= 0.30; break;
+      case 90..94: min *= 0.27; break;
+      case 95..99: min *= 0.24; break;
+      case 100..999999: min *= 0.20; break;
+   }
+
+   return to_int(ceil(min));
 }

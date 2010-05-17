@@ -1,16 +1,9 @@
-// Updated by deforce on 03-02-2007
-/*
-** m_wearable.c
-**
-** Mixed in to create a wearable item.  The client should also
-** mix in M_GETTABLE.
-**
-** 07-Sep-94. Created. Rust/Belboz.
-** 12-Nov-94. Updated for "modules" approach. Deathblade.
-** 970421, Deathblade: switched to flags to pick up attributes
-** 25 March, 1998: Iizuka made major changes to support the new adversary
-                   code.
-*/
+// Last edited by deforce on 03-05-2010
+// Mixed in to create a wearable item.  The client should also mix in M_GETTABLE.
+// Created by Rust/Belboz on 09-07-1994
+// Updated for "modules" approach by Deathblade on 11-12-1994
+// Deathblade switched to flags to pick up attributes on 04-21-1997
+// Iizuka made major changes to support the new adversary code on 03-25-1998
 
 #include <flags.h>
 
@@ -21,20 +14,27 @@ void assign_flag(int, int);
 void add_save(string array);
 void clear_flag(int);
 
-private string wearmsg = "$N $vwear a $o.";
-private nosave string slot;
-private nosave string array also_covering = ({ });
+private string array required_learned_skills = ({ });
+private mapping required_skills = ([ ]);
+private mapping required_guilds = ([ ]);
+private string wear_message = "$N $vwear $p $o.";
+private string remove_message = "$N $vremove $p $o.";
+private string array slots;
+private int body_size = 3;
+private int resize_count = 0;
+private mapping attribute_bonuses = ([ ]);
+private mapping attribute_hooks = ([ ]);
 
 void mudlib_setup()
 {
-   add_save(({ "persist_flags" }));
+   add_save(({ "body_size", "slots", "required_learned_skills", "required_skills", "required_guilds", "wear_message", "remove_message", "resize_count", "persist_flags" }));
 }
 
 mixed ob_state()
 {
    if (!test_flag(F_WORN)) { return 0; }
 
-   return slot;
+   return slots;
 }
 
 int valid_wear() // Return 1 if they can wear this.
@@ -47,74 +47,116 @@ int valid_remove() // Return 1 if they can remove this.
    return 1;
 }
 
-//:FUNCTION set_wearmsg
+//:FUNCTION set_wear_message
 //Set the message used when an object is worn.
-void set_wearmsg(string message)
+void set_wear_message(string message)
 {
-   wearmsg = message;
+   wear_message = message;
 }
 
-//:FUNCTION query_wearmsg
+//:FUNCTION query_wear_message
 //Return the message given when an object is used.
-string query_wearmsg()
+string query_wear_message()
 {
-   return wearmsg;
+   return wear_message;
+}
+
+//:FUNCTION set_remove_message
+//Set the message used when an object is removed.
+void set_remove_message(string message)
+{
+   remove_message = message;
+}
+
+//:FUNCTION query_remove_message
+//Return the message given when an object is removed.
+string query_remove_message()
+{
+   return remove_message;
+}
+
+//:FUNCTION add_a_resize
+//Increments the resize counter when an object is resized.
+void add_a_resize()
+{
+   resize_count++;
+}
+
+//:FUNCTION query_resized()
+//Returns the number of times an object has been resized.
+int query_resized()
+{
+   return resize_count;
+}
+
+//:FUNCTION set_body_size
+//Set the body size that can wear it.
+void set_body_size(int value)
+{
+   if ((value >= 1) && (value <= 5))
+   {
+      body_size = value;
+   }
+   else
+   {
+      body_size = 3;
+   }
+}
+
+//:FUNCTION query_body_size
+//Returns the body size that can wear it.
+int query_body_size()
+{
+   return body_size;
 }
 
 //:FUNCTION set_slot
-//Set the bodyslot that the wearable object takes up.
+//Sets the body slot that the wearable object takes up.
 void set_slot(string which)
 {
-   slot = which;
+   slots = ({ which });
 }
 
-//FUNCTION query_slot
-//Return the bodyslot the wearable object takes up.
-string query_slot()
+//:FUNCTION set_slots
+//Sets the body slots that the wearable object takes up.
+void set_slots(string array which ...)
 {
-   return slot;
+   slots = which;
 }
 
-string array also_covers()
+//FUNCTION query_slots
+//Returns the body slots that the wearable object takes up.
+string array query_slots()
 {
-   return also_covering;
-}
-
-void set_also_covers(string array slots...)
-{
-   also_covering = slots;
+   return slots;
 }
 
 string worn_attributes()
 {
-   string array all = ({ slot });
-
-   if (also_covers()) { all += also_covers(); }
-
-   if (sizeof(all) > 1)
+   if (sizeof(slots) > 1)
    {
       string array limbs = ({ });
 
-      if (member_array("head", all) != -1) { limbs += ({ "head" }); }
+      if (member_array("head", slots) != -1) { limbs += ({ "head" }); }
 
-      if (member_array("torso", all) != -1) { limbs += ({ "torso" }); }
+      if (member_array("torso", slots) != -1) { limbs += ({ "torso" }); }
 
-      if ((member_array("left arm", all) != -1) && (member_array("right arm", all) != -1))
+      if ((member_array("left arm", slots) != -1) && (member_array("right arm", slots) != -1))
       {
          limbs += ({ "arms" });
       }
 
-      if ((member_array("left hand", all) != -1) && (member_array("right hand", all) != -1))
+      if ((member_array("left hand", slots) != -1) && (member_array("right hand", slots) != -1))
       {
          limbs += ({ "hands" });
       }
 
-      if ((member_array("left leg", all) != -1) && (member_array("right leg", all) != -1))
+      if ((member_array("left leg", slots) != -1) && (member_array("right leg", slots) != -1))
       {
          limbs += ({ "legs" });
       }
 
-      if ((member_array("left foot", all) != -1) && (member_array("right foot", all) != -1))
+      if ((member_array("left foot", slots) != -1) && (member_array("right foot", slots) != -1))
       {
          limbs += ({ "feet" });
       }
@@ -129,19 +171,42 @@ string worn_attributes()
          return " worn over " + limbs[0];
       }
    }
-   else { return " worn over " + all[0]; }
+   else if ((slots[0] == "neck") || (slots[0] == "waist"))
+   {
+      return " worn around " + slots[0];
+   }
+   else if (slots[0] == "back") { return " worn on " + slots[0]; }
+   else { return " worn over " + slots[0]; }
 }
 
-string damaged_attributes()
+int get_attribute_bonus(string type)
 {
-   if (!test_flag(F_BROKEN)) { return " (damaged)"; }
-
-   return "";
+   return attribute_bonuses[type];
 }
 
-string broken_attributes()
+void set_attribute_bonuses(mapping bonuses)
 {
-   return " (broken)";
+   attribute_bonuses = bonuses;
+}
+
+void set_attribute_bonus(string type, int amount)
+{
+   attribute_bonuses[type] = amount;
+}
+
+void add_attribute_bonus(string type, int amount)
+{
+   attribute_bonuses[type] = attribute_bonuses[type] + amount;
+}
+
+void reset_attribute_bonuses()
+{
+   attribute_bonuses = ([ ]);
+}
+
+mapping query_attribute_bonuses()
+{
+   return attribute_bonuses;
 }
 
 //:FUNCTION set_worn
@@ -150,29 +215,40 @@ void set_worn(int g)
 {
    assign_flag(F_WORN, g);
 //   hook_state("prevent_drop", "You'll have to take it off first.\n", g);
+
+   foreach (string type in keys(attribute_bonuses))
+   {
+      if (g)
+      {
+         attribute_hooks[type] = (: get_attribute_bonus, type :);
+         owner(this_object())->add_hook(type + "_bonus", attribute_hooks[type]);
+      }
+      else
+      {
+         owner(this_object())->remove_hook(type + "_bonus", attribute_hooks[type]);
+      }
+   }
+
+   owner(this_object())->refresh_stats();
 }
 
 void remove()
 {
    object env = environment();
 
-   if (!slot || !env) { return 0; }
+   if (!slots || !env) { return 0; }
 
-   if (sizeof(also_covering))
+   foreach (string slot in slots)
    {
-      foreach (string other_slot in also_covering)
-      {
-         env->remove_item(this_object(), other_slot);
-      }
+      env->remove_item(this_object(), slot);
    }
 
-   env->remove_item(this_object(), slot);
    set_worn(0);
 }
 
 void do_wear()
 {
-   if (!slot) { return; }
+   if (!slots) { return; }
 
    if (test_flag(F_BROKEN))
    {
@@ -181,11 +257,11 @@ void do_wear()
       return;
    }
 
-   if (!environment()->wear_item(this_object(), slot))
+   if (!environment()->wear_item(this_object(), slots))
    {
       if (test_flag(F_WORN))
       {
-         environment()->simple_action("$N $vdiscover $ns $vare wearing the $o.", this_object());
+         environment()->simple_action("$N $vdiscover $ns $vare already wearing the $o.", this_object());
       }
       else
       {
@@ -195,32 +271,176 @@ void do_wear()
       return;
    }
 
+   if (test_flag(F_CONCEALED))
+   {
+      clear_flag(F_CONCEALED);
+      environment()->simple_action("$N $vpull out " + this_object()->a_short() + " from the folds of $p clothing.\n");
+   }
+
    set_worn(1);
-   environment()->simple_action(query_wearmsg(), this_object());
+   environment()->simple_action(query_wear_message(), this_object());
+
+   if (environment()->query_body_size() < body_size)
+   {
+      if (this_object()->query_plural())
+      {
+         environment()->my_action("They're a little loose, but you manage to wear them.");
+      }
+      else
+      {
+         environment()->my_action("It's a little loose, but you manage to wear it.");
+      }
+   }
+   else if (environment()->query_body_size() > body_size)
+   {
+      if (this_object()->query_plural())
+      {
+         environment()->my_action("They're a little tight, but you manage to fit them on.");
+      }
+      else
+      {
+         environment()->my_action("It's a little tight, but you manage to fit it on.");
+      }
+   }
 }
 
 void do_remove()
 {
-   if (!slot) { return 0; }
+   if (!slots) { return 0; }
 
    if (test_flag(F_WORN))
    {
-      if (sizeof(also_covering))
+      foreach (string slot in slots)
       {
-//         this_body()->simple_action("$N $vfind out that the $o covers more than one slot.", this_object());
-
-         foreach (string other_slot in also_covering)
-         {
-//            this_body()->simple_action("$N $vlook at the $o covering $p " + other_slot + ".", this_object());
-            environment()->remove_item(this_object(), other_slot);
-         }
+         environment()->remove_item(this_object(), slot);
       }
 
-      environment()->remove_item(this_object(), slot);
       set_worn(0);
-
-      this_body()->simple_action("$N $vremove $p $o.", this_object());
+      environment()->simple_action(query_remove_message(), this_object());
    }
+}
+
+void add_required_learned_skill(string skill)
+{
+   if (strlen(skill))
+   {
+      required_learned_skills += ({ skill });
+   }
+}
+
+void remove_required_learned_skill(string skill)
+{
+   if (member_array(skill, required_learned_skills) > -1)
+   {
+      required_learned_skills -= ({ skill });
+   }
+}
+
+string array query_required_learned_skills()
+{
+   return required_learned_skills;
+}
+
+int check_required_learned_skills()
+{
+   object who = owner(this_object());
+
+   foreach (string skill in required_learned_skills)
+   {
+      if (wizardp(who))
+      {
+         tell(who, "(Need to have learned " + skill + ")\n");
+      }
+
+      if (!who->has_learned_skill(skill))
+      {
+         return 0;
+      }
+   }
+
+   return 1;
+}
+
+void add_required_skill(mixed skills ...)
+{
+   if (arrayp(skills) && (sizeof(skills) == 2))
+   {
+      required_skills[skills[0]] = skills[1];
+   }
+}
+
+void remove_required_skill(string skill)
+{
+   if (required_skills[skill])
+   {
+      map_delete(required_skills, skill);
+   }
+}
+
+mapping query_required_skills()
+{
+   return required_skills;
+}
+
+int check_required_skills()
+{
+   object who = owner(this_object());
+
+   foreach (string skill in keys(required_skills))
+   {
+      if (wizardp(who))
+      {
+         tell(who, "(Skill in " + skill + " is " + who->query_skill(skill) + " and needs to be at least " + required_skills[skill] + ")\n");
+      }
+
+      if (who->query_skill(skill) < required_skills[skill])
+      {
+         return 0;
+      }
+   }
+
+   return 1;
+}
+
+void add_required_guild(mixed guild ...)
+{
+   if (arrayp(guild) && (sizeof(guild) == 2))
+   {
+      required_guilds[guild[0]] = guild[1];
+   }
+}
+
+void remove_required_guild(string guild)
+{
+   if (required_guilds[guild])
+   {
+      map_delete(required_guilds, guild);
+   }
+}
+
+mapping query_required_guilds()
+{
+   return required_guilds;
+}
+
+int check_required_guilds()
+{
+   object who = owner(this_object());
+
+   foreach (string guild in keys(required_guilds))
+   {
+      if (wizardp(who))
+      {
+         tell(who, "(Need to be at least level " + required_guilds[guild] + " in " + guild + " guild)\n");
+      }
+
+      if (who->query_guild_level(guild) < required_guilds[guild])
+      {
+         return 0;
+      }
+   }
+
+   return 1;
 }
 
 mixed direct_wear_obj()
@@ -229,11 +449,11 @@ mixed direct_wear_obj()
 
    if (who != this_body()) { return 0; }
 
-   foreach (string body_slot in (also_covering + ({ slot })))
+   foreach (string body_slot in slots)
    {
-      if (sizeof(this_body()->query_armors(body_slot)) > 1)
+      if (sizeof(this_body()->query_armor_slot(body_slot)) > 1)
       {
-         write("You're already wearing something that covers that area.\n");
+         write("You're already wearing something that covers your " + body_slot + ".\n");
 
          return 0;
       }

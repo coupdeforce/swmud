@@ -1,11 +1,18 @@
 inherit RACE;
 
 string race_name = "mon calamari";
+int body_size = 3;
 
 // This is the name of the race, used in the initial selection screen, finger info, etc.
 string query_race()
 {
    return race_name;
+}
+
+// This is the body size of the race, from 1 to 5
+int query_body_size()
+{
+   return body_size;
 }
 
 // This is the help description

@@ -11,10 +11,13 @@ void clear_flag(int);
 void assign_flag(int, int);
 mixed call_hooks(string, int);
 
-private mapping resistances = ([]);
-private mapping weaknesses = ([]);
+private mapping resistances = ([ ]);
+private mapping resistance_bonuses = ([ ]);
+private mapping weaknesses = ([ ]);
+private mapping weakness_bonuses = ([ ]);
 private int armor_class = 1;
 private int max_armor_class = 1;
+private int armor_bonus;
 private int durability = 1;
 private int max_durability = 1;
 private int chance_to_be_damaged = 5;
@@ -22,7 +25,7 @@ private nosave int armor_bonus;
 
 void internal_setup()
 {
-   this_object()->add_save( ({ "armor_class", "max_armor_class", "durability", "max_durability", "persist_flags" }) );
+   this_object()->add_save( ({ "armor_class", "max_armor_class", "armor_bonus", "durability", "max_durability", "resistances", "resistance_bonuses", "weaknesses", "weakness_bonuses", "persist_flags" }) );
 }
 
 //:FUNCTION set_armor_class
@@ -122,17 +125,11 @@ int query_max_armor_class()
    return max_armor_class;
 }
 
-//:FUNCTION set_armor_bonus
-// Set an overall modifier of armor class on the object.  The bonus
-// does not get saved, so should only be used for temporary bonuses. (i.e. buffs)
-void set_armor_bonus(int newbonus)
+//:FUNCTION add_armor_bonus
+// Adds an overall modifier of armor class on the object.
+void add_armor_bonus(int amount)
 {
-   armor_bonus = newbonus;
-}
-
-void add_armor_bonus(int delta)
-{
-   armor_bonus += delta;
+   armor_bonus += amount;
 }
 
 int query_armor_bonus()
@@ -142,58 +139,84 @@ int query_armor_bonus()
 
 class event_info sink_modify_event(class event_info evt)
 {
-   int damage_before_sink = evt->data[1];
-   int ac = evt->target->query_armor_class();
-   int force_shield = evt->target->call_hooks("force_shield", HOOK_SUM);
+   object wearer = evt->target;
+   int damage_before_sink = event_damage(evt);
+   int total_armor_class = wearer->query_armor_class() + wearer->query_armor_bonus();
+   mapping total_resistances = wearer->query_resistances();
+   mapping total_weaknesses = wearer->query_weaknesses();
 
-   if (stringp(evt->data)) { return evt; }
+   if (!mapp(evt->data) || evt->weapon->id("force_reflect")) { return evt; }
 
-   if ((force_shield > 0) && (member_array(evt->data[0], ({ "combat-unarmed", "combat-blade", "combat-blunt" })) > -1))
+   if (this_object()->is_jedi_armor() && wearer->query_guild_level("jedi") && wearer->has_learned_skill("jedi defense"))
    {
-      int damage_reduction = (evt->data[1] * (force_shield / 5)) / 100;
+      int jedi_alignment = wearer->query_jedi_alignment();
 
-      if (damage_reduction < 1) { damage_reduction = 1; }
+      total_armor_class += wearer->query_jedi_armor_class();
 
-      evt->data[1] -= damage_reduction;
-
-      tell(owner(this_object()), "(Your Force shield adjusted damage from " + damage_before_sink + " to " + evt->data[1] + ")\n");
+      wearer->test_skill("jedi_defense", jedi_alignment * (jedi_alignment < 0 ? -10 : 20));
    }
 
-   if (armor_class > ac) { ac = armor_class; }
-
-   if (member_array(evt->data[0], keys(weaknesses)) != -1)
+   if ((armor_class + armor_bonus) > total_armor_class)
    {
-      evt->data[1] += random(weaknesses[evt->data[0]] + 1);
-   }
-   else if (member_array(evt->data[0], keys(resistances)) != -1)
-   {
-      evt->data[1] -= random(resistances[evt->data[0]] + 1);
+      total_armor_class = armor_class + armor_bonus;
    }
 
-   if (ac > evt->data[1])
+   foreach (string type in keys(resistances) + keys(resistance_bonuses) + keys(total_resistances))
    {
-      ac = evt->data[1];
+      total_resistances[type] = total_resistances[type] + resistances[type] + resistance_bonuses[type];
    }
 
-   evt->data[1] -= (random(ac) + armor_bonus + 1);
-
-   if (evt->data[1] < 0) { evt->data[1] = 0; }
-
-   if (damage_before_sink > 0)
+   foreach (string type in keys(weaknesses) + keys(weakness_bonuses) + keys(total_weaknesses))
    {
-      if (chance_to_be_damaged && (chance_to_be_damaged > random(100)))
+      total_weaknesses[type] = total_weaknesses[type] + weaknesses[type] + weakness_bonuses[type];
+   }
+
+   foreach (string type in keys(evt->data))
+   {
+      int effective_armor_class = total_armor_class;
+
+      if (effective_armor_class > evt->data[type])
+      {
+         effective_armor_class = evt->data[type];
+      }
+
+      effective_armor_class -= total_weaknesses[type];
+      effective_armor_class += total_resistances[type];
+
+      if (effective_armor_class > evt->data[type])
+      {
+         effective_armor_class = evt->data[type];
+      }
+      else if (effective_armor_class < 0)
+      {
+         effective_armor_class = 0;
+      }
+
+      evt->data[type] -= random(effective_armor_class + 1);
+   }
+
+   if (chance_to_be_damaged)
+   {
+      int damage_chance = chance_to_be_damaged;
+
+      if (((damage_before_sink - event_damage(evt)) / 2) > damage_chance)
+      {
+         damage_chance = (damage_before_sink - event_damage(evt)) / 2;
+      }
+
+      if (damage_chance > random(100))
       {
          // X in 100 chance of the armor getting damaged
          decrease_class(1);
       }
-
-//      if (wizardp(owner(this_object())) && (damage_before_sink > 0) && (damage_before_sink > evt->data[1]))
-      if ((damage_before_sink > 0) && (damage_before_sink > evt->data[1]))
-      {
-         tell(owner(this_object()), "(Your " + this_object()->short() + " adjusted damage from " + damage_before_sink + " to " + evt->data[1] + ")\n");
-      }
    }
-
+/*
+//   if (wizardp(owner(this_object())) && (damage_before_sink > 0) && (damage_before_sink > event_damage(evt)))
+   if (damage_before_sink > evt->data[1])
+   {
+      tell(wearer, "(Your " + this_object()->short() + " adjusted damage from " + damage_before_sink + " to " + event_damage(evt) + ")\n");
+   }
+*/
    return evt;
 }
 
@@ -202,13 +225,47 @@ class event_info sink_modify_event(class event_info evt)
 void set_resist(string type, int amt)
 {
    resistances[type] = amt;
+
+   if (resistances[type] < 1)
+   {
+      map_delete(resistances, type);
+   }
 }
 
 //:FUNCTION set_resistances
 // Set all the resistances an armor possesses.
 void set_resistances(mapping x)
 {
-   resistances = x;
+   foreach (string type, int amount in x)
+   {
+      set_resist(type, amount);
+   }
+}
+
+//:FUNCTION add_resistance_bonus
+// Allows for setting temporary resistances
+void add_resistance_bonus(string type, int amt)
+{
+   resistance_bonuses[type] += amt;
+
+   if (resistance_bonuses[type] < 1)
+   {
+      map_delete(resistance_bonuses, type);
+   }
+}
+
+//:FUNCTION query_resistances
+// Returns all the resistances an armor possesses.
+mapping query_resistances()
+{
+   mapping resistances = ([ ]);
+
+   foreach (string type in keys(resistances) + keys(resistance_bonuses))
+   {
+      resistances[type] = resistances[type] + resistance_bonuses[type];
+   }
+
+   return resistances;
 }
 
 //:FUNCTION set_weakness
@@ -216,11 +273,45 @@ void set_resistances(mapping x)
 void set_weakness(string type, int amt)
 {
    weaknesses[type] = amt;
+
+   if (weaknesses[type] < 1)
+   {
+      map_delete(weaknesses, type);
+   }
 }
 
 void set_weaknesses(mapping weak)
 {
-   weaknesses = weak;
+   foreach (string type, int amount in weak)
+   {
+      set_weakness(type, amount);
+   }
+}
+
+//:FUNCTION add_weakness_bonus
+// Allows for setting temporary weaknesses
+void add_weakness_bonus(string type, int amt)
+{
+   weakness_bonuses[type] += amt;
+
+   if (weakness_bonuses[type] < 1)
+   {
+      map_delete(weakness_bonuses, type);
+   }
+}
+
+//:FUNCTION query_weaknesses
+// Returns all the weaknesses an armor possesses.
+mapping query_weaknesses()
+{
+   mapping weaknesses = ([ ]);
+
+   foreach (string type in keys(weaknesses) + keys(weakness_bonuses))
+   {
+      weaknesses[type] = weaknesses[type] + weakness_bonuses[type];
+   }
+
+   return weaknesses;
 }
 
 //:FUNCTION is_armor
@@ -273,7 +364,7 @@ void do_repair()
          if (!skill_delay)
          {
             int skill_test = body->test_skill("armor_repair", 1);
-            int max_repair = (body->query_skill("armor_repair") / 200) + 1;
+            int max_repair = (body->query_skill("armor_repair") / 100) + 1;
 
             body->add_skill_delay(4);
 
@@ -311,9 +402,4 @@ void do_repair()
    {
       tell(body, this_object()->short() + " is broken and cannot be repaired.\n");
    }
-}
-
-mapping lpscript_attributes()
-{
-   return ([ "armor_class" : ({ LPSCRIPT_INT, "setup", "set_armor_class" }), ]);
 }

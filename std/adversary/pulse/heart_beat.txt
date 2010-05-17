@@ -1,7 +1,9 @@
+// Last edited by deforce on 07-12-2008
 // Heartbeat based interface to combat.  It is intended that this will
 // be interchangeable with the non_heart_beat based module.
 
 void switch_to(object);
+void buff_heartbeat();
 void attack();
 object get_target();
 
@@ -16,13 +18,12 @@ int query_penalty()
 
 void do_something()
 {
-   if (!attacking)
-   {
-      set_heart_beat(0);
-      return;
-   }
+   buff_heartbeat();
 
-   attack();
+   if (attacking)
+   {
+      attack();
+   }
 }
 
 void heart_beat()
