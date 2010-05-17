@@ -1,4 +1,4 @@
-// Last edited by deforce on 12-05-2007
+// Last edited by deforce on 12-22-2007
 #include <classes.h>
 
 inherit CLASS_SKILL;
@@ -11,6 +11,11 @@ private mapping skill_delays = ([ ]);
 
 int set_skill(string skill, int skill_points)
 {
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set " + this_object()->short() + "'s skill in " + skill + " to " + skill_points + ".\n");
+   }
+
    if (skill_points < 1)
    {
       map_delete(skills, skill);
@@ -168,6 +173,11 @@ void learn_skill(string skill, int value)
    int roll;
    float chance;
 
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to use learn_skill on  " + this_object()->short() + ".\n");
+   }
+
    skill_data = SKILL_D->query_skill(skill);
 
    if (!skill_data)
@@ -185,7 +195,7 @@ void learn_skill(string skill, int value)
       advrate = skill_data[1];
 
       roll = random(skill_value * 10);
-      chance = (value + skill_value) * ((1000 - skill_value) / 100);
+      chance = (((1000 + value + skill_value) / 100) * ((1000 - value + skill_value) / 100) * (advrate / 100) * 10);
       chance *= (advrate / 100);
 
       if (chance > 950) { chance = 950; }
@@ -223,6 +233,11 @@ int test_skill(string skill, int adjustment)
    int destination_value;
    int stat_bonus = get_stat_bonus(skill);
 
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to use test_skill on  " + this_object()->short() + ".\n");
+   }
+
    if (skill_value < 1000) { learn_skill(skill, stat_bonus + adjustment); }
 
    destination_value = skill_value + stat_bonus + adjustment;
@@ -252,6 +267,11 @@ int query_evaluation()
 // Adds a specificed skill delay in seconds
 void add_skill_delay(int delay)
 {
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to add skill delay of " + delay + " to " + this_object()->short() + ".\n");
+   }
+
    skill_delay = time() + delay;
 }
 
@@ -288,6 +308,11 @@ mapping query_skill_delays()
 // Adds a specificed skill delay in seconds to the specified skill
 void add_special_skill_delay(string skill, int delay)
 {
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to add special skill delay of " + delay + " to " + this_object()->short() + " for " + skill + ".\n");
+   }
+
    skill_delays[skill] = time() + delay;
 }
 
