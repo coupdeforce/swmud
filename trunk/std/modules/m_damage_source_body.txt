@@ -1,10 +1,14 @@
-// Last edited by deforce on 06-09-2008
+// Last edited by deforce on 05-05-2010
 // Adversary's unarmed weapon
 
 inherit CLASS_EVENT_INFO;
 
-private nosave int damage_bonus;
-private nosave mapping combat_messages = ([]);
+int query_primary_level();
+int query_agi();
+int query_str();
+int query_skill(string skill);
+
+private nosave mapping damage_bonuses = ([ ]);
 
 int can_swing()
 {
@@ -16,36 +20,27 @@ mixed adjust_my_result(mixed result)
    return result;
 }
 
-int query_to_hit_bonus(object target)
+int query_to_hit_base(object target)
 {
-   return to_int(ceil(this_body()->query_agi() / 2)) - 35;  // Unarmed to-hit penalty or bonus
+   // Unarmed to-hit penalty or bonus
+   return (query_agi() * 100 / target->query_agi()) - 100;
 }
 
-string array query_damage_type()
+mapping query_damage_types()
 {
-   return ({ "combat-unarmed" });
-}
+   int level = query_primary_level();
+   int strength = query_str();
+   int rank = query_skill("unarmed") / 100;
+   int unarmed_damage = level * strength * rank / 1000;
 
-//:FUNCTION set_combat_messages
-// Set the set of combat messages which are used by default
-void set_combat_messages(string type)
-{
-   if (!(combat_messages = MESSAGES_D->get_messages(type)))
-   {
-      error("No messages of that type.\n");
-   }
-}
+   if (unarmed_damage < ((level / 5) + (strength / 5) + rank)) { unarmed_damage = (level / 5) + (strength / 5) + rank; }
 
-//:FUNCTION query_combat_message
-// Returns the combat message for a given type
-mixed query_combat_message(string type)
-{
-   return combat_messages[type] || MESSAGES_D->get_messages(type);
+   return ([ "striking" : unarmed_damage + damage_bonuses["striking"] ]) + filter(damage_bonuses, (: $1 != "striking" :));
 }
 
 mixed query_combat_messages()
 {
-   return combat_messages;MESSAGES_D->get_messages("combat-unarmed");
+   return MESSAGES_D->get_messages("combat-unarmed");
 }
 
 int is_weapon()
@@ -91,32 +86,38 @@ int query_chance_to_be_damaged()
 //:FUNCTION set_damage_bonus
 // Set an overall modifier of weapon class on the object.  The bonus
 // does not get saved, so should only be used for temporary bonuses. (i.e. buffs)
-void set_damage_bonus(int bonus)
+void set_damage_bonus(string type, int bonus)
 {
-   damage_bonus = bonus;
+   damage_bonuses[type] = bonus;
 }
 
-void add_damage_bonus(int value)
+void add_damage_bonus(string type, int value)
 {
-   damage_bonus += value;
+   damage_bonuses[type] += value;
 }
 
-int query_damage_bonus()
+mapping query_damage_bonuses()
 {
-   return damage_bonus;
+   return damage_bonuses;
 }
 
 int query_weapon_class()
 {
-   object this_ob = this_object();
+   mapping damage_types = query_damage_types();
 
-//   return 6 + to_int(floor((this_ob->query_primary_level() / 10.0) + (pow(this_ob->query_str() / 100.0, 2) * (this_ob->query_primary_level() / 2.0))));
-   return to_int(floor(this_ob->query_primary_level() / 5.0) + floor(this_ob->query_str() / 5.0) + (floor(this_ob->query_skill("unarmed") / 100.0) * 2));
-}
+   if (sizeof(damage_types))
+   {
+      int total = 0;
 
-int query_max_weapon_class()
-{
-   return query_weapon_class();
+      foreach (string type in keys(damage_types))
+      {
+         total += damage_types[type];
+      }
+
+      return total;
+   }
+
+   return 0;
 }
 
 int query_weapon_speed()

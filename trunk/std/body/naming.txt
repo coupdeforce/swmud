@@ -1,11 +1,9 @@
-// Last edited by deforce on 12-22-2007
+// Last edited by deforce on 03-22-2010
 // naming.c -- functions for naming and description of the player body
 // Created by Deathblade 06-03-1996
 #include <commands.h>           // for CMD_OB_xxx
 
 private string describe;
-private string invis_name;
-private string nickname;
 
 int is_visible();
 int test_flag(int which);
@@ -14,7 +12,6 @@ object query_link();
 string number_of(int num, string what);
 void save_me();
 string query_reflexive();
-void remove_id(string array id...);
 void add_id_no_plural(string array id...);
 string in_room_desc();
 string living_query_name();
@@ -35,9 +32,14 @@ nomask string query_userid()
    return query_link()->query_userid();
 }
 
+string query_name()
+{
+   return query_userid();
+}
+
 nomask string query_invis_name()
 {
-   return invis_name;
+   return "Someone";
 }
 
 string query_idle_string()
@@ -83,22 +85,9 @@ string query_formatted_desc(int num_chars)
    return M_ANSI->colour_truncate(base_in_room_desc(), num_chars) + idle_string;
 }
 
-string adjust_name(string name)
-{
-   if (invis_name == capitalize(name) || !invis_name) { invis_name = "Someone"; }
-   if (!is_visible()) { return invis_name; }
-
-   return capitalize(name);
-}
-
 void set_description(string str)
 {
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to set " + this_object()->short() + "'s description to " + str + ".\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("set " + this_object()->short() + "'s description to " + str, previous_object(-1)); }
 
    if (base_name(previous_object()) == CMD_OB_DESCRIBE) { describe = str; }
 
@@ -109,38 +98,7 @@ void set_description(string str)
 
 string our_description()
 {
-   if (describe) { return in_room_desc() + "\n" + describe +"\n"; }
+   if (describe) { return describe + "\n"; }
 
-   return in_room_desc() + "\n" + capitalize(query_name()) + " is boring and hasn't described " + query_reflexive() + ".\n";
-}
-
-void set_nickname(string arg)
-{
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to set " + this_object()->short() + "'s nickname to " + arg + ".\n");
-   }
-*/
-
-   if (file_name(previous_object()) != CMD_OB_NICKNAME)
-   {
-      error("Illegal call to set_nickname\n");
-   }
-
-   if (nickname) { remove_id(nickname); }
-
-   nickname = arg;
-   add_id_no_plural(nickname);
-   parse_refresh();
-}
-
-string query_nickname()
-{
-   return nickname;
-}
-
-protected void naming_init_ids()
-{
-   if (nickname) { add_id_no_plural(nickname); }
+   return capitalize(query_name()) + " is boring and hasn't described " + query_reflexive() + ".\n";
 }

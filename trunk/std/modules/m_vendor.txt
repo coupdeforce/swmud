@@ -1,14 +1,13 @@
-// Last edited by deforce on 05-17-2008
+// Last edited by deforce on 03-17-2010
 
 //:MODULE
 //m_vendor is used to create vendor objects that buy and sell stuff
 //they work as traditional shopkeepers and also bartenders
 //See: /domains/std/shopkeeper.c
 
-/* TODO
-compatibility of buying and selling vehicles
-problem lies in ob->move(this_object()), and vehicles are too large.
-*/
+// TODO
+// compatibility of buying and selling vehicles
+// problem lies in ob->move(this_object()), and vehicles are too large.
 
 // Shall the vendor sell objects which were in the store-room befor the start?
 // If you define this vendors may not share a store-room.
@@ -20,19 +19,10 @@ problem lies in ob->move(this_object()), and vehicles are too large.
 #ifdef VENDOR_MIN_VALUE
 #define MIN_VALUE VENDOR_MIN_VALUE
 #else
-#define MIN_VALUE 70
-#endif
-
-// Value of what the objects value is multiplied by to achieve its cost
-#ifdef VENDOR_COST_MULT
-#define COST_MULT VENDOR_COST_MULT
-#else
-#define COST_MULT 1.5
+#define MIN_VALUE 1
 #endif
 
 #include <move.h>
-
-void organize_stock();
 
 class item
 {
@@ -49,6 +39,8 @@ string short();
 string query_subjective();
 int check_uniqueness(object ob);
 void clear_stock();
+void organize_stock();
+int sort_short(object first, object second);
 
 private mixed for_sale;
 private mixed will_buy;
@@ -57,32 +49,51 @@ private mapping stored_items = ([ ]);
 private string unique_inv = "";
 private int all_unique = 0;
 private int max_item_number = 0;
-private float cost_mult = COST_MULT;
+private float cost_multiplier = 1;
+private float sell_divisor = 3;
 
-//:FUNCTION set_cost_multiplicator
-float set_cost_multiplicator(float m)
+//:FUNCTION set_cost_multiplier
+float set_cost_multiplier(float value)
 {
-   cost_mult = m;
+   if (value > 0)
+   {
+      cost_multiplier = value;
+   }
+}
+
+//:FUNCTION set_sell_divisor
+float set_sell_divisor(float value)
+{
+   if (value > 0)
+   {
+      sell_divisor = value;
+   }
 }
 
 //:FUNCTION selling_cost
-//multiply the objects value with cost_mult to get the cost for selling
+// multiply the objects value with cost_mult to get the cost for selling
+// This is how much they sell for at the shop
 float selling_cost(float cost)
 {
-   if (cost < MIN_VALUE) { return MIN_VALUE * cost_mult; }
-   else { return cost * cost_mult; }
+   if (cost < MIN_VALUE) { return MIN_VALUE * cost_multiplier; }
+
+   return cost * cost_multiplier;
 }
 
 //:FUNCTION buying_cost
-//override if you want a different way to determine cost
+// Override if you want a different way to determine cost
+// This is how much a player gets for selling something
 float buying_cost(float cost)
 {
-   return cost;
+   if (cost < MIN_VALUE) { return MIN_VALUE / sell_divisor; }
+
+   return cost / sell_divisor;
 }
 
 private class item init_item(object ob)
 {
    class item item;
+
    item = new(class item, short: ob->short(), long: ob->long(),
       ids: ob->query_id() + ({ ob->short(), ob->plural_short() }),
       value: ob->query_value(), amount: 1);
@@ -203,7 +214,7 @@ mixed direct_list_str_from_liv(string item, object liv) { return 1; }
 mixed direct_buy_str_from_liv(string item, object liv) { return 1; }
 mixed indirect_sell_obj_to_liv(object ob, object liv) { return 1; }
 
-int test_buy(object ob)
+int test_buy_from(object ob, object seller)
 {
    mixed result;
 
@@ -242,20 +253,45 @@ int test_buy(object ob)
    return 0;
 }
 
-//FUNCTION: buy_object
+//FUNCTION: buy_object_from
 //gets called from the verb sell. Addes bought object to the list of
 //stored_items depending on check_uniqueness()
-void buy_object(object ob)
+void buy_object_from(object ob, object seller)
 {
    float cost;
    mixed item;
    string file;
    mapping money;
-   int exchange_rate = MONEY_D->query_exchange_rate(currency_type);
 
-   if (!test_buy(ob)) { return; }
+   if (!test_buy_from(ob, seller)) { return; }
 
-   cost = buying_cost(to_float(ob->query_value())) / to_float(exchange_rate);
+   cost = to_float(ob->query_value());
+
+   if (seller->query_guild_level("merchant") && seller->has_learned_skill("haggling")
+      && (seller->query_toggle("haggle") == "on"))
+   {
+      int level = seller->query_guild_level("merchant");
+      int rank = to_int(floor(seller->query_skill("haggle") / 100.0));
+      float amount;
+
+      if (!seller->test_skill("haggle", level * 10)
+         && ((50 - level - (rank * 3)) > random(100)))
+      {
+         amount = level + (seller->query_cha() / 5.0) + rank - 50;
+
+         if (amount > 0) { amount = 0; }
+      }
+      else
+      {
+         amount = (level / 2.0) + (rank * 2.5);
+
+         if (amount < 1) { amount = 1; }
+      }
+
+      cost += (cost * amount) / 100.0;
+   }
+
+   cost = buying_cost(cost);
 
    if (cost < 0.01)
    {
@@ -275,7 +311,7 @@ void buy_object(object ob)
 
    foreach (string type, int amount in money)
    {
-      this_body()->add_money(type, amount);
+      seller->add_money(type, amount);
    }
 
    this_body()->my_action("$N $vsell a $o for " + MONEY_D->currency_to_string(money, currency_type) + ".\n", ob);
@@ -308,6 +344,7 @@ void buy_object(object ob)
       break;
    }
 
+   reset_eval_cost();
    organize_stock();
 }
 
@@ -321,7 +358,9 @@ int query_items(string item, int flag)
    int *keys = ({});
    int key, num;
    string cost;
-   float exchange_rate = to_float(MONEY_D->query_exchange_rate(currency_type));
+   int row_count = 1;
+
+   organize_stock();
 
    if (sizeof(stored_items) == 0 || !for_sale)
    {
@@ -354,24 +393,20 @@ int query_items(string item, int flag)
 
    keys = sort_array(keys, 1);
 //   printf("%|6s %|8s %-24s %s\n","List #", "Amount", "Name/id", capitalize(currency_type));
-   printf("%2s   %3s  %-48s   %13s\n","ID", "Amt", "Item Name", capitalize(currency_type));
-   write(repeat_string("-", 75) + "\n");
+   printf("%4s  %-54s   %15s\n", "Qty", "Item", capitalize(currency_type));
+   write(repeat_string("-", 79) + "\n");
 
    foreach (key in keys)
    {
-      cost = MONEY_D->currency_to_string(
-         selling_cost(to_float(stored_items[key]->value)) / exchange_rate, currency_type);
+      cost = MONEY_D->currency_to_string( selling_cost(stored_items[key]->value), currency_type);
 
       num = stored_items[key]->amount;
 
-      if (num != -1)
-      {
-//         printf("%|6d %|8d %-24s %s\n", key, num, stored_items[key]->short, cost);
-         printf("%2d   %3d  %-46s   %15s\n", key, num, stored_items[key]->short[0..45], cost);
-      }
-      else { printf("%|6d %|8s %-24s %s\n", key, "Numerous", stored_items[key]->short, cost); }
+      printf("%s%4s  %-54s   %15s   %s\n", (row_count % 2 ? "%^BOLD%^" : ""), (num != -1 ? sprintf("%d", num) : "*"), stored_items[key]->short[0..45] + stored_items[key]->objects[0]->get_attributes(), cost, (row_count % 2 ? "%^RESET%^" : ""));
 
-      if (flag) { write(stored_items[key]->long); }
+      if (flag) { write(stored_items[key]->long + "\n"); }
+
+      row_count++;
    }
 
    return 1;
@@ -405,15 +440,40 @@ int test_sell(object ob)
    return 0;
 }
 
-protected int sell_object(object ob)
+protected int sell_object_to(object ob, object buyer)
 {
-   float exchange_rate = to_float(MONEY_D->query_exchange_rate(currency_type));
    float cost;
    mapping array money;
 
    if (!test_sell(ob)) { return 0; }
 
-   cost = floor(selling_cost(to_float(ob->query_value())) / exchange_rate);
+   cost = to_float(ob->query_value());
+
+   if (buyer->query_guild_level("merchant") && buyer->has_learned_skill("haggling")
+      && (buyer->query_toggle("haggle") == "on"))
+   {
+      int level = buyer->query_guild_level("merchant");
+      int rank = to_int(floor(buyer->query_skill("haggle") / 100.0));
+      float amount;
+
+      if (!buyer->test_skill("haggle", level * 10)
+         && ((50 - level - (rank * 3)) > random(100)))
+      {
+         amount = level + (buyer->query_cha() / 5.0) + rank - 50;
+
+         if (amount > 0) { amount = 0; }
+      }
+      else
+      {
+         amount = (level / 2.0) + (rank * 2.5);
+
+         if (amount < 1) { amount = 1; }
+      }
+
+      cost -= (cost * amount) / 100.0;
+   }
+
+   cost = ceil(selling_cost(cost));
 
    if (cost > this_body()->query_amt_currency(currency_type))
    {
@@ -423,27 +483,30 @@ protected int sell_object(object ob)
       return 0;
    }
 
-   if (ob->move(this_body()) != MOVE_OK)
+   if (ob->move(buyer) != MOVE_OK)
    {
       write(capitalize(query_subjective()) + " can't seem to give " + ob->the_short() + " to you.\n");
 
       return 0;
    }
 
-  money = MONEY_D->handle_subtract_money(this_body(), cost, currency_type);
-  this_body()->my_action("$N $vbuy a $o for " +
-      MONEY_D->currency_to_string(cost, currency_type)  +
-      ". You give " + MONEY_D->currency_to_string(cost, currency_type) +
-      " to $o1" +(sizeof(money[1]) ? " and get " + 
-      MONEY_D->currency_to_string(money[1],currency_type) + " as change" : "") +
-      ".\n", ob, this_object());
+   money = MONEY_D->handle_subtract_money(buyer, cost, currency_type);
 
-  this_body()->other_action("$N $vbuy a $o.\n", ob);
+   buyer->my_action("$N $vbuy a $o for "
+      + MONEY_D->currency_to_string(cost, currency_type)
+      + (sizeof(money[1]) ? " and get "
+      + MONEY_D->currency_to_string(money[1], currency_type) + " as change" : "")
+      + ".", ob, this_object());
 
-  return 1;
+   buyer->other_action("$N $vpurchase $o.\n", ob);
+
+   reset_eval_cost();
+   organize_stock();
+
+   return 1;
 }
 
-private void sell_items(int key, int amount)
+private void sell_items_to(int key, int amount, object buyer)
 {
    int i;
    class item item;
@@ -458,7 +521,7 @@ private void sell_items(int key, int amount)
       if (item->objects) { ob = item->objects[0]; }
       else { ob = new(item->file); }
 
-      if (sell_object(ob))
+      if (sell_object_to(ob, buyer))
       {
          if (item->objects) { item->objects -= ({ ob }); }
 
@@ -478,7 +541,7 @@ private void sell_items(int key, int amount)
 //Gets called from the buy verb with the string from obj rule.
 //This is the way the players can buy objects from the shopkeeper
 //that he has stored away.
-void sell_stored_objects(string item, int number, int amount)
+void sell_stored_objects_to(string item, int number, int amount, object buyer)
 {
    if (!for_sale)
    {
@@ -498,10 +561,10 @@ void sell_stored_objects(string item, int number, int amount)
          return;
       }
 
-      if (item == "all") { sell_items(number, amount); }
+      if (item == "all") { sell_items_to(number, amount, buyer); }
       else
       {
-         if (member_array(item, stored_items[number]->ids) != -1) { sell_items(number, amount); }
+         if (member_array(item, stored_items[number]->ids) != -1) { sell_items_to(number, amount, buyer); }
          else { write("There is no '" + item + "' at #" + number + ".\n"); }
       }
    }
@@ -511,7 +574,7 @@ void sell_stored_objects(string item, int number, int amount)
       {
          if (member_array(item, stored_items[key]->ids) != -1)
          {
-            sell_items(key, amount);
+            sell_items_to(key, amount, buyer);
 
             return;
          }
@@ -544,7 +607,7 @@ void set_unique_inventory(string str)
 {
    unique_inv = str;
 #ifdef SELL_OLD_OBJECTS
-   foreach (object ob in all_inventory(load_object(str))) { add_sell_object(ob); }
+   foreach (object ob in sort_array(all_inventory(load_object(str)), "sort_short")) { add_sell_object(ob); }
 #endif
 }
 
@@ -606,13 +669,12 @@ int check_uniqueness(object ob)
    return 0;
 }
 
-mapping lpscript_attributes()
+int sort_short(object first, object second)
 {
-   return (["currency_type" : ({ LPSCRIPT_STRING, "setup", "set_currency_type" }),
-      "for_sale" : ({ LPSCRIPT_BOOLEAN, "setup", "set_for_sale" }),
-      "will_buy" : ({ LPSCRIPT_BOOLEAN, "setup", "set_will_buy" }),
-      "sell" : ({ LPSCRIPT_INT_MAPPING, "setup", "set_sell" }),
-   ]);
+   string first_short = first->short();
+   string second_short = second->short();
+
+   return strcmp(first_short, second_short);
 }
 
 void clear_stock()
@@ -622,18 +684,30 @@ void clear_stock()
 
 void organize_stock()
 {
-   mapping files = ([ ]);
-   string array file_keys = keys(query_stored());
-   string array file_values = values(query_stored());
-
-   foreach (class item item in file_values)
+   if (!all_unique)
    {
-      if (!files[item->file]) { files[item->file] = 0; }
+      mapping files = ([ ]);
 
-      files[item->file] += item->amount;
+      foreach (class item item in values(stored_items))
+      {
+         if (!files[item->file]) { files[item->file] = 0; }
+
+         files[item->file] += item->amount;
+      }
+
+      clear_stock();
+
+      set_sell(files);
+
+      if (strlen(unique_inv))
+      {
+         set_unique_inventory(unique_inv);
+      }
    }
+   else if (strlen(unique_inv))
+   {
+      clear_stock();
 
-   clear_stock();
-
-   set_sell(files);
+      set_unique_inventory(unique_inv);
+   }
 }

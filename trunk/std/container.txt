@@ -1,9 +1,10 @@
-// Last edited by deforce on 12-16-2007
+// Last edited by deforce on 02-18-2010
 // possibly the grossest piece of code in the mudlib.
 // (not as bad as the code that describes Rust's mom, of course)
 // Reworked a bit 2-17-99 by Tigran.  
 // Reworking included merging CONTAINER and COMPLEX_CONTAINER
 
+#include <flags.h>
 #include <move.h>
 #include <setbit.h>
 #include <driver/origin.h>
@@ -39,7 +40,8 @@ varargs string introduce_contents(string relation);
 
 string simple_long();
 int inventory_visible();
-
+void on_reset();
+int test_flag(int);
 
 /********    Relations    ********/
 // Return 1 if the relation is valid, else 0
@@ -247,9 +249,9 @@ string query_default_relation()
 
 //:FUNCTION query_capacity
 //Returns the amount of mass currently attached to a container
-varargs int query_capacity(string relation)
+int query_capacity(string relation)
 {
-   int cap;
+   float cap;
    string aliased_to;
    // Need a little special handling for #CLONE#
    if (!relation || (relation == "") || (relation == "#CLONE#"))
@@ -275,14 +277,17 @@ varargs int query_capacity(string relation)
          continue;
       }
 
-#ifdef USE_SIZE 
-      cap+=ob->query_size();
-#else
-      cap+=ob->query_mass();
-#endif
+      if (ob->test_flag(F_WORN) || ob->test_flag(F_WIELDED))
+      {
+         cap += ob->query_weight() * 0.9;
+      }
+      else
+      {
+         cap += ob->query_weight();
+      }
    }
 
-   return cap;
+   return to_int(cap);
 }
 
 //:FUNCTION set_max_capacity
@@ -392,14 +397,7 @@ mixed receive_object( object target, string relation )
       relation = aliased_to;
    }
 
-
-#ifdef USE_SIZE
-   x = target->query_size();
-#else
-   x=target->query_mass();
-#endif
-
-   if ((m = (query_capacity(relation)) + x) > query_max_capacity(relation))
+   if ((m = (query_capacity(relation)) + target->query_weight()) > query_max_capacity(relation))
    {
       return MOVE_NO_ROOM;
    }
@@ -654,16 +652,12 @@ mixed array make_objects_if_needed()
       foreach(string file, mixed parameters in object_data->create_on_reset)
       {
          int num = 1;
-         mixed array rest = ({ });
-         object array matches = ({ });
+         mixed array rest=({});
+         object array matches=({});
          // Allow use of relative paths, relative to the container.
          file = absolute_path(file, this_object());
-
          // If the only parameter is an integer, it is the quantity of the object that needs to be in this relation
-         if (intp(parameters))
-         {
-            num = parameters;
-         }
+         if (intp(parameters)) { num = parameters; }
          else if (arrayp(parameters))
          {
             // Check the first argument for an integer value, if it is then it is the quantity fo the object to be in the relation
@@ -672,43 +666,32 @@ mixed array make_objects_if_needed()
                num = parameters[0];
                rest = parameters[1..];
             }
-            // Everything else is parameters passed to create()
-            else
-            {
-               rest = parameters;
-	    }
+            // Everything else is parameters passed to create() */
+            else { rest = parameters; }
          }
-	 else
-         {
-            continue;
-         }
+         else { continue; }
 
          if (sizeof(object_data->contents))
          {
-            matches = filter(object_data->contents, (:cannonical_form ($1) == $(file) :) );
+            matches = filter(object_data->contents, (: cannonical_form ($1) == $(file) :));
          }
 
-         while(sizeof(matches)<num)
+         while (sizeof(matches) < num)
          {
             int ret;
             object ob = new(absolute_path(file), rest...);
 
-            if (!ob)
-            {
-               error("Couldn't find file '" + file + "' to clone!\n");
-            }
+            if (!ob) { error("Couldn't find file '" + file + "' to clone!\n"); }
 
             ret = ob->move(this_object(), "#CLONE#");
 
-            if (ret != MOVE_OK)
-            {
-               error("Initial clone failed for '" + file + "': " + ret + "\n");
-               ob->on_clone( rest... );
-               matches += ({ ob });
-            }
+            if (ret != MOVE_OK) { error("Initial clone failed for '" + file +"': " + ret + "\n"); }
 
-            objs += matches;
+            ob->on_clone( rest... );
+            matches+=({ob});
          }
+
+         objs += matches;
       }
    }
 
@@ -855,10 +838,14 @@ varargs string introduce_contents(string relation)
 
    relation = PREPOSITION_D->translate_preposition(relation);
 
+   if (!sizeof(all_inventory())) { return ""; }
+
    switch (relation)
    {
       case "in": return capitalize(the_short()) + " contains:\n";
       case "on": return "Sitting on " + the_short() +  " you see:\n";
+      case "attached to": return "";
+      case "holstered in": return "";
       default: return capitalize(relation) + " " + the_short() + " you see:\n";
    }
 }
@@ -915,7 +902,7 @@ varargs string inventory_recurse(int depth, mixed avoid)
       }
    }
 
-   if (!this_object()->is_living())
+   if (!this_object()->is_living() && sizeof(obs))
    {
       foreach (string key, mixed data in relations)
       {
@@ -1128,4 +1115,11 @@ void reset()
 {
    make_objects_if_needed();
    make_unique_objects_if_needed();
+
+   on_reset();
+}
+
+// Overload in object
+void on_reset()
+{
 }

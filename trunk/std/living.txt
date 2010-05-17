@@ -1,4 +1,5 @@
-// Last edited by deforce on 11-20-2007
+// Last edited by deforce on 03-25-2010
+#include <flags.h>
 #include <log.h>
 
 inherit CONTAINER;
@@ -16,17 +17,21 @@ inherit __DIR__ "living/misc";
 // This is an object than can hold things and do actions.  If you want it to be able
 // to fight, inherit MONSTER instead.
 
-private string name;
+int assign_flag(int, int);
+int test_flag(int);
 
+private string name;
+private nosave string race = "human";
 
 void mudlib_setup()
 {
    ::mudlib_setup();
    // We always should have an 'in' relation in living objects.
    // This takes care of capacity too
-   add_relation("on",100);
+   add_relation("on", 100);
    set_default_relation("on");
    set_def_msgs("living-default");
+   assign_flag(F_FORCE_SENSITIVE, 1);
 }
 
 string query_name() { return name; }
@@ -37,9 +42,32 @@ void set_name(string new_name)
 
    name = new_name;
 
-   LOG_D->log(LOG_SETNAME, sprintf("%O used set_name() on %O (%s)\n", this_user(),
-      this_object(), query_name()));
+   if (wizardp(this_user()) && this_object()->is_body()
+      && (this_user()->query_userid() != lower_case(query_name())))
+   {
+      LOG_D->log(LOG_SETNAME, sprintf("%O used set_name() on %O (%s)\n", this_user(),
+         this_object(), query_name()));
+   }
+
    add_id_no_plural(lower_case(new_name));
+}
+
+void set_race(string value)
+{
+   if (!this_object()->is_body() && strlen(value))
+   {
+      race = value;
+   }
+
+   if (race == "yuuzhan vong")
+   {
+      assign_flag(F_FORCE_SENSITIVE, 0);
+   }
+}
+
+string query_race()
+{
+   return race;
 }
 
 string in_room_desc()
@@ -52,6 +80,11 @@ string inventory_header()
    return capitalize(query_subjective()) + " is carrying:\n";
 }
 
+string introduce_contents()
+{
+   return inventory_header();
+}
+
 string invis_name()
 {
    return "someone";
@@ -59,7 +92,36 @@ string invis_name()
 
 int is_living()
 {
+   if (this_object()->is_droid())
+   {
+      return 0;
+   }
+
    return 1;
+}
+
+int can_feel_force()
+{
+   if (test_flag(F_FORCE_SENSITIVE) && !this_object()->is_droid()
+      && !this_object()->has_buff("/d/buffs/sever_force"))
+   {
+      return !environment()->is_force_blocked();
+   }
+
+   return 0;
+}
+
+object has_effect(string type)
+{
+   foreach (object thing in all_inventory(this_object()))
+   {
+      if (thing->query_effect_name() == type)
+      {
+         return thing;
+      }
+   }
+
+   return 0;
 }
 
 // This returns an action, so that spells can modify the perspective. i.e:
@@ -102,9 +164,9 @@ string look_in(string relation)
 
 string query_possessive() { return grammar::query_possessive(); }
 
-int query_encumberance()
+int query_encumbrance()
 {
    this_object()->refresh_stats();
 
-   return (this_body()->query_capacity() * 100) / this_body()->query_max_capacity();
+   return to_int(floor((this_body()->query_capacity() * 100) / this_body()->query_max_capacity()));
 }

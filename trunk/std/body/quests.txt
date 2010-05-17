@@ -1,31 +1,19 @@
-// Last edited by deforce on 12-22-2007
+// Last edited by deforce on 03-22-2010
 #include <daemons.h>
 
-int has_status_line();
-void update_status_line();
-
-string* quests;
-int points;
+string array completed_quests = ({ });
 
 void save_me();
 
-int add_quest(string quest, int pts)
+int add_quest(string quest)
 {
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to give " + pts + " quest points to " + this_object()->short() + " for " + quest + ".\n");
-   }
-*/
-
-   if (!quests) { quests = ({}); }
+   if (this_object()->is_body()) { this_object()->check_wizard_set("set quested as completed for " + this_object()->short() + " for quest '" + quest + "'", previous_object(-1)); }
 
    if (previous_object() != find_object(QUEST_D)) { return 0; }
 
-   if (member_array(quest, quests) != -1) { return 0; }
+   if (member_array(quest, completed_quests) != -1) { return 0; }
 
-   quests += ({ quest });
-   points += pts;
+   completed_quests += ({ quest });
    save_me();
 
    return 1;
@@ -33,30 +21,12 @@ int add_quest(string quest, int pts)
 
 int check_quest(string quest)
 {
-   if (!quests) { return 0; }
+   if (!completed_quests) { return 0; }
 
-   return (member_array(quest, quests) != -1);
+   return (member_array(quest, completed_quests) != -1);
 }
 
-string* query_quests()
+string array query_quests()
 {
-   return quests;
-}
-
-int query_score()
-{
-   return points;
-}
-
-void set_score(int new_score)
-{
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to set " + this_object()->short() + "'s quest score to " + new_score + ".\n");
-   }
-*/
-
-   points = new_score;
-   save_me();
+   return completed_quests;
 }

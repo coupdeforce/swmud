@@ -1,3 +1,4 @@
+// Last edited by deforce on 10-06-2009
 // A smarter movement system for some objects.  It handles movement from room to room.
 #include <move.h>
 #include <playerflags.h>
@@ -10,7 +11,8 @@ inherit CLASS_MOVE;
 varargs mixed move(mixed dest, string where);
 string query_msg(string which);
 int test_flag(int which);
-void simple_action(string s,array obs... );
+void simple_action(string s, array obs... );
+void other_action(string s, array obs... );
 varargs string *action(object *who, mixed msg, array obs...);
 varargs string compose_message(object forwhom, string msg, object *who, array obs...);
 
@@ -57,6 +59,9 @@ private nomask int move_me_there(class move_data data)
                write("You aren't able to fit with the load you're carrying.\n");
             }
             return 0;
+         case MOVE_STUNNED:
+            write(MOVE_STUNNED);
+            return 0;
          default:
             write("You remain where you are.\n");
             return 0;
@@ -66,9 +71,20 @@ private nomask int move_me_there(class move_data data)
    // Make sure that there is some type of direction for the exit
    if (!data->exit_dir)
    {
-      data->exit_dir= "somewhere";
+      data->exit_dir = "somewhere";
    }
+
    env = environment();
+
+   if (this_object()->is_body())
+   {
+      last_loc->add_tracked(this_object(), this_object()->query_race(), data->exit_dir);
+   }
+
+   if (this_object()->has_buff("/d/buffs/silent_movement"))
+   {
+      return r == MOVE_OK;
+   }
 
    // Exit Messages
    txt = data->exit_messages;
@@ -83,10 +99,14 @@ private nomask int move_me_there(class move_data data)
    // Display the message
    if (data->source)
    {
+      if (this_object()->is_body()) { txt = "%^PLAYER_MOVEMENT%^" + txt + "%^RESET%^"; }
+
       tell_from_inside(last_loc,action(({this_body()}),txt,data->source)[1]);
    }
    else
    {
+      if (this_object()->is_body()) { txt = "%^PLAYER_MOVEMENT%^" + txt + "%^RESET%^"; }
+
       tell_from_inside(last_loc,action(({this_body()}),txt,data->exit_dir)[1]);
    }
 
@@ -103,15 +123,21 @@ private nomask int move_me_there(class move_data data)
    // Display the message
    if (data->through)
    {
-      simple_action(txt, data->through);
+      if (this_object()->is_body()) { txt = "%^PLAYER_MOVEMENT%^" + txt + "%^RESET%^"; }
+
+      other_action(txt, data->through);
    }
    else if (data->source)
    {
-      simple_action(txt, data->source);
+      if (this_object()->is_body()) { txt = "%^PLAYER_MOVEMENT%^" + txt + "%^RESET%^"; }
+
+      other_action(txt, data->source);
    }
    else
    {
-      simple_action(txt);
+      if (this_object()->is_body()) { txt = "%^PLAYER_MOVEMENT%^" + txt + "%^RESET%^"; }
+
+      other_action(txt);
    }
 
    foreach (object foe in this_object()->query_unfinished_business())

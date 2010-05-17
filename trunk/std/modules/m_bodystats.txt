@@ -1,23 +1,20 @@
-// Last edited by deforce on 04-20-2007
-// bodystats.c -- body statistics (characteristics)
-// This module should be inherited into anything requiring physical statistics/characteristics.
-// Typically, this will be used by a player's body, or an NPC.
+// Last edited by deforce on 11-14-2007
+// Created by Deathblade 08-13-1995
 
 #include <classes.h>
 #include <hooks.h>
 
-private inherit CLASS_STATMODS;
-
 mixed call_hooks(string, int);
 
-private int stat_str;  // Strength
-private int stat_con;  // Constitution
-private int stat_agi;  // Agility
-private int stat_dex;  // Dexterity
-private int stat_per;  // Perception
-private int stat_int;  // Intelligence
-private int stat_cha;  // Charisma
-private int stat_for;  // Force
+private int stat_str; // Strength
+private int stat_con; // Constitution
+private int stat_agi; // Agility
+private int stat_dex; // Dexterity
+private int stat_per; // Perception
+private int stat_int; // Intelligence
+private int stat_cha; // Charisma
+private int stat_luc; // Luck
+private int stat_for; // Force
 
 private int cur_str;
 private int cur_con;
@@ -26,23 +23,13 @@ private int cur_dex;
 private int cur_per;
 private int cur_int;
 private int cur_cha;
+private int cur_luc;
 private int cur_for;
 
 private int points_remaining; // Used for character creation
 
-#define DEFAULT_RANGE   6
-#define BASE_VALUE      20
-
 void refresh_stats();
 
-/* Base statistics
-**
-** query_xxx_pure() returns the "pure" unadulterated statistic.  These
-**   values are typically never used.
-**
-** query_xxx() returns the statistic, adjusted for all additional factors
-**   such as temporary boosts, detriments, etc.
-*/
 nomask int query_points_remaining()
 {
    return points_remaining;
@@ -53,6 +40,8 @@ nomask void set_points_remaining(int n)
    points_remaining = n;
 }
 
+// query_xxx_pure() returns the "pure" unadulterated statistic.
+// query_xxx() returns the statistic adjusted for all temporary effects
 nomask int query_str_pure() { return stat_str; }
 nomask int query_con_pure() { return stat_con; }
 nomask int query_agi_pure() { return stat_agi; }
@@ -60,6 +49,7 @@ nomask int query_dex_pure() { return stat_dex; }
 nomask int query_per_pure() { return stat_per; }
 nomask int query_int_pure() { return stat_int; }
 nomask int query_cha_pure() { return stat_cha; }
+nomask int query_luc_pure() { return stat_luc; }
 nomask int query_for_pure() { return stat_for; }
 
 nomask int query_str() { return cur_str; }
@@ -69,6 +59,7 @@ nomask int query_dex() { return cur_dex; }
 nomask int query_per() { return cur_per; }
 nomask int query_int() { return cur_int; }
 nomask int query_cha() { return cur_cha; }
+nomask int query_luc() { return cur_luc; }
 nomask int query_for() { return cur_for; }
 
 nomask void set_str(int n)
@@ -95,15 +86,15 @@ nomask void set_dex(int n)
    refresh_stats();
 }
 
-nomask void set_int(int n)
-{
-   stat_int = n;
-   refresh_stats();
-}
-
 nomask void set_per(int n)
 {
    stat_per = n;
+   refresh_stats();
+}
+
+nomask void set_int(int n)
+{
+   stat_int = n;
    refresh_stats();
 }
 
@@ -113,88 +104,73 @@ nomask void set_cha(int n)
    refresh_stats();
 }
 
+nomask void set_luc(int n)
+{
+   stat_luc = n;
+   refresh_stats();
+}
+
 nomask void set_for(int n)
 {
    stat_for = n;
    refresh_stats();
 }
 
-#define STR 0
-#define CON 1
-#define AGI 2
-#define DEX 3
-#define INT 4
-#define PER 5
-#define CHA 6
-#define FOR 6
-
-// Derived statistics
 //:FUNCTION refresh_stats
 //refresh_stats() recalculates all the stats and requery's all the bonuses.
 //Combat calls this once a round.  If you are using stats in a non-combat
 //setting, you might want to call this first.
 void refresh_stats()
 {
-   int adj_str, adj_con, adj_agi, adj_dex, adj_int, adj_per, adj_cha, adj_for;
+//:HOOK str_bonus
+//Used to modify strength
+//:HOOK con_bonus
+//Used to modify constitution
+//:HOOK agi_bonus
+//Used to modify agility
+//:HOOK dex_bonus
+//Used to modify dexterity
+//:HOOK per_bonus
+//Used to modify perception
+//:HOOK int_bonus
+//Used to modify intelligence
+//:HOOK cha_bonus
+//Used to modify charisma
+//:HOOK luc_bonus
+//Used to modify luck
+//:HOOK for_bonus
+//Used to modify force
+
+   int adj_str, adj_con, adj_agi, adj_dex, adj_per, adj_int, adj_cha, adj_luc, adj_for;
 
    cur_str = stat_str + (adj_str = call_hooks("str_bonus", HOOK_SUM));
    cur_con = stat_con + (adj_con = call_hooks("con_bonus", HOOK_SUM));
    cur_agi = stat_agi + (adj_agi = call_hooks("agi_bonus", HOOK_SUM));
    cur_dex = stat_dex + (adj_dex = call_hooks("dex_bonus", HOOK_SUM));
-   cur_int = stat_int + (adj_int = call_hooks("int_bonus", HOOK_SUM));
    cur_per = stat_per + (adj_per = call_hooks("per_bonus", HOOK_SUM));
+   cur_int = stat_int + (adj_int = call_hooks("int_bonus", HOOK_SUM));
    cur_cha = stat_cha + (adj_cha = call_hooks("cha_bonus", HOOK_SUM));
+   cur_luc = stat_luc + (adj_luc = call_hooks("luc_bonus", HOOK_SUM));
    cur_for = stat_for + (adj_for = call_hooks("for_bonus", HOOK_SUM));
 
    this_object()->set_max_capacity(query_str() * 3);
    this_object()->set_weapon_class(query_str() ? to_int(query_str() / 3.3) : 9);
    this_object()->set_armor_class(query_con() ? to_int(query_con() / 4) : 10);
+   this_object()->set_to_hit_bonus((query_agi() / 2) - 35);  // Unarmed to-hit penalty or bonus
 }
 
-void recompute_derived()
-{
-   refresh_stats();
-}
-
-//:FUNCTION init_stats
-//Rolls the stats for the first time, based on the proper racial adjustments.
-//Admins can call this to reinitialize a player's stats (for example, in the
-//case of abysmally horrific (near minimum) rolls.
+// This is later modified by race
 nomask void init_stats()
 {
-   stat_str = 40;
-   stat_con = 40;
-   stat_agi = 40;
-   stat_dex = 40;
-   stat_int = 40;
-   stat_per = 40;
-   stat_cha = 40;
-   stat_for = 40;
+   stat_str = this_object()->query_race_str_min();
+   stat_con = this_object()->query_race_con_min();
+   stat_agi = this_object()->query_race_agi_min();
+   stat_dex = this_object()->query_race_dex_min();
+   stat_per = this_object()->query_race_per_min();
+   stat_int = this_object()->query_race_int_min();
+   stat_cha = this_object()->query_race_cha_min();
+   stat_luc = this_object()->query_race_luc_min();
+   stat_for = this_object()->query_race_for_min();
 
    refresh_stats();
-}
-
-// Object inheriting this module should be sure to call this.
-void internal_setup(mixed args...)
-{
-}
-
-// Returning string values for stats
-string get_stat_string(int stat)
-{
-   switch(stat)
-   {
-      case 0..10: return "very bad";
-      case 11..20: return "bad";
-      case 21..30: return "poor";
-      case 31..40: return "fair";
-      case 41..50: return "average";
-      case 51..60: return "good";
-      case 61..70: return "very good";
-      case 71..80: return "great";
-      case 81..90: return "excellent";
-      case 91..999999: return "incredible";
-   }
-
-   return "error";
 }

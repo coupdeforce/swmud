@@ -1,3 +1,4 @@
+// Last edited by deforce on 07-03-2008
 // An object that provides light to its environment.
 // Iizuka seperated from m_lightable on 06-26-1998
 
@@ -14,7 +15,6 @@ void clear_flag(int);
 
 private int is_lit = 0;
 private int light_level = 1;
-private string burned_out_msg = "The $o is burned out.";
 
 int query_is_lit()
 {
@@ -24,16 +24,6 @@ int query_is_lit()
 void set_light_level(int x)
 {
    light_level = x;
-}
-
-void set_burned_out_msg(string x)
-{
-   burned_out_msg = x;
-}
-
-string query_burned_out_msg()
-{
-   return burned_out_msg;
 }
 
 protected void set_lit(int x)
@@ -55,6 +45,7 @@ mixed extinguish()
    }
 
    set_lit(0);
+   clear_flag(F_LIGHTED);
    set_light(0);
 
    //:HOOK extinguish

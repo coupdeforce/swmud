@@ -1,4 +1,4 @@
-// Last edited by deforce on 12-16-2007
+// Last edited by deforce on 05-14-2010
 // object.c  about 1/2 Rust and 1/2 Nevyn
 // Modifications:  Peregrin@ZorkMUD (GUE),  Mar '94
 // Beek - rewrote the DISCARDED_MESSAGE stuff b/c it was hideously
@@ -12,13 +12,9 @@
 #include <clean_up.h>
 
 inherit BASE_OBJ;
-
-inherit __DIR__ "object/size";
-inherit __DIR__ "object/mass";
-
-#ifdef EVERYTHING_SAVES
 inherit M_SAVE;
-#endif
+
+inherit __DIR__ "object/mass";
 
 inherit __DIR__ "object/light";		// before non_object
 inherit __DIR__ "object/properties";
@@ -27,23 +23,16 @@ inherit __DIR__ "object/visible";
 inherit __DIR__ "object/hooks";
 inherit __DIR__ "object/msg_recipient";
 
+int test_unique();
+
 mapping lpscript_attributes;
 
 //:FUNCTION stat_me
 //return some debugging info about the state of the object
 string stat_me() 
 {
-   string result = ::stat_me() + "Short: "+short()+"\n";
-
-#ifdef USE_SIZE
-   result += "Size: " + query_size() + " Light: " + query_light() + "\n";
-#else
-# ifdef USE_MASS
+   string result = ::stat_me() + "Short: " + short() + "\n";
    result += "Weight: " + query_mass() + "  Light: " + query_light() + "\n";
-# else
-   result += "Light: " + query_light() + "\n";
-# endif
-#endif
 
    return result;
 }
@@ -171,11 +160,15 @@ string array list_lpscript_attributes()
 string query_unique_id()
 {
    string output = "";
-   string file;
 
-   if (!sscanf(file_name(this_object()), "%s#%s", file, output)) { output = "unknown"; }
+   if (!sscanf(file_name(this_object()), "%*s#%s", output)) { output = "unknown"; }
 
    return output;
+}
+
+void do_check_obj()
+{
+   write("You check " + this_object()->the_short() + " and you detect nothing unusual.\n");
 }
 
 // LPScript stuff is kept here just so lots of the lib examples don't break

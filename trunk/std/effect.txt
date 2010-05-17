@@ -1,8 +1,6 @@
 // Last edited by deforce on 06-03-2008
 // Transient effects inheritable for diseases, intoxication, etc...
 // Created by Midhir@Mutants and Machinery on 07-15-1997
-#include <hooks.h>
-
 inherit OBJ;
 inherit M_GETTABLE;
 
@@ -14,7 +12,7 @@ string effect_name;
 
 int is_transient_effect() { return 1; }
 
-//:HOOK another_effect_exists
+//:FUNCTION another_effect_exists
 // Passed the object of the existing effect, used to perform extra
 // functionality if another effect with the same type/name exists.
 void another_effect_exists(object ob)
@@ -82,14 +80,12 @@ void do_effect(object affected) {}
 
 void heart_beat()
 {
-   if (!environment()->is_living())
+   if (!environment() || !environment()->is_living())
    {
-      set_heart_beat(0);
+      destruct(this_object());
    }
-   else
-   {
-      set_heart_beat(1);
-   }
+
+   set_heart_beat(1);
 
    if (delay_count >= effect_delay)
    {
@@ -124,7 +120,7 @@ varargs mixed move(object dest, string where)
 
       if ((ob->query_effect_type() == effect_type) && (ob->query_effect_name() == effect_name))
       {
-         call_hooks("another_effect_exists", HOOK_IGNORE, ob);
+         call_hooks(ob, "another_effect_exists");
          return;
       }
 

@@ -1,13 +1,11 @@
-// Last modified by deforce on 12-21-2006
+// Last modified by deforce on 03-03-2010
 // Rust.
 
 private int mass;
 
 //:FUNCTION set_mass
 //Change the mass of an object
-protected
-void
-set_mass(int m)
+void set_mass(int m)
 {
    object env;
 
@@ -34,10 +32,9 @@ int query_mass()
 //returns the mass of an object, based on local gravity
 float query_weight()
 {
-   int gravity, m;
-   float weight;
-   m = this_object()->query_mass();
-   weight = (((m * 10.0) / 10.0) * 2.0) / 1000.0;
+   int gravity;
+   int mass = this_object()->query_mass();
+   float weight = (mass * 2.0) / 1000.0;
 
    if (!environment(this_object()))
    {
@@ -52,7 +49,7 @@ float query_weight()
       if (environment(this_object())->query("gravity"))
       {
          gravity = environment(this_object())->query("gravity");
-         weight = (((m * gravity) / 10) * 2) / 1000;
+         weight = (((mass * gravity) / 10.0) * 2.0) / 1000.0;
       }
 
       if (weight < 0.1) { weight = 0.1; }
@@ -70,7 +67,7 @@ float query_weight()
          if (environment(environment(this_object()))->query("gravity"))
          {
             gravity = environment(environment(this_object()))->query("gravity");
-            weight = (((m * gravity) / 10) * 2) / 1000;
+            weight = (((mass * gravity) / 10.0) * 2.0) / 1000.0;
          }
       }
 
@@ -103,7 +100,7 @@ float query_weight()
             if (environment(environment(environment(this_object())))->query("gravity"))
             {
                gravity = environment(environment(environment(this_object())))->query("gravity");
-               weight = (((m * gravity) / 10) * 2) / 1000;
+               weight = (((mass * gravity) / 10.0) * 2.0) / 1000.0;
             }
          }
 
@@ -117,7 +114,7 @@ float query_weight()
          if (environment(environment(this_object()))->query("gravity"))
          {
             gravity = environment(environment(this_object()))->query("gravity");
-            weight = (((m * gravity) / 10) * 2) / 1000;
+            weight = (((mass * gravity) / 10.0) * 2.0) / 1000.0;
          }
       }
 

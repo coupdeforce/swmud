@@ -1,4 +1,4 @@
-// Last edited by deforce on 03-22-2010
+// Last edited by deforce on 04-21-2010
 // Note: updates only after reboot
 //### lots of functions in here need to be autodoc'd
 
@@ -32,7 +32,7 @@ inherit M_ACTIONS;
 
 inherit __DIR__ "body/cmd";
 inherit __DIR__ "body/deaths";
-//inherit __DIR__ "body/guilds";
+inherit __DIR__ "body/guild_specializations";
 inherit __DIR__ "body/help";
 //inherit __DIR__ "body/jedi";
 inherit __DIR__ "body/money";
@@ -48,8 +48,6 @@ inherit __DIR__ "body/toggles";
 inherit __DIR__ "body/wizfuncs";
 inherit __DIR__ "body/wiz_position";
 
-void heal_all();
-varargs void stop_fight(object);
 int query_jedi_alignment();
 
 // Global variables --
@@ -156,10 +154,10 @@ private nomask void init_stuff()
    {
       if (inv->query_wielding() && sizeof(inv->query_wielding()))
       {
-         this_object()->wield(inv, inv->query_wielding()[0]); 
+         this_object()->wield(inv, inv->query_wielding()[0]);
       }
 
-      if(inv->test_flag(F_WORN))
+      if (inv->test_flag(F_WORN))
       {
          inv->do_wear();
       }
@@ -356,29 +354,26 @@ void reconnect(object new_link)
 protected void die()
 {
    object killer = previous_object();
-   string weapon = query_last_weapon_used()->is_adversary() ? "bare hands" : query_last_weapon_used()->short();
-   string killer_name = killer->short();
-   string location = environment(this_object())->short();
+   object weapon = query_last_weapon_used();
+   string weapon_name = weapon->is_adversary() ? "bare hands" : weapon->short();
+   object location = environment(this_object());
    string death_message = weapon->query_death_message();
 
    if (killer && (killer != this_object()) && (environment(killer) != this_object()))
    {
-      death_message = short() + " was killed by " + killer_name + " with a " + weapon + " at " + location + ".";
+      death_message = replace_string(action(({ this_object(), killer }), death_message, weapon, location)[2], "\n", "");
    }
    else
    {
-      death_message = short() + " inadvertently killed " + query_reflexive() + " in a moment of carelessness with a " + weapon + " at " + location + ".";
+      death_message = capitalize(short()) + " inadvertently killed " + query_reflexive() + " in a moment of carelessness with " + query_possessive() + " " + weapon_name + " at " + location->short() + ".";
    }
-
-   stop_fight();
-   killer->stop_fight(this_object());
 
    if (wizardp(link))
    {
       if (is_visible()) { simple_action("If $n $vwere mortal, $n would now no longer be mortal."); }
 
       call_out((: reincarnate :), 1);
-      heal_all();
+      this_object()->set_health(this_object()->query_max_health());
       return;
    }
 
@@ -408,7 +403,7 @@ protected void die()
    }
 
    add_a_death();
-   drop_corpse(killer_name, weapon);
+   drop_corpse(killer->short(), weapon_name);
    move(MORGUE_D->query_morgue(file_name(environment(killer))));
    death_penalty();
 //   reset_armors();
@@ -424,7 +419,7 @@ protected void die()
       CHANNEL_D->deliver_channel("death", death_message);
    }
 
-   set_killed_by(time(), killer_name, location);
+   set_killed_by(time(), killer->short(), location->short());
 }
 
 int clean_up()
