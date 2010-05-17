@@ -1,10 +1,13 @@
-// Last edited by deforce on 12-23-2007
+// Last edited by deforce on 03-11-2010
 #include <classes.h>
+#include <hooks.h>
 
 int get_stat_bonus(string skill);
+int get_stat_weight(string skill);
 int query_skill_evaluation();
 int query_int();
 int get_skill_point_minimum(int adv_rate);
+mixed call_hooks(string, int);
 
 private mapping skills = ([ ]);
 private string array learned_skills = ({ });
@@ -141,11 +144,9 @@ void learn_skill(string skill, int value)
          my_skill[0] += 1;
          my_skill[1] = 0;
 
-         if (my_skill[0] % 100)
-         {
-            tell(this_object(), "%^SKILL_IMPROVE%^You notice improvement in " + skill_data[0] + ".%^RESET%^\n");
-         }
-         else
+         tell(this_object(), "%^SKILL_IMPROVE%^You feel better at " + skill_data[0] + "." + (my_skill[0] < 1000 ? "  You are now " + (my_skill[0] % 100) + "% towards Rank " + ((my_skill[0] / 100) + 1) + "." : "") + "%^RESET%^\n");
+
+         if (!(my_skill[0] % 100))
          {
             tell(this_object(), "%^SKILL_IMPROVE%^You have acheived Rank " +  (my_skill[0] / 100) + " in " + skill_data[0] + ".%^RESET%^\n");
          }
@@ -165,6 +166,7 @@ int test_skill(string skill, int adjustment)
    int skill_value;
    int destination_value;
    int stat_bonus = get_stat_bonus(skill);
+   float stat_weight = get_stat_weight(skill);
 
 /*
    if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
@@ -178,12 +180,13 @@ int test_skill(string skill, int adjustment)
       my_skill = ({ 0, 0 });
    }
 
-   skill_value = my_skill[0];
+   skill_value = my_skill[0] + call_hooks("all_skill_bonus", HOOK_SUM) + call_hooks(skill + "_skill_bonus", HOOK_SUM);
 
-   destination_value = skill_value + stat_bonus + adjustment;
+//   tell(this_object(), skill + " - bonus: " + stat_bonus + " weight: " + to_int(stat_weight));
+   destination_value = stat_bonus / stat_weight * (stat_weight + skill_value + adjustment);
 
    if (destination_value > 950) { destination_value = 950; }
-   else if (destination_value < 10) { destination_value = 10; }
+   else if (destination_value < 50) { destination_value = 50; }
 
    // Debug code for skillrolls
 //   tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill roll for " + skill + ": Is " + destination_value + " more than " + roll + "?\n");
@@ -217,13 +220,13 @@ int test_skill(string skill, int adjustment)
 
       skills[skill] = my_skill;
 
-      learn_skill(skill, stat_bonus + adjustment);
+      learn_skill(skill, (stat_bonus / stat_weight * adjustment));
    }
 
    return (destination_value > roll);
 }
 
-//:FUNCTION query_evaluation
+//:FUNCTION query_skill_evaluation
 //Returns the player's overall evaluation (0 to 100 percent) of their skill point total.
 //This evaluation corresponds to how they are doing with respect to the maximum possible skill level.
 int query_skill_evaluation()
@@ -237,7 +240,7 @@ int query_skill_evaluation()
       total += my_skill[0];
    }
 
-   return to_int(floor(total / (10 * sizeof(skills))));
+   return sizeof(skills) ? to_int(floor(total / (10 * sizeof(skills)))) : 0;
 }
 
 void add_learned_skill(string skill)
@@ -308,26 +311,26 @@ int get_skill_point_minimum(int adv_rate)
 
    switch (query_int())
    {
-      case 0..9: min *= 0.60; break;
-      case 10..14: min *= 0.59; break;
-      case 15..19: min *= 0.58; break;
-      case 20..24: min *= 0.57; break;
-      case 25..29: min *= 0.56; break;
-      case 30..34: min *= 0.55; break;
-      case 35..39: min *= 0.54; break;
-      case 40..44: min *= 0.52; break;
-      case 45..49: min *= 0.50; break;
-      case 50..54: min *= 0.48; break;
-      case 55..59: min *= 0.46; break;
-      case 60..64: min *= 0.44; break;
-      case 65..69: min *= 0.42; break;
-      case 70..74: min *= 0.39; break;
-      case 75..79: min *= 0.36; break;
-      case 80..84: min *= 0.33; break;
-      case 85..89: min *= 0.30; break;
-      case 90..94: min *= 0.27; break;
-      case 95..99: min *= 0.24; break;
-      case 100..999999: min *= 0.20; break;
+      case 0..9: min *= 1.00; break;
+      case 10..14: min *= 0.99; break;
+      case 15..19: min *= 0.98; break;
+      case 20..24: min *= 0.97; break;
+      case 25..29: min *= 0.96; break;
+      case 30..34: min *= 0.95; break;
+      case 35..39: min *= 0.94; break;
+      case 40..44: min *= 0.92; break;
+      case 45..49: min *= 0.90; break;
+      case 50..54: min *= 0.88; break;
+      case 55..59: min *= 0.86; break;
+      case 60..64: min *= 0.84; break;
+      case 65..69: min *= 0.82; break;
+      case 70..74: min *= 0.79; break;
+      case 75..79: min *= 0.76; break;
+      case 80..84: min *= 0.73; break;
+      case 85..89: min *= 0.70; break;
+      case 90..94: min *= 0.67; break;
+      case 95..99: min *= 0.64; break;
+      case 100..999999: min *= 0.60; break;
    }
 
    return to_int(ceil(min));

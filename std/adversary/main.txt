@@ -1,6 +1,6 @@
-// Last edited by deforce on 12-03-2007
+// Last edited by deforce on 03-17-2008
 string query_random_limb();
-object query_weapon();
+object query_weapons();
 object query_target();
 object get_target();
 void add_event(object target, object weapon, mixed target_extra, mixed data);
@@ -15,16 +15,25 @@ void handle_events();
 
 void take_a_swing(object target)
 {
-   object weapon = query_weapon();
-   int chance, roll;
+   foreach (object weapon in query_weapons())
+   {
+      for (int count = 0; count < weapon->query_weapon_speed(); count ++)
+      {
+         if (query_ghost() || !(target = get_target()))
+         {
+            stop_fight();
+            return;
+         }
 
-   if (random(101) > 95)
-   {
-      add_event(target, weapon, query_random_limb(), "miss");
-   }
-   else
-   {
-      add_event(target, weapon, query_random_limb(), random(weapon->query_weapon_class() + 1));
+         if (random(101) > 95)
+         {
+            add_event(target, weapon, query_random_limb(), "miss");
+         }
+         else
+         {
+            add_event(target, weapon, query_random_limb(), random(weapon->query_weapon_class() + 1));
+         }
+      }
    }
 }
 
@@ -42,8 +51,10 @@ void attack()
       return;
    }
 
+   target = get_target();
+
    // Any reason to continue the carnage?
-   if (query_ghost() || !(target = get_target()))
+   if (query_ghost() || !target)
    {
       stop_fight();
       return;
