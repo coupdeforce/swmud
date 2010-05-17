@@ -1,0 +1,80 @@
+// Last edited by deforce on 11-20-2007
+int team_alignment = 0;
+int jedi_alignment = 0;
+
+//:FUNCTION query_team_alignment
+//Returns numeric team alignment
+int query_team_alignment()
+{
+   return team_alignment;
+}
+
+//:FUNCTION query_jedi_alignment
+//Returns numeric jedi alignment
+int query_jedi_alignment()
+{
+   return jedi_alignment;
+}
+
+//:FUNCTION set_team_alignment
+//Value is from -100 to 100
+void set_team_alignment(int value)
+{
+   if ((value >= -100) && (value <= 100))
+   {
+      team_alignment = value;
+   }
+}
+
+//:FUNCTION set_jedi_alignment
+//Value is from -50 to 50
+void set_jedi_alignment(int value)
+{
+   if ((value >= -50) && (value <= 50))
+   {
+      jedi_alignment = value;
+   }
+}
+
+//:FUNCTION adjust_team_alignment
+//Value is positive or negative integer
+void adjust_team_alignment(int value)
+{
+   if ((team_alignment < -25) && ((team_alignment + value) > -26))
+   {
+   }
+   else if ((team_alignment > 25) && ((team_alignment + value) < 26))
+   {
+   }
+   else if ((team_alignment < 26) && (team_alignment > -26))
+   {
+      if ((team_alignment + value) < -25)
+      {
+      }
+      else if ((team_alignment + value) > 25)
+      {
+      }
+   }
+
+   team_alignment += value;
+
+   if (team_alignment < -100) { team_alignment = -100; }
+   else if (team_alignment > 100) { team_alignment = 100; }
+}
+
+//:FUNCTION adjust_jedi_alignment
+//Value is positive or negative integer
+void adjust_jedi_alignment(int value)
+{
+   if ((jedi_alignment < 0) && ((jedi_alignment + value) > -1))
+   {
+   }
+   else if ((jedi_alignment > 0) && ((jedi_alignment + value) < 1))
+   {
+   }
+
+   jedi_alignment += value;
+
+   if (jedi_alignment < -50) { jedi_alignment = -50; }
+   else if (jedi_alignment > 50) { jedi_alignment = 50; }
+}

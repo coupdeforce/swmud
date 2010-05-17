@@ -1,0 +1,68 @@
+// Last edited by deforce on 11-29-2007
+void simple_action(string msg, array obs...);
+varargs mixed *action(mixed *, mixed, object, object);
+void inform(mixed *, mixed, object);
+string query_combat_message(string);
+
+string damage_message(int percent)
+{
+   if (percent < 1) { return "!none"; }
+
+   switch (percent)
+   {
+      case 1..4: return "!dam1";
+      case 5..8: return "!dam2";
+      case 9..12: return "!dam3";
+      case 13..16: return "!dam4";
+      case 17..20: return "!dam5";
+      case 21..24: return "!dam6";
+      case 25..28: return "!dam7";
+      case 29..32: return "!dam8";
+      case 33..36: return "!dam9";
+      case 37..40: return "!dam10";
+      case 41..44: return "!dam11";
+      case 45..48: return "!dam12";
+      case 49..52: return "!dam13";
+      case 53..56: return "!dam14";
+      case 57..60: return "!dam15";
+      case 61..64: return "!dam16";
+      case 65..68: return "!dam17";
+      case 69..72: return "!dam18";
+      case 73..76: return "!dam19";
+      case 77..80: return "!dam20";
+      default: return "!dam21";
+   }
+}
+
+void handle_message(string mess, object target, object weapon, object limb)
+{
+   array combat_who, messages;
+
+   if (mess[0] == '!')
+   {
+      string tmp;
+
+      if (weapon)
+      {
+         tmp = weapon->query_combat_message(mess[1..]);
+      }
+      else
+      {
+         tmp = query_combat_message(mess[1..]);
+      }
+
+      if (!tmp)
+      {
+         simple_action("$N $vare puzzled because $n $vhave no message for '" + mess[1..] + "'.");
+
+         return;
+      }
+
+      mess = tmp;
+   }
+
+   combat_who = ({ this_object(), target });
+   messages = action(combat_who, mess, weapon, target->query_weapon(), limb);
+
+   inform(combat_who, messages, environment());
+}

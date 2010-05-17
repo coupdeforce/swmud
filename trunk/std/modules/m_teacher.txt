@@ -1,0 +1,141 @@
+inherit M_CONVERSATION;
+inherit M_MESSAGES;
+
+array get_trainable_guilds();
+mapping get_trainable_abilities();
+void set_trainable_guild(string guild);
+varargs void set_trainable_ability(string ability, mapping prerequisites);
+void generate_training_options();
+void train(string ability);
+int guild_check();
+void set_not_guild_member(string text);
+void set_got_stuff_to_teach(string text);
+void set_nothing_to_teach(string text);
+
+array trainable_guilds = ({ });
+mapping trainable_abilities = ([ ]);
+string not_guild_member = "You're not a member of the guild.";
+string got_stuff_to_teach = "Here's what I can teach you with your current ability";
+string nothing_to_teach = "There is nothing more I can teach you.";
+
+array get_trainable_guilds()
+{
+   return trainable_guilds;
+}
+
+mapping get_trainable_abilities()
+{
+   return trainable_abilities;
+}
+
+void generate_training_options()
+{
+   object player = get_current_player();
+   string array ability_options = ({ });
+
+   if (!guild_check() || !player) { return; }
+
+   foreach (string ability in sort_array(keys(trainable_abilities), 1))
+   {
+      if (member_array(ability, player->query_learned_skills()) == -1)
+      {
+         if (sizeof(trainable_abilities[ability]))
+         {
+            int check = 1;
+
+            foreach (string prereq in keys(trainable_abilities[ability]))
+            {
+               if (player->query_skill(prereq) < trainable_abilities[ability][prereq])
+               {
+                  check = 0;
+               }
+            }
+
+            if (check)
+            {
+               ability_options += ({ ability });
+               add_options(([ "$train$" + ability : "I would like to learn " + title_capitalize(ability) + "." ]));
+               add_responses(([ "$train$" + ability : "$train$" + ability + "@@@@" + "$train$" + ability ]));
+            }
+         }
+         else
+         {
+            ability_options += ({ ability });
+            add_options(([ "$train$" + ability : "I would like to learn " + title_capitalize(ability) + "." ]));
+            add_responses(([ "$train$" + ability : "$train$" + ability + "@@@@" + "$train$" + ability ]));
+         }
+      }
+   }
+
+   add_options(([ "$ask_learn$" : "Is there anything you can teach me?" ]));
+
+   if (sizeof(ability_options))
+   {
+      add_responses(([ "$ask_learn$" : got_stuff_to_teach + ": " + title_capitalize(implode(ability_options, ", ")) + "@@$train$" + implode(ability_options, ",$train$") + "@@$clear$" ]));
+      add_start(({ "$ask_learn$" }));
+   }
+   else
+   {
+      add_responses(([ "$ask_learn$" : nothing_to_teach + "@@@@$ask_learn$" ]));
+      add_start(({ "$ask_learn$" }));
+   }
+}
+
+void train(string ability)
+{
+   get_current_player()->add_learned_skill(ability);
+
+   targetted_action("$N teaches $t how to do " + title_capitalize(ability) + ".", get_current_player());
+}
+
+void set_trainable_guild(string guild)
+{
+   if (strlen(guild) && (member_array(guild, trainable_guilds) == -1))
+   {
+      trainable_guilds += ({ guild });
+   }
+}
+
+varargs void set_trainable_ability(string ability, mapping prerequisites)
+{
+   if (strlen(ability) && (member_array(ability, keys(trainable_abilities)) == -1))
+   {
+      trainable_abilities[ability] = ([ ]);
+
+      if (sizeof(prerequisites))
+      {
+         foreach (string key in keys(prerequisites))
+         {
+            trainable_abilities[ability] += ([ key : (prerequisites[key] < 100 ? prerequisites[key] * 100 : prerequisites[key]) ]);
+         }
+      }
+   }
+}
+
+int guild_check()
+{
+   foreach (string guild in trainable_guilds)
+   {
+      if (member_array(guild, get_current_player()->query_guild_names()) == -1)
+      {
+         return 0;
+      }
+   }
+
+   return 1;
+}
+
+void set_not_guild_member(string text)
+{
+   not_guild_member = text;
+}
+
+void set_got_stuff_to_teach(string text)
+{
+   got_stuff_to_teach = text;
+}
+
+void set_nothing_to_teach(string text)
+{
+   nothing_to_teach = text;
+}

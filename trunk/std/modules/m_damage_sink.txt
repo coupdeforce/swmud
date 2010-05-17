@@ -1,0 +1,319 @@
+// Last edited by deforce on 10-31-2009
+// 04-XX-1998: Iizuka updated to conform to the new adversary code.
+// 05-XX-1998: Iizuka added support for multiple resistances.
+// On repair, clear the damaged flag and set new class/durability if necessary
+#include <hooks.h>
+
+inherit CLASS_EVENT_INFO;
+
+int test_flag(int);
+void clear_flag(int);
+void assign_flag(int, int);
+mixed call_hooks(string, int);
+
+private mapping resistances = ([]);
+private mapping weaknesses = ([]);
+private int armor_class = 1;
+private int max_armor_class = 1;
+private int durability = 1;
+private int max_durability = 1;
+private int chance_to_be_damaged = 5;
+private nosave int armor_bonus;
+
+void internal_setup()
+{
+   this_object()->add_save( ({ "armor_class", "max_armor_class", "durability", "max_durability", "persist_flags" }) );
+}
+
+//:FUNCTION set_armor_class
+// Set the protection of the particular damage sink, preventing random(class) points of damage
+void set_armor_class(int x)
+{
+   if (x > 0)
+   {
+      armor_class = x;
+      max_armor_class = x;
+      durability = x;
+      max_durability = x;
+   }
+}
+
+void decrease_class(int x)
+{
+   if (!this_object()->is_living())
+   {
+      armor_class -= x;
+      durability -= x;
+
+      assign_flag(F_DAMAGED, 1);
+
+      if (test_flag(F_WORN))
+      {
+         tell(environment(), "%^ITEM_DAMAGE%^You notice your " + terminal_colour(this_object()->short(), ANSI_D->query_translations()[1]) + " becomes damaged.%^RESET%^\n");
+      }
+
+      if ((armor_class <= 0) || (durability <= 0))
+      {
+         armor_class = 0;
+         durability = 0;
+
+         assign_flag(F_BROKEN, 1);
+
+         environment()->my_action("Your $o breaks from damage.", this_object());
+         this_object()->do_remove();
+      }
+   }
+}
+
+//:FUNCTION query_armor_class
+// Query the current armor class of an object.  Higher is better.
+int query_armor_class()
+{
+   return armor_class;
+}
+
+//:FUNCTION set_durability
+// Set the durability equal to or lower than armor class, which is independent
+// Must be used after set_armor_class()
+void set_durability(int x)
+{
+   if (x <= armor_class)
+   {
+      durability = x;
+      max_durability = x;
+   }
+}
+
+//:FUNCTION query_durability
+// Query the current durability of an object.  Higher is better.
+int query_durability()
+{
+   return durability;
+}
+
+//:FUNCTION query_max_durability
+// Query the current maximum durability of an object.  Higher is better.
+int query_max_durability()
+{
+   return max_durability;
+}
+
+//:FUNCTION set_chance_to_be_damaged
+// Set the probability for this to be damaged, from 0 (never) to 100 (always)
+void set_chance_to_be_damaged(int x)
+{
+   if ((x >= 0) && (x <= 100))
+   {
+      chance_to_be_damaged = x;
+   }
+}
+
+//:FUNCTION query_chance_to_be_damaged
+// Query the probability for this to be damaged
+int query_chance_to_be_damaged()
+{
+   return chance_to_be_damaged;
+}
+
+//:FUNCTION query_max_armor_class
+// Query the maximum armor class of an object.  Higher is better.
+int query_max_armor_class()
+{
+   return max_armor_class;
+}
+
+//:FUNCTION set_armor_bonus
+// Set an overall modifier of armor class on the object.  The bonus
+// does not get saved, so should only be used for temporary bonuses. (i.e. buffs)
+void set_armor_bonus(int newbonus)
+{
+   armor_bonus = newbonus;
+}
+
+void add_armor_bonus(int delta)
+{
+   armor_bonus += delta;
+}
+
+int query_armor_bonus()
+{
+   return armor_bonus;
+}
+
+class event_info sink_modify_event(class event_info evt)
+{
+   int damage_before_sink = evt->data[1];
+   int ac = evt->target->query_armor_class();
+   int force_shield = evt->target->call_hooks("force_shield", HOOK_SUM);
+
+   if (stringp(evt->data)) { return evt; }
+
+   if ((force_shield > 0) && (member_array(evt->data[0], ({ "combat-unarmed", "combat-blade", "combat-blunt" })) > -1))
+   {
+      int damage_reduction = (evt->data[1] * (force_shield / 5)) / 100;
+
+      if (damage_reduction < 1) { damage_reduction = 1; }
+
+      evt->data[1] -= damage_reduction;
+
+      tell(owner(this_object()), "(Your Force shield adjusted damage from " + damage_before_sink + " to " + evt->data[1] + ")\n");
+   }
+
+   if (armor_class > ac) { ac = armor_class; }
+
+   if (member_array(evt->data[0], keys(weaknesses)) != -1)
+   {
+      evt->data[1] += random(weaknesses[evt->data[0]] + 1);
+   }
+   else if (member_array(evt->data[0], keys(resistances)) != -1)
+   {
+      evt->data[1] -= random(resistances[evt->data[0]] + 1);
+   }
+
+   if (ac > evt->data[1])
+   {
+      ac = evt->data[1];
+   }
+
+   evt->data[1] -= (random(ac) + armor_bonus + 1);
+
+   if (evt->data[1] < 0) { evt->data[1] = 0; }
+
+   if (damage_before_sink > 0)
+   {
+      if (chance_to_be_damaged && (chance_to_be_damaged > random(100)))
+      {
+         // X in 100 chance of the armor getting damaged
+         decrease_class(1);
+      }
+
+//      if (wizardp(owner(this_object())) && (damage_before_sink > 0) && (damage_before_sink > evt->data[1]))
+      if ((damage_before_sink > 0) && (damage_before_sink > evt->data[1]))
+      {
+         tell(owner(this_object()), "(Your " + this_object()->short() + " adjusted damage from " + damage_before_sink + " to " + evt->data[1] + ")\n");
+      }
+   }
+
+   return evt;
+}
+
+//:FUNCTION set_resist
+// Specifies that for damage of type 'type', the armor class should be increased by 'amt'
+void set_resist(string type, int amt)
+{
+   resistances[type] = amt;
+}
+
+//:FUNCTION set_resistances
+// Set all the resistances an armor possesses.
+void set_resistances(mapping x)
+{
+   resistances = x;
+}
+
+//:FUNCTION set_weakness
+// Specifies that for damage of type 'type', the armor class should be decreased by 'amt'
+void set_weakness(string type, int amt)
+{
+   weaknesses[type] = amt;
+}
+
+void set_weaknesses(mapping weak)
+{
+   weaknesses = weak;
+}
+
+//:FUNCTION is_armor
+// Returns 1 if the object is a damage_sink.
+int is_armor()
+{
+   return 1;
+}
+
+void do_adjust(int amount)
+{
+   if (test_flag(F_ADJUSTED))
+   {
+      return;
+   }
+
+   assign_flag(F_ADJUSTED, 1);
+
+   if (!test_flag(F_BROKEN))
+   {
+      max_armor_class += amount;
+
+      if (max_armor_class < 1)
+      {
+         max_armor_class = 1;
+      }
+
+      if (max_durability > max_armor_class)
+      {
+         max_durability = max_armor_class;
+      }
+
+      armor_class = max_armor_class;
+      durability = max_durability;
+
+      clear_flag(F_DAMAGED);
+   }
+}
+
+void do_repair()
+{
+   object body = this_body();
+
+   if (!test_flag(F_BROKEN))
+   {
+      int skill_delay = body->has_skill_delay();
+
+      if ((armor_class < max_armor_class) || (durability < max_durability))
+      {
+         if (!skill_delay)
+         {
+            int skill_test = body->test_skill("armor_repair", 1);
+            int max_repair = (body->query_skill("armor_repair") / 200) + 1;
+
+            body->add_skill_delay(4);
+
+            if (skill_test > 0)
+            {
+               if ((max_durability - durability) > max_repair)
+               {
+                  max_durability = durability + max_repair;
+                  max_armor_class = armor_class + max_repair;
+               }
+
+               armor_class = max_armor_class;
+               durability = max_durability;
+
+               clear_flag(F_DAMAGED);
+
+               body->simple_action("$N $vrepair $o.", this_object());
+            }
+            else
+            {
+               body->simple_action("$N $vfail to repair $o.", this_object());
+            }
+         }
+         else
+         {
+            tell(body, "You must wait at least " + skill_delay + " more second" + (skill_delay > 1 ? "s" : "") + " before attempting to repair.\n");
+         }
+      }
+      else
+      {
+         tell(body, this_object()->short() + " does not need to be repaired.\n");
+      }
+   }
+   else
+   {
+      tell(body, this_object()->short() + " is broken and cannot be repaired.\n");
+   }
+}
+
+mapping lpscript_attributes()
+{
+   return ([ "armor_class" : ({ LPSCRIPT_INT, "setup", "set_armor_class" }), ]);
+}

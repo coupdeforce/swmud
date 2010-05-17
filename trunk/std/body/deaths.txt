@@ -1,0 +1,96 @@
+// Last edited by deforce on 12-22-2007
+#include <daemons.h>
+
+int has_status_line();
+void update_status_line();
+
+int deaths;
+mapping killed_by = ([ ]);
+mapping killed_where = ([ ]);
+
+void save_me();
+
+protected void add_a_death()
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to add a death to " + this_object()->short() + ".\n");
+   }
+*/
+
+   deaths++;
+   save_me();
+
+   if (has_status_line()) { update_status_line(); }
+}
+
+int query_deaths()
+{
+   return deaths;
+}
+
+void set_deaths(int new_deaths)
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set " + this_object()->short() + "'s deaths to " + new_deaths + ".\n");
+   }
+*/
+
+   if (new_deaths >= 1)
+   {
+      deaths = new_deaths;
+      save_me();
+   }
+}
+
+void reset_deaths()
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to reset " + this_object()->short() + "'s deaths.\n");
+   }
+*/
+
+   deaths = 0;
+   save_me();
+}
+
+mapping query_killed_by()
+{
+   return killed_by;
+}
+
+mapping query_killed_where()
+{
+   return killed_where;
+}
+
+void set_killed_by(int time, string name, string where)
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set " + this_object()->short() + " killed by " + name + " at " + where + " on " + ctime(time) + ".\n");
+   }
+*/
+
+   killed_by[time] = name;
+   killed_where[time] = where;
+}
+
+void reset_killed_by()
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to reset " + this_object()->short() + "'s killed by info.\n");
+   }
+*/
+
+   killed_by = ([ ]);
+   killed_where = ([ ]);
+}

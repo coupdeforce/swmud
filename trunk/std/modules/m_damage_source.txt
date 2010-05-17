@@ -1,0 +1,361 @@
+// Last edited by deforce on 03-23-2010
+/* The concept is a bit abstract, so the name isn't entirely correct.  This
+ * is an abstraction of the concept of something that one attacks with;
+ * either a weapon or one's self.  It controls the combat messages, and
+ * modifies the result based on the target, etc.
+ *
+ * This means that when you fight with a weapon, the _weapon_ is really
+ * attacking, not you.  Some of the names in this are a bit backwards compat,
+ * though.
+ *
+ * April, 1998: Iizuka made significant changes and updated for adversary. */
+// On repair, clear the damaged flag and set new class/durability if necessary
+
+inherit CLASS_EVENT_INFO;
+
+int test_flag(int);
+void clear_flag(int);
+void assign_flag(int, int);
+
+private int weapon_class = 1;
+private int max_weapon_class = 1;
+private int weapon_speed = 1;
+private int to_hit_bonus;
+private int durability = 1;
+private int max_durability = 1;
+private int chance_to_be_damaged = 2;
+private string skill_used = "unarmed";
+private string array damage_type = ({ "combat-unarmed" });
+private nosave string backstab_message = "";
+private nosave string death_message = "";
+private nosave mapping def_combat_messages = ([]);
+private mapping combat_messages = ([]);
+
+void internal_setup()
+{
+   this_object()->add_save( ({ "weapon_class", "max_weapon_class", "durability", "max_durability", "persist_flags" }) );
+}
+
+int can_swing()
+{
+   return 1;
+}
+
+mixed adjust_my_result(mixed result)
+{
+   return result;
+}
+
+int query_to_hit_bonus(object target)
+{
+   return to_hit_bonus;
+}
+
+void set_to_hit_bonus(int x)
+{
+   to_hit_bonus = x;
+}
+
+string array query_damage_type()
+{
+   return damage_type;
+}
+
+void set_damage_type(string array str...)
+{
+   damage_type = str;
+}
+
+int is_weapon()
+{
+   return 1;
+}
+
+//:FUNCTION set_backstab_message
+// Set the targetted_action displayed on a successful backstab with this weapon
+void set_backstab_message(string message)
+{
+   if (strlen(message))
+   {
+      backstab_message = message;
+   }
+}
+
+//:FUNCTION query_backstab_message
+// Returns the targetted_action displayed on a successful backstab with this weapon
+string query_backstab_message()
+{
+   if (strlen(backstab_message))
+   {
+      return backstab_message;
+   }
+
+   switch (skill_used)
+   {
+      case "unarmed": return "$N $vdeliver a surprising blow to the back of $p1 neck!";
+      case "slash_1h":
+      case "slash_2h": return "$N $vbury $p $o into $p1 back!";
+      case "strike_1h":
+      case "strike_2h": return "$N viciously $vclub $t in the back of the head with $p $o!";
+   }
+
+   return "$N $vbackstab $t with $p $o2!";
+}
+
+//:FUNCTION set_death_message
+// Set the targetted_action for the death message when something is killed with this weapon
+void set_death_message(string message)
+{
+   if (strlen(message))
+   {
+      death_message = message;
+   }
+}
+
+//:FUNCTION query_death_message
+// Returns the targetted_action for the death message when something is killed with this weapon
+string query_death_message()
+{
+   if (strlen(death_message))
+   {
+      return death_message;
+   }
+
+   return "$N was killed by $N1 with $p1 $o at $o1.";
+}
+
+//:FUNCTION set_combat_messages
+// Set the set of combat messages which are used by default
+void set_combat_messages(string type)
+{
+   if (!(def_combat_messages = MESSAGES_D->get_messages(type)))
+   {
+      error("No messages of that type.\n");
+   }
+}
+
+//:FUNCTION query_combat_message
+// Returns the combat message for a given type
+mixed query_combat_message(string type)
+{
+   return combat_messages[type] || def_combat_messages[type];
+}
+
+mixed query_combat_messages()
+{
+   return combat_messages;
+}
+
+private mixed merge_lists(mixed list, mixed item, mixed def)
+{
+   if (arrayp(list)) { return list + ({ item }); }
+   else if (list) { return ({ list, item }); }
+   else if (def) { return merge_lists(def, item, 0); }
+   else { return item; }
+}
+
+void add_combat_message(string type, string msg)
+{
+   combat_messages[type] = merge_lists(combat_messages[type], msg, def_combat_messages[type]);
+}
+
+//:FUNCTION set_weapon_class
+// Set the damage potential for the weapon
+void set_weapon_class(int x)
+{
+   if (x > 0)
+   {
+      weapon_class = x;
+      max_weapon_class = x;
+      durability = x;
+      max_durability = x;
+   }
+}
+
+void decrease_class(int x)
+{
+   if (!this_object()->is_living())
+   {
+      object owner = this_object()->query_wielded_by();
+      weapon_class -= x;
+      durability -= x;
+
+      assign_flag(F_DAMAGED, 1);
+
+      if (owner)
+      {
+         tell(owner, "%^ITEM_DAMAGE%^You notice your " + terminal_colour(this_object()->short(), ANSI_D->query_translations()[1]) + " becomes damaged.%^RESET%^\n");
+      }
+
+      if ((weapon_class <= 0) || (durability <= 0))
+      {
+         this_object()->unwield();
+
+         weapon_class = 0;
+         durability = 0;
+
+         assign_flag(F_BROKEN, 1);
+      }
+   }
+}
+
+int query_weapon_class()
+{
+   return weapon_class;
+}
+
+//:FUNCTION set_durability
+// Set the durability equal to or lower than weapon class, which is independent
+// Must be used after set_weapon_class()
+void set_durability(int x)
+{
+   if (x <= weapon_class)
+   {
+      durability = x;
+      max_durability = x;
+   }
+}
+
+//:FUNCTION query_durability
+// Query the current durability of an object.  Higher is better.
+int query_durability()
+{
+   return durability;
+}
+
+//:FUNCTION query_max_durability
+// Query the current maximum durability of an object.  Higher is better.
+int query_max_durability()
+{
+   return max_durability;
+}
+
+//:FUNCTION set_chance_to_be_damaged
+// Set the probability for this to be damaged, from 0 (never) to 100 (always)
+void set_chance_to_be_damaged(int x)
+{
+   if ((x >= 0) && (x <= 100))
+   {
+      chance_to_be_damaged = x;
+   }
+}
+
+//:FUNCTION query_chance_to_be_damaged
+// Query the probability for this to be damaged
+int query_chance_to_be_damaged()
+{
+   return chance_to_be_damaged;
+}
+
+int query_max_weapon_class()
+{
+   return max_weapon_class;
+}
+
+void set_weapon_speed(int x)
+{
+   weapon_speed = x;
+}
+
+int query_weapon_speed()
+{
+   return weapon_speed;
+}
+
+string query_skill_used()
+{
+   return skill_used;
+}
+
+void set_skill_used(string new_skill_used)
+{
+   skill_used = new_skill_used;
+}
+
+void do_adjust(int amount)
+{
+   if (test_flag(F_ADJUSTED))
+   {
+      return;
+   }
+
+   assign_flag(F_ADJUSTED, 1);
+
+   if (!test_flag(F_BROKEN))
+   {
+      max_weapon_class += amount;
+
+      if (max_weapon_class < 1)
+      {
+         max_weapon_class = 1;
+      }
+
+      if (max_durability > max_weapon_class)
+      {
+         max_durability = max_weapon_class;
+      }
+
+      weapon_class = max_weapon_class;
+      durability = max_durability;
+
+      clear_flag(F_DAMAGED);
+   }
+}
+
+void do_repair()
+{
+   object body = this_body();
+
+   if (!test_flag(F_BROKEN))
+   {
+      int skill_delay = body->has_skill_delay();
+
+      if ((weapon_class < max_weapon_class) || (durability < max_durability))
+      {
+         if (!skill_delay)
+         {
+            int skill_test = body->test_skill("melee_repair", 1);
+            int max_repair = (body->query_skill("melee_repair") / 200) + 1;
+
+            body->add_skill_delay(4);
+
+            if (skill_test > 0)
+            {
+               if ((max_durability - durability) > max_repair)
+               {
+                  max_durability = durability + max_repair;
+                  max_weapon_class = weapon_class + max_repair;
+               }
+
+               weapon_class = max_weapon_class;
+               durability = max_durability;
+
+               clear_flag(F_DAMAGED);
+
+               body->simple_action("$N $vrepair $o.", this_object());
+            }
+            else
+            {
+               body->simple_action("$N $vfail to repair $o.", this_object());
+            }
+         }
+         else
+         {
+            tell(body, "You must wait at least " + skill_delay + " more second" + (skill_delay > 1 ? "s" : "") + " before attempting to repair.\n");
+         }
+      }
+      else
+      {
+         tell(body, this_object()->short() + " does not need to be repaired.\n");
+      }
+   }
+   else
+   {
+      tell(body, this_object()->short() + " is broken and cannot be repaired.\n");
+   }
+}
+
+class event_info source_modify_event(class event_info evt)
+{
+   return evt;
+}
