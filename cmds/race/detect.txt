@@ -34,16 +34,13 @@ void do_detect_obj(object room)
 
 void do_detect_wrd(string direction)
 {
-   object dir_room;
+   object room;
 
    if (translations[direction]) { direction = translations[direction]; }
 
-   dir_room = environment(this_body())->query_exit_destination(direction);
+   room = load_object(environment(this_body())->query_exit_destination(direction));
 
-   if (dir_room && (member_array(direction, environment(this_body())->query_exit_directions(wizardp(this_body()))) > -1))
-   {
-      do_detect_obj(dir_room);
-   }
+   do_detect_obj(room);
 }
 
 void do_detect()
@@ -52,6 +49,60 @@ void do_detect()
 }
 
 mixed can_detect_obj()
+{
+   object this_body = this_body();
+
+   if ((this_body->query_race() == "rodian") || (this_body->query_race() == "verpine"))
+   {
+      if (this_body->has_skill_delay())
+      {
+         return "You are too busy to concentrate on detection.\n";
+      }
+      else if (this_body->get_target())
+      {
+         return "You are unable to concentrate on detection while in combat.\n";
+      }
+      else if (this_body->query_stunned())
+      {
+         return "You are too distracted to detect anything.\n";
+      }
+   }
+   else
+   {
+      return "Only Rodians and Verpine can detect something.\n";
+   }
+
+   return 1;
+}
+
+mixed can_detect_wrd()
+{
+   object this_body = this_body();
+
+   if ((this_body->query_race() == "rodian") || (this_body->query_race() == "verpine"))
+   {
+      if (this_body->has_skill_delay())
+      {
+         return "You are too busy to concentrate on detection.\n";
+      }
+      else if (this_body->get_target())
+      {
+         return "You are unable to concentrate on detection while in combat.\n";
+      }
+      else if (this_body->query_stunned())
+      {
+         return "You are too distracted to detect anything.\n";
+      }
+   }
+   else
+   {
+      return "Only Rodians and Verpine can detect something.\n";
+   }
+
+   return 1;
+}
+
+mixed can_detect()
 {
    object this_body = this_body();
 

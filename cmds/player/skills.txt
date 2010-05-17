@@ -1,5 +1,4 @@
 // Last modified by deforce on 12-08-2007
-
 #include <mudlib.h>
 #include <config.h>
 #include <classes.h>
@@ -7,11 +6,15 @@
 inherit CMD;
 inherit CLASS_SKILL;
 
+#define WIDTH this_user()->query_screen_width()
+#define COLUMNS floor(WIDTH / 37)
+
 private void main(string arg)
 {
    object body;
    mapping skills;
    string array lines = ({ });
+   int line_count;
 
    if (wizardp(this_body()) && find_body(arg)) { body = find_body(arg); }
    else { body = this_body(); }
@@ -53,12 +56,31 @@ private void main(string arg)
    }
 
    lines = sort_array(lines, 1);
+   line_count = ceil(sizeof(lines) / COLUMNS);
 
-   outf("\n\n%-28s %5s\n", "Skill", "Rank");
-   out(repeat_string("-", 37) + "\n");
-
-   foreach (string line in lines)
+   if (COLUMNS > 1)
    {
-      out(line + "\n");
+      out(sprintf("\n\n%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank") + repeat_string("    " + sprintf("%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank"), COLUMNS - 1) + "\n");
+      out(repeat_string("-", 37) + repeat_string("    " + repeat_string("-", 37), COLUMNS - 1) + "\n");
+   }
+   else
+   {
+      outf("\n\n%%^YELLOW%%^%-29s %-7s%%^RESET%%^\n", "Skill", "Rank");
+      out(repeat_string("-", 37) + "\n");
+   }
+
+   for (int count = 0; count < line_count; count++)
+   {
+      for (int column_count = 0; column_count < COLUMNS; column_count++)
+      {
+         int index = count + (line_count * column_count);
+
+         if (index < sizeof(lines))
+         {
+            out((column_count > 0 ? "    " : "") + lines[index]);
+         }
+      }
+
+      out("\n");
    }
 }

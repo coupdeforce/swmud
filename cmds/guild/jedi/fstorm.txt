@@ -11,6 +11,7 @@ void damage_everything(object room, int damage);
 
 private mapping translations = ([ "n" : "north", "s" : "south", "e" : "east", "w" : "west", "ne" : "northeast", "nw" : "northwest", "se" : "southeast", "sw" : "southwest", "u" : "up", "d" : "down" ]);
 object this_body;
+object this_room;
 
 void main(string arg)
 {
@@ -60,6 +61,8 @@ void main(string arg)
 
             this_body->adjust_jedi_alignment(alignment < 0 ? -10 : (max_alignment - 1) * -1);
 
+            this_room = environment(this_body);
+
             call_out("concentration", 8, room);
 
             this_body->add_skill_delay(12);
@@ -107,9 +110,18 @@ int get_ceiling()
 
 void concentration(object room)
 {
-   int alignment = this_body->query_jedi_alignment();
+   int alignment;
 
-   if (this_body->test_skill("lightning", alignment * (alignment < 0 ? -5 : -50)))
+   if (this_room != environment(this_body))
+   {
+      tell(this_body, "Your concentration has been broken!\n");
+
+      return;
+   }
+
+   alignment = this_body->query_jedi_alignment();
+
+   if (this_body->test_skill("lightning", alignment * (alignment < 0 ? -2 : -50)))
    {
       int rounds = floor(this_body->query_guild_level("jedi") / 10.0);
 
@@ -133,7 +145,7 @@ void storm_room(object room, int floor, int ceiling, int rounds)
    {
       nearby_message = "A Force storm rages nearby.\n";
 
-      call_out("storm_room", 8, room, floor, ceiling, rounds - 1);
+      call_out("storm_room", 12, room, floor, ceiling, rounds - 1);
    }
    else
    {

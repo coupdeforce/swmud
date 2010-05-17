@@ -88,9 +88,9 @@ private void show_users_channels(object user)
 
 private void main(mixed *argv)
 {
-   if (!check_privilege(1))
+   if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 3))
    {
-      out("Sorry, this command is only available to admins.\n");
+      out("Sorry, this command is only available to moffs.\n");
 
       return;
    }
@@ -108,6 +108,6 @@ private void main(mixed *argv)
    }
    else
    {
-      map(CHANNEL_D->query_channels(), (: show_one_channel :));
+      map(sort_array(CHANNEL_D->query_channels(), 1), (: show_one_channel :));
    }
 }

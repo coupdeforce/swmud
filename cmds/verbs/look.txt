@@ -1,23 +1,10 @@
-// Last edited by deforce on 11-10-2009
+// Last edited by deforce on 03-28-2010
 #include <verbs.h>
 
 inherit VERB_OB;
 inherit M_GRAMMAR;
 
 string inspect_corpse(object ob);
-
-void create()
-{
-   clear_flag(NEED_TO_BE_ALIVE);
-
-   add_rules( ({ "", "STR OBJ","STR","WRD OBJ","at OBJ", "for OBS", "at OBS with OBJ" }) );
-   add_rules( ({ "OBS", "OBS with OBJ" }) );
-}
-
-mixed can_look_str(string str)
-{
-   return "That doesn't seem to be possible.\n";
-}
 
 void do_look()
 {
@@ -48,9 +35,14 @@ void do_look_at_obs(array info, string name)
    handle_obs(info, (: do_look_at_obj :), name);
 }
 
-void do_look_str_obj(string prep, object ob)
+void do_look_in_obj(object ob)
 {
-   write(ob->look_in(prep) + "\n");
+   write(ob->look_in("in") + "\n");
+}
+
+void do_look_on_obj(object ob)
+{
+   write(ob->look_in("on") + "\n");
 }
 
 void do_look_obj(object ob, string name)
@@ -196,18 +188,6 @@ void do_look_for_obs(array info)
    write(res + ".\n");
 }
 
-void do_look_str(string thing)
-{
-   object target = get_object(thing);
-
-   if (target) { do_look_at_obj(target, ""); }
-}
-
-mixed do_look_wrd_obj(string wrd, object ob)
-{
-   ob->look(wrd);
-}
-
 string inspect_corpse(object ob)
 {
    object this_body = this_body();
@@ -250,4 +230,12 @@ string inspect_corpse(object ob)
    }
 
    return text;
+}
+
+void create()
+{
+   clear_flag(NEED_TO_BE_ALIVE);
+
+   add_rules( ({ "", "in OBJ", "on OBJ", "at OBJ", "for OBS", "at OBS with OBJ" }) );
+   add_rules( ({ "OBS", "OBS with OBJ" }) );
 }

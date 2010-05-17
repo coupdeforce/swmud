@@ -17,7 +17,7 @@ private void main(string direction)
       room = environment(this_body());
       dir_room = room->query_exit_destination(direction);
 
-      if (dir_room && ((member_array(direction, environment(this_body())->query_hidden_exits()) == -1) || wizardp(this_body())))
+      if (dir_room && (member_array(direction, environment(this_body())->query_exit_directions(wizardp(this_body()))) > -1))
       {
          string exits = dir_room->show_exits();
          int room_count = 1;
@@ -35,7 +35,7 @@ private void main(string direction)
          {
             dir_room = dir_room->query_exit_destination(direction);
 
-            if (dir_room && ((member_array(direction, environment(this_body())->query_hidden_exits()) == -1) || wizardp(this_body())))
+            if (dir_room && (member_array(direction, environment(this_body())->query_exit_directions(wizardp(this_body()))) > -1))
             {
                exits = dir_room->show_exits();
 

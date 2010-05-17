@@ -6,12 +6,14 @@ inherit M_ANSI;
 
 #include <guild_colors.h>
 
+#define USER_WIDTH 26
 #define WIDTH this_user()->query_screen_width()
 #define DELIM (repeat_string("=", (WIDTH - 1)) + "\n")
 
-string format_idle_time(int time);
+string format_idle_time(object body);
 string format_status(string user);
 string show_location(string line, object body);
+int sort_level_name(string first, string second);
 
 void main()
 {
@@ -72,7 +74,7 @@ void main()
       users_player[count] = sprintf("%02d", primary_level) + ":::" + users_player[count];
    }
 
-   users_player = sort_array(users_player, -1);
+   users_player = sort_array(users_player, "sort_level_name");
 
    for (int count = 0; count < sizeof(users_player); count++)
    {
@@ -83,38 +85,40 @@ void main()
 
    if (sizeof(users_player))
    {
-      int user_width = 26;
-      int users_per_line = (WIDTH / user_width);
-      int line_count = 0;
+      int users_per_line = floor(WIDTH / USER_WIDTH);
+      int lines = ceil(to_float(sizeof(users_player)) / to_float(users_per_line));
 
-      string line = " ";
+      string line = "";
 
-      foreach (string user in users_player)
+      for (int count = 0; count < lines; count++)
       {
-         object body = find_body(user);
-
-         if (body)
+         for (int line_count = 0; line_count < users_per_line; line_count++)
          {
-            string primary_guild = body->query_primary_guild();
+            object body;
+            string user = "";
 
-            if ((line_count > 0) && (colour_strlen(line) < (line_count * user_width)))
+            if (sizeof(users_player) > (count + (lines * line_count)))
             {
-               line += repeat_string(" ", ((line_count * user_width) - colour_strlen(line)));
+               user = users_player[count + (lines * line_count)];
+               body = find_body(user);
             }
 
-            line += get_guild_color(primary_guild);
-            line += format_status(user);
-
-            line_count++;
-
-            if (line_count >= users_per_line)
+            if (body && strlen(user))
             {
-               line_count = 0;
+               string primary_guild = body->query_primary_guild();
 
-               output += line + "\n";
-               line = " ";
+               if ((line_count > 0) && (colour_strlen(line) < (line_count * USER_WIDTH)))
+               {
+                  line += repeat_string(" ", ((line_count * USER_WIDTH) - colour_strlen(line)));
+               }
+
+               line += get_guild_color(primary_guild);
+               line += format_status(user);
             }
          }
+
+         output += line + "\n";
+         line = "";
       }
 
       output += line + "\n";
@@ -123,8 +127,22 @@ void main()
    out(output);
 }
 
-string format_idle_time(int time)
+int sort_level_name(string first, string second)
 {
+   int first_level = to_int(first[0..1]);
+   int second_level = to_int(second[0..1]);
+   first = first[2..];
+   second = second[2..];
+
+   if (first_level < second_level) { return 1; }
+   else if (first_level > second_level) { return -1; }
+
+   return strcmp(first, second);
+}
+
+string format_idle_time(object body)
+{
+   int time = query_idle(body->query_link());
    string output = "";
 
    if (time > 59)
@@ -147,7 +165,7 @@ string format_idle_time(int time)
 
       output += (time / 60) + "m";
 
-      if (wizardp(this_user()) && (time > 0)) { output += ", " + (time % 60) + "s"; }
+      if (wizardp(this_user()) && wizardp(body) && (time > 0)) { output += ", " + (time % 60) + "s"; }
 
       output += ")";
    }
@@ -173,9 +191,11 @@ string format_status(string user)
    output += (!body->is_visible() ? ")" : "");
    if (body->test_flag(F_IN_EDIT)) { output += (wizardp(user) ? " **" : "*"); }
 
-   output += "%^RESET%^" + (wizardp(user) && body->test_flag(F_INACTIVE) ? " (away)" : format_idle_time(query_idle(body->query_link())));
+   output += "%^RESET%^" + (wizardp(user) && body->test_flag(F_INACTIVE) ? " (away)" : format_idle_time(body));
 
-   return output;
+   if (wizardp(body)) { return output; }
+
+   return output[0..USER_WIDTH + (strlen(output) - colour_strlen(output)) - 1];
 }
 
 string show_location(string line, object body)

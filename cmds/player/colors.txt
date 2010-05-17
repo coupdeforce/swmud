@@ -4,10 +4,10 @@ inherit M_ANSI;
 
 void do_print(string which)
 {
-   string array colors;
-   string array illegal;
+   string array colors = ({ });
+   string array illegal = ({ });
    mapping null = ANSI_D->query_translations()[1];
-   int longest;
+   int longest = 0;
 
    if (which)
    {
@@ -15,11 +15,11 @@ void do_print(string which)
    }
    else
    {
-      colors = this_user()->query_colors();
+      colors = this_user()->query_colours();
 
-      if (!wizardp(this_body()))
+      if (!wizardp(this_user()))
       {
-//         colors -= ANSI_D->query_restrictions();
+         colors -= ANSI_D->query_restrictions();
       }
    }
 

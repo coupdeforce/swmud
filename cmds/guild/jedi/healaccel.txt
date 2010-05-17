@@ -1,9 +1,13 @@
-// Last edited by deforce on 12-13-2007
+// Last edited by deforce on 07-09-2008
+#include <hooks.h>
+
 inherit VERB_OB;
 
 void perform_healaccel(object body);
 void meditation_time(object body);
-void clear_heal_accel(object body);
+void clear_heal_accel(object body, int amount);
+int has_special_skill_delay(string skill);
+string format_time_left(int time);
 
 object this_body;
 
@@ -15,47 +19,54 @@ void do_healaccel_liv(object living)
    {
       if (this_body->query_guild_level("assassin"))
       {
-         write("You are too dedicated to the Dark side of the Force to use it for healing.\n");
+         write("You are too dedicated to the Dark side of the Force to use it for healing acceleration.\n");
       }
       else if (living->query_guild_level("assassin") && (living->query_jedi_alignment() < 0))
       {
-         write(living->short() + " is too dedicated to the Dark side of the Force to be healed.\n");
+         write(living->short() + " is too dedicated to the Dark side of the Force to be affected.\n");
       }
-      else if ((living != this_body) && (this_body->query_skill("healing") < 100))
+      else if (this_body->query_skill("healing") < 600)
       {
-         write("You are not experienced enough to heal another's wounds.\n");
+         write("You are not experienced enough to know how to accelerate healing.\n");
       }
-      else if (living->query_health() >= living->query_max_health())
+      else if ((living != this_body) && (this_body->query_skill("healing") < 700))
       {
-         if (living == this_body)
-         {
-            write("You are already at full health.\n");
-         }
-         else
-         {
-            write(living->short() + " is already at full health.\n");
-         }
+         write("You are not experienced enough to accelerate another's healing.\n");
+      }
+      else if (!this_body->has_learned_skill("accelerate healing"))
+      {
+         write("You have not learned how to accelerate healing with the Force.\n");
       }
       else if (this_body->has_skill_delay())
       {
-         write("You are too busy to concentrate on healing.\n");
+         write("You are too busy to concentrate on healing acceleration.\n");
+      }
+      else if (this_body->has_special_skill_delay("accelerate healing"))
+      {
+         write("You need to wait " + format_time_left(this_body->has_special_skill_delay("accelerate healing")) + " before you can accelerate healing again.\n");
+      }
+      else if (living->call_hooks("heal_accel", HOOK_SUM))
+      {
+         write(living->short() + " is already experiencing accelerated healing.\n");
       }
       else
       {
          if (living == this_body)
          {
-            this_body->simple_action("$N $vconcentrate for a moment on healing $r with the Force...\n");
+            this_body->simple_action("$N $vconcentrate on accelerating $p body's healing with the Force...\n");
          }
          else
          {
-            this_body->targetted_action("$N $vconcentrate momentarily on healing $t with the Force...\n", living);
+            this_body->targetted_action("$N $vconcentrate on accelerating $P1 body's healing with the Force...\n", living);
          }
 
-         this_body->adjust_jedi_alignment(1);
+         this_body->adjust_jedi_alignment(2);
 
-         call_out("meditation_time", 4, living);
+         call_out("meditation_time", 6, living);
 
-         this_body->add_skill_delay(8);
+         this_body->add_skill_delay(10);
+
+         this_body->stun(6);
       }
    }
    else
@@ -73,31 +84,33 @@ void perform_healaccel(object body)
 {
    float force = this_body->query_for();
    float level = this_body->query_guild_level("jedi");
-   float skill = this_body->query_skill("healing");
-   float modifier = (skill >= 800 ? 100 : (skill >= 200 ? 200 : 400));
-   int amount = ((force / 100.0) * (level / 50.0) * 50.0) + (force * (force / modifier));
-   string output = "You " + (this_body == body ? "heal yourself" : "are healed by " + this_body->short()) + ".\n";
+   int amount = floor(body->query_heal_rate() * 2 * (force / 50.0) * (level / 100.0));
+   int delay = 300 - (((floor(level / 10.0) * 2) + ((force * 8) / 10)));
+   int duration = ((floor(level / 5.0) * 2) + ((force * 16) / 10));
+   string output = "Your healing is accelerated" + (this_body == body ? "" : " by " + this_body->short()) + ".\n";
 
-   body->other_action("$N $vare surrounded by a faint blue glow.\n");
-   body->heal_us(amount);
+   if (amount < 1) { amount = 1; }
 
-   foreach (string limb in body->query_limbs())
-   {
-      body->heal_us(amount * 0.5, limb);
-   }
+//   body->simple_action("$N $vhave a heal rate of " + body->query_heal_rate() + " and it was increased by " + amount + ".\n");
+   body->other_action("$N $vare surrounded by a steady, faint blue glow.\n");
+   body->add_hook("heal_accel", amount);
+
+   call_out("clear_heal_accel", duration, body, amount);
 
    if (body != this_body)
    {
-      body->adjust_jedi_alignment(1);
+      body->adjust_jedi_alignment(3);
    }
 
-   output += "hp: " + body->query_health() + "/" + body->query_max_health() + "    dr: undrugged\n";
-
    tell(body, output);
+
+   this_body->add_special_skill_delay("accelerate healing", delay);
 }
 
 void meditation_time(object body)
 {
+   int alignment = this_body->query_jedi_alignment();
+
    if (!this_body) { return; }
    else if (!body || (environment(this_body) != environment(body)))
    {
@@ -106,14 +119,42 @@ void meditation_time(object body)
       return;
    }
 
-   if (this_body->test_skill("healing", this_body->query_jedi_alignment() * 10))
+   if (this_body->test_skill("healing", alignment * (alignment < 0 ? 30 : 8)))
    {
-      perform_healing(body);
+      perform_healaccel(body);
    }
    else
    {
       this_body->simple_action("$N $vlose focus.\n");
+      this_body->stun(2);
    }
+}
+
+void clear_heal_accel(object body, int amount)
+{
+   if (!body) { return; }
+
+   body->update_health();
+
+   body->remove_hook("heal_accel", amount);
+
+   body->other_action("The blue glow around $N fades away.\n");
+
+   tell(body, "%^BOLD%^Your healing is no longer accelerated.%^RESET%^\n");
+}
+
+string format_time_left(int time)
+{
+   string output = "";
+
+   if (time > 59)
+   {
+      if ((time / 60) > 0) { output += (time / 60) + " minute" + ((time / 60) != 1 ? "s" : "") + ", "; }
+   }
+
+   output += (time % 60) + " second" + ((time % 60) != 1 ? "s" : "");
+
+   return output;
 }
 
 void create()

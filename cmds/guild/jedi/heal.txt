@@ -11,13 +11,44 @@ void do_heal_liv(object living)
       {
          write("You are too dedicated to the Dark side of the Force to use it for healing.\n");
       }
+      else if (living->query_guild_level("assassin") && (living->query_jedi_alignment() < 0))
+      {
+         write(living->short() + " is too dedicated to the Dark side of the Force to be healed.\n");
+      }
+      else if (living->query_health() >= living->query_max_health())
+      {
+         if (living == this_body())
+         {
+            tell(this_body(), "You are already at full health.\n");
+         }
+         else
+         {
+            tell(this_body(), living->short() + " is already at full health.\n");
+         }
+      }
       else if (this_body()->has_skill_delay())
       {
          write("You are too busy to concentrate on healing.\n");
       }
       else
       {
-         perform_healing(living);
+         if (living == this_body())
+         {
+            this_body->simple_action("$N $vconcentrate for a moment on healing $r with the Force...\n");
+         }
+         else
+         {
+            this_body->targetted_action("$N $vconcentrate momentarily on healing $t with the Force...\n", body);
+         }
+
+         if (this_body()->test_skill("healing", this_body()->query_jedi_alignment() * 10))
+         {
+            perform_healing(living);
+         }
+         else
+         {
+            this_body->simple_action("$N $vconcentrate for a moment on healing $r with the Force.\n");
+         }
       }
    }
    else
@@ -28,21 +59,7 @@ void do_heal_liv(object living)
 
 void do_heal()
 {
-   if (this_body()->query_guild_level("jedi"))
-   {
-      if (this_body()->query_guild_level("assassin"))
-      {
-         write("You are too dedicated to the Dark side of the Force to use it for healing.\n");
-      }
-      else
-      {
-         perform_healing(this_body());
-      }
-   }
-   else
-   {
-      write("Only Jedi know how to use the Force for healing.\n");
-   }
+   do_heal_liv(this_body());
 }
 
 void perform_healing(object body)
@@ -56,12 +73,15 @@ void perform_healing(object body)
 
    if (body == this_body)
    {
-      this_body->simple_action("$N can heal $r for " + amount + " hit points.\n", body);
+      this_body->simple_action("$N $vconcentrate for a moment on healing $r with the Force.\n");
    }
    else
    {
-      this_body->targetted_action("$N can heal $t for " + amount + " hit points.\n", body);
+      this_body->targetted_action("$N $vconcentrate momentarily on healing $t with the Force.\n", body);
    }
+
+   body->heal_us(amount);
+   tell(body, "HP: " + body->query_health() + "/" + body->query_max_health() + "\n\n");
 
    this_body->add_skill_delay(8);
 }

@@ -1,9 +1,11 @@
-// Last edited by deforce on 11-26-2007
+// Last edited by deforce on 12-05-2007
 #include <playerflags.h>
 
 inherit CMD;
 inherit M_ANSI;
 inherit CLASS_FINGER;
+
+#include <guild_colors.h>
 
 #define WIDTH this_user()->query_screen_width()
 #define DELIM (repeat_string("=", (WIDTH - 1)) + "\n")
@@ -11,6 +13,7 @@ inherit CLASS_FINGER;
 string format_idle_time(int time);
 string format_status(string user);
 string show_location(string line, object body);
+int sort_level_name(string first, string second);
 
 string get_who_string()
 {
@@ -56,13 +59,31 @@ string get_who_string()
       }
    }
 
+   for (int count = 0; count < sizeof(users_player); count++)
+   {
+      object body = find_body(users_player[count]);
+      int primary_level = body->query_primary_level();
+
+      users_player[count] = sprintf("%02d", primary_level) + ":::" + users_player[count];
+   }
+
+   users_player = sort_array(users_player, "sort_level_name");
+
+   for (int count = 0; count < sizeof(users_player); count++)
+   {
+      string array name = explode(users_player[count], ":::");
+
+      users_player[count] = name[1];
+   }
+
    foreach (string user in users_player)
    {
       object body = find_body(user);
 
       if (body)
       {
-         string line = "%^ORANGE%^";
+         string primary_guild = body->query_primary_guild();
+         string line = get_guild_color(primary_guild);
 
          line += format_status(user);
 
@@ -71,6 +92,19 @@ string get_who_string()
    }
 
    return output;
+}
+
+int sort_level_name(string first, string second)
+{
+   int first_level = to_int(first[0..1]);
+   int second_level = to_int(second[0..1]);
+   first = first[2..];
+   second = second[2..];
+
+   if (first_level < second_level) { return 1; }
+   else if (first_level > second_level) { return -1; }
+
+   return strcmp(first, second);
 }
 
 string format_idle_time(int time)
@@ -112,6 +146,8 @@ string format_status(string user)
    class finger user_info = FINGER_D->get_finger_data(user);
    string output = "";
 
+   if (!wizardp(body)) { output += sprintf("[%2i] ", body->query_primary_level()); }
+
    if (body->test_flag(F_IN_EDIT)) { output += (wizardp(user) ? "** " : "*"); }
    output += (!body->is_visible() ? "(" : "");
 
@@ -119,6 +155,9 @@ string format_status(string user)
 
    output += (!body->is_visible() ? ")" : "");
    if (body->test_flag(F_IN_EDIT)) { output += (wizardp(user) ? " **" : "*"); }
+
+   output += " (" + title_capitalize(user_info->race) + ")";
+   if (!wizardp(user)) { output += " (" + (user_info->team == 1 ? "Rebel" : user_info->team == -1 ? "Imperial" : "Neutral") + ")"; }
 
    output += "%^RESET%^" + (body->test_flag(F_INACTIVE) ? " (away)" : "");
    output += (!body->test_flag(F_INACTIVE) || wizardp(this_body()) ? format_idle_time(query_idle(body->query_link())) : "");

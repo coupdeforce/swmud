@@ -1,4 +1,4 @@
-// Last edited by deforce on 11-20-2007
+// Last edited by deforce on 12-19-2007
 inherit CMD;
 
 private nomask void main(string arg)
@@ -13,9 +13,9 @@ private nomask void main(string arg)
       return;
    }
 
-   if (!check_privilege(1))
+   if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 4))
    {
-      out("You need to be an administrator in order to add new wizards.\n");
+      out("You need to be a grand moff in order to add new wizards.\n");
 
       return;
    }
@@ -63,5 +63,9 @@ private nomask void main(string arg)
       tell(ob, "You are now a wizard.  Changing bodies...\n");
 
       ob->force_me("su");
+
+      ob = find_user(arg);
+
+      ob->add_channel("wiz");
    }
 }

@@ -1,6 +1,5 @@
-// Last edited by deforce on 12-19-2007
-inherit CMD;
-inherit M_EXIT;
+// Last edited by deforce on 03-25-2010
+inherit VERB_OB;
 
 void sense_room(object room);
 void sense_object(object thing);
@@ -9,94 +8,82 @@ string alignment_description(int alignment);
 string force_description(int force);
 string health_description(int percent);
 string level_description(int difference);
+mixed can_sense();
 
-private mapping translations = ([ "n" : "north", "s" : "south", "e" : "east", "w" : "west", "ne" : "northeast", "nw" : "northwest", "se" : "southeast", "sw" : "southwest", "u" : "up", "d" : "down" ]);
-object this_body;
-
-void main(string arg)
+void do_sense_liv(object living)
 {
-   this_body = this_body();
+   sense_living(living);
+}
+
+void do_sense_obj(object thing)
+{
+   sense_object(thing);
+}
+
+void do_sense()
+{
+   sense_room(environment(this_body()));
+}
+
+mixed can_sense_liv() { return can_sense(); }
+mixed can_sense_obj() { return can_sense(); }
+
+mixed can_sense()
+{
+   object this_body = this_body();
 
    if (this_body->query_guild_level("jedi"))
    {
       if (!this_body->has_learned_skill("force sense"))
       {
-         write("You have not learned how to sense the Force.\n");
-      }
-      else
-      {
-         string thing;
-         string direction;
-         int thing_number;
-         int direction_number;
-
-         if (!arg)
-         {
-            sense_room(environment(this_body));
-         }
-         else if (sscanf(arg, "%s", thing) == 1)
-         {
-            object target = present(thing, environment(this_body));
-
-            if (!target) { target = present(thing, this_body); }
-
-            if (target)
-            {
-               if (target->is_living())
-               {
-                  sense_living(target);
-               }
-               else
-               {
-                  sense_object(target);
-               }
-            }
-            else { out("You don't sense " + thing + ".\n"); }
-         }
+         return "You have not learned how to sense the Force.\n";
       }
    }
    else
    {
-      out("Only Jedi know how to sense the Force.\n");
+      return "Only Jedi know how to sense the Force.\n";
    }
+
+   return 1;
 }
 
 void sense_room(object room)
 {
    if (room && strlen(room->sense_force()))
    {
-      this_body->learn_skill("sense", -200);
+      this_body()->learn_skill("force_sense", -200);
 
-      tell(this_body, room->sense_force());
+      tell(this_body(), room->sense_force());
 
       return;
    }
 
-   tell(this_body, "You sense nothing unusual here.\n");
+   tell(this_body(), "You sense nothing unusual here.\n");
 }
 
 void sense_object(object thing)
 {
-   if (thing && strlen(thing->sense_force()))
+   if (thing && strlen(thing->query_force()))
    {
-      this_body->learn_skill("sense", -100);
+      this_body()->learn_skill("force_sense", -100);
 
-      tell(this_body, thing->sense_force());
+      tell(this_body(), thing->query_force() + "\n");
 
       return;
    }
 
-   tell(this_body, "You sense nothing unusual about " + thing->short() + ".\n");
+   tell(this_body(), "You sense nothing unusual about " + thing->short() + ".\n");
 }
 
 void sense_living(object living)
 {
+   object this_body = this_body();
    string pronoun = capitalize(living->query_pronoun());
    string output;
 
-   if (!living->query_for())
+   if (!living->can_feel_force())
    {
-      tell(this_body, living->short() + " is not connected to the Force.\n");
+      tell(this_body, capitalize(living->short()) + " is not connected to the Force.\n");
 
       return;
    }
@@ -107,9 +94,14 @@ void sense_living(object living)
    output += pronoun + " is " + alignment_description(living->query_jedi_alignment()) + ".\n";
    output += pronoun + " is " + health_description((living->query_health() * 100) / living->query_max_health()) + ".\n";
 
+   if (living->has_effect("poison"))
+   {
+      output += pronoun + " is poisoned.\n";
+   }
+
    if (living != this_body)
    {
-      this_body->learn_skill("sense");
+      this_body->learn_skill("force_sense");
    }
 
    tell(this_body, output);
@@ -119,19 +111,15 @@ string alignment_description(int alignment)
 {
    switch (alignment)
    {
-      case 50: return "an avatar of the Light side of the Force";
-      case 40..49: return "... Light side of the Force";
-      case 30..39: return "... Light side of the Force";
-      case 20..29: return "... Light side of the Force";
-      case 10..19: return "... Light side of the Force";
-      case 1..9: return "... Light side of the Force";
-      case 0: return "of neither the Light nor the Dark";
+      case 40..50: return "dedicated to the Light side of the Force";
+      case 20..39: return "allied with the Light side of the Force";
+      case 10..19: return "aligned with the Light side of the Force";
+      case 1..9: return "associated with the Light side of the Force";
+      case 0: return "indifferent towards the Force";
       case -9..-1: return "tainted by the Dark side of the Force";
-      case -19..-10: return "... Dark side of the Force";
-      case -29..-20: return "... Dark side of the Force";
-      case -39..-30: return "... Dark side of the Force";
-      case -49..-40: return "... Dark side of the Force";
-      case -50: return "consumed by the Dark side of the Force";
+      case -19..-10: return "aligned with the Dark side of the Force";
+      case -39..-20: return "allied with the Dark side of the Force";
+      case -50..-40: return "consumed by the Dark side of the Force";
    }
 
    return "is in an odd state of jedi alignment";
@@ -186,4 +174,9 @@ string level_description(int difference)
    }
 
    return "in an odd state of level difference";
+}
+
+void create()
+{
+   add_rules( ({ "", "LIV", "OBJ" }) );
 }

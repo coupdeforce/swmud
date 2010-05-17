@@ -1,34 +1,30 @@
-// Last edited by deforce on 03-30-2008
+// Last edited by deforce on 07-09-2008
 #include <hooks.h>
 
 inherit VERB_OB;
 
 void perform_enhance_attribute(string attribute);
 void meditation_time(string attribute);
-void clear_enhance_attribute(string attribute, int amount);
+void clear_enhance_attribute(object body, string attribute, int amount);
 string format_time_left(int time);
 string get_stat_name(string stat);
 string get_stat_full_name(string stat);
 
-object this_body;
-
 void do_enhatt_wrd(string attribute)
 {
-   this_body = this_body();
+   object this_body = this_body();
 
-   if (this_body->query_guild_level("jedi"))
+   if (!this_body->query_guild_level("jedi"))
    {
       write("Only Jedi know how to use the Force to enhance their attributes.\n");
-      return;
-   }
-
-   if (this_body->query_skill("whatever skill") < 800)
-   {
-      write("You are not experienced enough to know how to enhance your attributes.\n");
    }
    else if (!this_body->has_learned_skill("enhance attributes"))
    {
       write("You have not learned how to enhance your attributes with the Force.\n");
+   }
+   else if (this_body->get_target())
+   {
+      write("You are unable to concentrate on enhancing your attributes while in combat.\n");
    }
    else if (this_body->has_skill_delay())
    {
@@ -38,73 +34,82 @@ void do_enhatt_wrd(string attribute)
    {
       write("You need to wait " + format_time_left(this_body->has_special_skill_delay("enhance attribute")) + " before you can enhance your attributes again.\n");
    }
+   else if (!get_stat_name(attribute))
+   {
+      write("You have no " + attribute + " to enhance.\n");
+   }
    else
    {
       this_body->simple_action("$N $vconcentrate on enhancing $p body with the Force...\n");
 
-      call_out("meditation_time", 6, living);
+      call_out("meditation_time", 4, attribute);
 
-      this_body->add_skill_delay(10);
-   }
-}
+      this_body->add_skill_delay(8);
 
-void perform_enhance_attribute(string attribute)
-{
-   string stat_name = get_stat_name(attribute);
-   string stat_full_name = get_stat_full_name(attribute);
-   float force = this_body->query_for();
-   float level = this_body->query_guild_level("jedi");
-   int amount = ((level / 25) + 1) * 5;
-   int delay = 300 - (((floor(level / 10.0) * 2) + ((force * 8) / 10)));
-   int duration = ((floor(level / 5.0) * 2) + ((force * 16) / 10));
-   string output = "Your " + stat_full_name + " is enhanced.\n";
-
-   if (amount < 1) { amount = 1; }
-
-   body->other_action("$N $vare surrounded by a steady, yellow glow.\n");
-   body->add_hook(stat_name + "_enhatt", amount);
-
-   call_out("clear_enhance_attribute", duration, this_body, attribute, amount);
-
-   tell(body, output);
-
-   this_body->add_special_skill_delay("enhance attribute", delay);
-}
-
-void meditation_time(object body)
-{
-   int alignment = this_body->query_jedi_alignment();
-
-   if (!this_body) { return; }
-   else if (!body || (environment(this_body) != environment(body)))
-   {
-      write(body->short() + " left and your concentration was broken.\n");
-
-      return;
-   }
-
-   if (this_body->test_skill("healing", alignment * (alignment < 0 ? 30 : 8)))
-   {
-      perform_enhance_attribute(body);
-   }
-   else
-   {
-      this_body->simple_action("$N $vlose focus.\n");
       this_body->stun(2);
    }
 }
 
-void clear_enhance_attribute(string attribute, int amount)
+void do_enhatt()
 {
+   write("Enhance which attribute?\n");
+}
+
+void perform_enhance_attribute(string attribute)
+{
+   object this_body = this_body();
+   string stat_name = get_stat_name(attribute);
+   float force = this_body->query_for();
+   float level = this_body->query_guild_level("jedi");
+   int rank = to_int(floor(this_body->query_skill("enhatt") / 100.0));
+   int amount = to_int(floor((level / 50.0) * (force / 100.0) * (rank * 3.0)));
+   int delay = 300 - to_int(floor(((level * 2.0) + force) / 50.0) * 30.0);
+   int duration = 10 + (rank * 5) + to_int(floor((level / 50.0) * (force / 100.0) * (10.0 + (rank * 5.0))) * 2.0);
+
+   if (amount < 1) { amount = 1; }
+
+   this_body->add_hook(stat_name + "_enhatt", amount);
+   this_body->refresh_stats();
+   this_body->other_action("$N $vare surrounded by a steady, yellow glow.\n");
+
+   call_out("clear_enhance_attribute", duration, this_body, stat_name, amount);
+
+   tell(this_body, "You feel your " + get_stat_full_name(attribute) + " become greater.\n");
+
+   this_body->add_special_skill_delay("enhance attribute", delay);
+}
+
+void meditation_time(string attribute)
+{
+   object this_body = this_body();
+   int alignment = this_body->query_jedi_alignment();
+
    if (!this_body) { return; }
 
-   this_body->remove_hook(attribute + "_enhatt", amount);
+   if (this_body->test_skill("enhatt", alignment * (alignment < 0 ? -2 : 2)))
+   {
+      perform_enhance_attribute(attribute);
+   }
+   else
+   {
+      this_body->simple_action("$N $vlose focus.\n");
 
-   this_body->refresh_stats();
+      if (this_body->query_int() < random(100))
+      {
+         this_body->stun(2);
+      }
+   }
+}
 
-   this_body->other_action("The yellow glow around $N fades away.\n");
+void clear_enhance_attribute(object body, string attribute, int amount)
+{
+   if (!body) { return; }
 
-   tell(this_body, "%^BOLD%^Your healing is no longer accelerated.%^RESET%^\n");
+   body->remove_hook(attribute + "_enhatt", amount);
+   body->refresh_stats();
+   body->other_action("The yellow glow around $N fades away.\n");
+
+   tell(body, "%^BOLD%^Your " + get_stat_full_name(attribute) + " is no longer enhanced.%^RESET%^\n");
 }
 
 string format_time_left(int time)
@@ -187,7 +192,7 @@ string get_stat_full_name(string stat)
          return "luck";
       case "force":
       case "for":
-         return "force";
+         return "Force";
    }
 
    return 0;
@@ -195,5 +200,5 @@ string get_stat_full_name(string stat)
 
 void create()
 {
-   add_rules( ({ "WRD" }) );
+   add_rules( ({ "", "WRD" }) );
 }

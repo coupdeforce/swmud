@@ -1,12 +1,11 @@
-// Last edited by deforce on 03-04-2007
+// Last edited by deforce on 11-14-2009
 inherit CMD;
-
-string format_time_left(int time);
 
 private void main(string arg)
 {
    object body = find_body(arg);
    mapping delays = ([ ]);
+   string output = "";
 
    if (!wizardp(this_body()) || !body) { body = this_body(); }
 
@@ -15,45 +14,22 @@ private void main(string arg)
    if (sizeof(keys(delays)))
    {
       int time = time();
-      string output = "";
 
       foreach (string skill in sort_array(keys(delays), 1))
       {
-         output += sprintf("%-30s : %s\n", skill, format_time_left(delays[skill] - time));
+         if ((delays[skill] - time) > 0)
+         {
+            output += sprintf("%-30s : %s\n", skill, convert_time(delays[skill] - time));
+         }
       }
+   }
 
+   if (strlen(output))
+   {
       out(output + "\n");
    }
    else
    {
       out("You have no skill delays.\n");
    }
-}
-
-string format_time_left(int time)
-{
-   string output = "";
-
-   if (time > 59)
-   {
-      if (time > 3599)
-      {
-         if (time > 86399)
-         {
-            if ((time / 86400) > 0) { output += (time / 86400) + " days, "; }
-
-            time = time % 86400;
-         }
-
-         if ((time / 3600) > 0) { output += (time / 3600) + " hours, "; }
-
-         time = time % 3600;
-      }
-
-      if ((time / 60) > 0) { output += (time / 60) + " minutes, "; }
-   }
-
-   output += (time % 60) + " seconds";
-
-   return output;
 }
