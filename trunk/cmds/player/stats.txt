@@ -1,0 +1,61 @@
+// Last edited by deforce on 11-19-2007
+#include <mudlib.h>
+#include <config.h>
+
+inherit CMD;
+
+#define BORDER (repeat_string("=", 79))
+#define SEPARATOR (repeat_string("-", 79))
+
+private void main(string arg)
+{
+   object body;
+   string name;
+   int stat_str, stat_con, stat_agi, stat_dex, stat_per, stat_int, stat_cha, stat_luc, stat_for;
+
+   if (wizardp(this_body()) && find_body(arg)) { body = find_body(arg); }
+   else { body = this_body(); }
+
+   name = body->query_title();
+   body->refresh_stats();
+
+   stat_str = body->query_str();
+   stat_con = body->query_con();
+   stat_agi = body->query_agi();
+   stat_dex = body->query_dex();
+   stat_per = body->query_per();
+   stat_int = body->query_int();
+   stat_cha = body->query_cha();
+   stat_luc = body->query_luc();
+   stat_for = body->query_for();
+
+   out(BORDER + "\n");
+
+   out(name + (wizardp(body) ? (adminp(body) ? " (Admin Wizard)" : " (Wizard)") : "") + "\n");
+
+   out(SEPARATOR + "\n");
+
+   outf("%-13s:%7d %-7s    %-13s:%7d %-7s\n",
+      "Strength", (stat_str / 5), (wizardp(this_body()) ? "(" + stat_str + ")" : ""),
+      "Intelligence", (stat_int / 5), (wizardp(this_body()) ? "(" + stat_int + ")" : ""));
+   outf("%-13s:%7d %-7s    %-13s:%7d %-7s\n",
+      "Constitution", (stat_con / 5), (wizardp(this_body()) ? "(" + stat_con + ")" : ""),
+      "Charisma", (stat_cha / 5), (wizardp(this_body()) ? "(" + stat_cha + ")" : ""));
+   outf("%-13s:%7d %-7s    %-13s:%7d %-7s\n",
+      "Agility", (stat_agi / 5), (wizardp(this_body()) ? "(" + stat_agi + ")" : ""),
+      "Luck", (stat_luc / 5), (wizardp(this_body()) ? "(" + stat_luc + ")" : ""));
+   outf("%-13s:%7d %-7s    %-13s:%7d %-7s\n",
+      "Dexterity", (stat_dex / 5), (wizardp(this_body()) ? "(" + stat_dex + ")" : ""),
+      "Force", (stat_for / 5), (wizardp(this_body()) ? "(" + stat_for + ")" : ""));
+   outf("%-13s:%7d %-7s\n",
+      "Perception", (stat_per / 5), (wizardp(this_body()) ? "(" + stat_per + ")" : ""));
+
+   out(SEPARATOR + "\n");
+
+   outf("Hit points: %-9s    %27s: %i%% %s\n",
+      sprintf("%i/%i", body->query_health(), body->query_max_health()),
+      "Carry weight", (body->query_capacity() > 0 ? ((body->query_capacity() * 100) / body->query_max_capacity()) : 0),
+      (wizardp(this_body()) ? "(" + body->query_capacity() + "/" + body->query_max_capacity() + ")" : ""));
+
+   out(BORDER + "\n");
+}

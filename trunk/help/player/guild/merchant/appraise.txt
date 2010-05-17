@@ -1,0 +1,6 @@
+$$ see: merchant
+ --=== Appraise ===--  (Merchant Guild Command)
+
+ Usage: appraise <object>
+
+ A merchant can attempt to appraise an object's sell value. An inexperienced appraiser will sometimes overestimate.

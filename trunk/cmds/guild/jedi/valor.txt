@@ -1,0 +1,199 @@
+// Last edited by deforce on 03-30-2008
+#include <hooks.h>
+
+inherit VERB_OB;
+
+void perform_enhance_attribute(string attribute);
+void meditation_time(string attribute);
+void clear_enhance_attribute(string attribute, int amount);
+string format_time_left(int time);
+string get_stat_name(string stat);
+string get_stat_full_name(string stat);
+
+object this_body;
+
+void do_enhatt_wrd(string attribute)
+{
+   this_body = this_body();
+
+   if (this_body->query_guild_level("jedi"))
+   {
+      write("Only Jedi know how to use the Force to enhance their attributes.\n");
+      return;
+   }
+
+   if (this_body->query_skill("whatever skill") < 800)
+   {
+      write("You are not experienced enough to know how to enhance your attributes.\n");
+   }
+   else if (!this_body->has_learned_skill("enhance attributes"))
+   {
+      write("You have not learned how to enhance your attributes with the Force.\n");
+   }
+   else if (this_body->has_skill_delay())
+   {
+      write("You are too busy to concentrate on enhancing your attributes.\n");
+   }
+   else if (this_body->has_special_skill_delay("enhance attribute"))
+   {
+      write("You need to wait " + format_time_left(this_body->has_special_skill_delay("enhance attribute")) + " before you can enhance your attributes again.\n");
+   }
+   else
+   {
+      this_body->simple_action("$N $vconcentrate on enhancing $p body with the Force...\n");
+
+      call_out("meditation_time", 6, living);
+
+      this_body->add_skill_delay(10);
+   }
+}
+
+void perform_enhance_attribute(string attribute)
+{
+   string stat_name = get_stat_name(attribute);
+   string stat_full_name = get_stat_full_name(attribute);
+   float force = this_body->query_for();
+   float level = this_body->query_guild_level("jedi");
+   int amount = ((level / 25) + 1) * 5;
+   int delay = 300 - (((floor(level / 10.0) * 2) + ((force * 8) / 10)));
+   int duration = ((floor(level / 5.0) * 2) + ((force * 16) / 10));
+   string output = "Your " + stat_full_name + " is enhanced.\n";
+
+   if (amount < 1) { amount = 1; }
+
+   body->other_action("$N $vare surrounded by a steady, yellow glow.\n");
+   body->add_hook(stat_name + "_enhatt", amount);
+
+   call_out("clear_enhance_attribute", duration, this_body, attribute, amount);
+
+   tell(body, output);
+
+   this_body->add_special_skill_delay("enhance attribute", delay);
+}
+
+void meditation_time(object body)
+{
+   int alignment = this_body->query_jedi_alignment();
+
+   if (!this_body) { return; }
+   else if (!body || (environment(this_body) != environment(body)))
+   {
+      write(body->short() + " left and your concentration was broken.\n");
+
+      return;
+   }
+
+   if (this_body->test_skill("healing", alignment * (alignment < 0 ? 30 : 8)))
+   {
+      perform_enhance_attribute(body);
+   }
+   else
+   {
+      this_body->simple_action("$N $vlose focus.\n");
+      this_body->stun(2);
+   }
+}
+
+void clear_enhance_attribute(string attribute, int amount)
+{
+   if (!this_body) { return; }
+
+   this_body->remove_hook(attribute + "_enhatt", amount);
+
+   this_body->refresh_stats();
+
+   this_body->other_action("The yellow glow around $N fades away.\n");
+
+   tell(this_body, "%^BOLD%^Your healing is no longer accelerated.%^RESET%^\n");
+}
+
+string format_time_left(int time)
+{
+   string output = "";
+
+   if (time > 59)
+   {
+      if ((time / 60) > 0) { output += (time / 60) + " minute" + ((time / 60) != 1 ? "s" : "") + ", "; }
+   }
+
+   output += (time % 60) + " second" + ((time % 60) != 1 ? "s" : "");
+
+   return output;
+}
+
+string get_stat_name(string stat)
+{
+   switch(lower_case(stat))
+   {
+      case "strength":
+      case "str":
+         return "str";
+      case "constitution":
+      case "con":
+         return "con";
+      case "agility":
+      case "agi":
+         return "agi";
+      case "dexterity":
+      case "dex":
+         return "dex";
+      case "perception":
+      case "per":
+         return "per";
+      case "intelligence":
+      case "int":
+         return "int";
+      case "charisma":
+      case "cha":
+         return "cha";
+      case "luck":
+      case "luc":
+         return "luc";
+      case "force":
+      case "for":
+         return "for";
+   }
+
+   return 0;
+}
+
+string get_stat_full_name(string stat)
+{
+   switch(lower_case(stat))
+   {
+      case "strength":
+      case "str":
+         return "strength";
+      case "constitution":
+      case "con":
+         return "constitution";
+      case "agility":
+      case "agi":
+         return "agility";
+      case "dexterity":
+      case "dex":
+         return "dexterity";
+      case "perception":
+      case "per":
+         return "perception";
+      case "intelligence":
+      case "int":
+         return "intelligence";
+      case "charisma":
+      case "cha":
+         return "charisma";
+      case "luck":
+      case "luc":
+         return "luck";
+      case "force":
+      case "for":
+         return "force";
+   }
+
+   return 0;
+}
+
+void create()
+{
+   add_rules( ({ "WRD" }) );
+}

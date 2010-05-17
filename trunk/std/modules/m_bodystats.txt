@@ -16,15 +16,15 @@ private int stat_cha; // Charisma
 private int stat_luc; // Luck
 private int stat_for; // Force
 
-private int cur_str;
-private int cur_con;
-private int cur_agi;
-private int cur_dex;
-private int cur_per;
-private int cur_int;
-private int cur_cha;
-private int cur_luc;
-private int cur_for;
+private nosave int cur_str;
+private nosave int cur_con;
+private nosave int cur_agi;
+private nosave int cur_dex;
+private nosave int cur_per;
+private nosave int cur_int;
+private nosave int cur_cha;
+private nosave int cur_luc;
+private nosave int cur_for;
 
 private int points_remaining; // Used for character creation
 
@@ -214,22 +214,21 @@ void refresh_stats()
    int adj_str, adj_con, adj_agi, adj_dex, adj_per, adj_int, adj_cha, adj_luc, adj_for;
    int limb_health;
 
-   cur_str = stat_str + (adj_str = call_hooks("str_bonus", HOOK_SUM));
-   cur_con = stat_con + (adj_con = call_hooks("con_bonus", HOOK_SUM));
-   cur_agi = stat_agi + (adj_agi = call_hooks("agi_bonus", HOOK_SUM));
-   cur_dex = stat_dex + (adj_dex = call_hooks("dex_bonus", HOOK_SUM));
-   cur_per = stat_per + (adj_per = call_hooks("per_bonus", HOOK_SUM));
-   cur_int = stat_int + (adj_int = call_hooks("int_bonus", HOOK_SUM));
-   cur_cha = stat_cha + (adj_cha = call_hooks("cha_bonus", HOOK_SUM));
-   cur_luc = stat_luc + (adj_luc = call_hooks("luc_bonus", HOOK_SUM));
-   cur_for = stat_for + (adj_for = call_hooks("for_bonus", HOOK_SUM));
+   cur_str = stat_str + (adj_str = call_hooks("str_bonus", HOOK_SUM) + call_hooks("str_enhatt", HOOK_SUM));
+   cur_con = stat_con + (adj_con = call_hooks("con_bonus", HOOK_SUM) + call_hooks("con_enhatt", HOOK_SUM));
+   cur_agi = stat_agi + (adj_agi = call_hooks("agi_bonus", HOOK_SUM) + call_hooks("agi_enhatt", HOOK_SUM));
+   cur_dex = stat_dex + (adj_dex = call_hooks("dex_bonus", HOOK_SUM) + call_hooks("dex_enhatt", HOOK_SUM));
+   cur_per = stat_per + (adj_per = call_hooks("per_bonus", HOOK_SUM) + call_hooks("per_enhatt", HOOK_SUM));
+   cur_int = stat_int + (adj_int = call_hooks("int_bonus", HOOK_SUM) + call_hooks("int_enhatt", HOOK_SUM));
+   cur_cha = stat_cha + (adj_cha = call_hooks("cha_bonus", HOOK_SUM) + call_hooks("cha_enhatt", HOOK_SUM));
+   cur_luc = stat_luc + (adj_luc = call_hooks("luc_bonus", HOOK_SUM) + call_hooks("luc_enhatt", HOOK_SUM));
+   cur_for = stat_for + (adj_for = call_hooks("for_bonus", HOOK_SUM) + call_hooks("for_enhatt", HOOK_SUM));
 
 //   this_object()->set_max_capacity(cur_str * 3);
    this_object()->set_max_capacity(to_int(floor((cur_str + 100) * (1.25 * (cur_str / 100.0)))) + 50);
    this_object()->set_weapon_class(cur_str ? to_int(floor(cur_str / 3.3)) : 9);
    this_object()->set_armor_class(cur_con ? to_int(floor(cur_con / 4)) : 10);
    this_object()->set_to_hit_bonus(to_int(ceil(cur_agi / 2)) - 35);  // Unarmed to-hit penalty or bonus
-   this_object()->set_weapon_speed(random(cur_agi + 1) > 50 ? 2 : 1);  // One or two punches/kicks
 
    // Recalculate limb health
    limb_health = (this_object()->query_max_health() * (((cur_con / 3) + (cur_con * (cur_con / 300))) / (133.3 - (cur_con / 3)))) + (this_object()->query_max_health() / 3);

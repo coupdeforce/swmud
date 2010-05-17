@@ -1,0 +1,92 @@
+// Last edited by deforce on 06-06-2008
+inherit VERB_OB;
+
+void backstab(object body);
+
+void do_backstab_liv(object living)
+{
+   object this_body = this_body();
+
+   if (this_body->query_guild_level("assassin"))
+   {
+      if (!this_body->has_learned_skill("backstab"))
+      {
+         write("You have not learned how to backstab someone.\n");
+      }
+      else if (this_body->get_target())
+      {
+         write("You are unable to backstab when you're already in combat.\n");
+      }
+      else if (this_body->has_skill_delay())
+      {
+         write("You are too busy to concentrate on backstabbing someone.\n");
+      }
+      else
+      {
+         if (living == this_body)
+         {
+            write("You stab yourself in the back and will never forgive yourself.\n");
+         }
+         else
+         {
+            this_body->add_skill_delay(2);
+
+            if (this_body->test_skill("backstab", (this_body->query_guild_level("assassin") * 6)))
+            {
+               backstab(living);
+            }
+            else
+            {
+               int skill;
+
+               this_body->refresh_stats();
+
+               skill = ((50.0 / this_body->query_guild_level("assassin")) + (1000.0 / ((this_body->query_skill("backstab") + 1) * 10.0))) * (100.0 / this_body->query_agi()) * (100.0 / this_body->query_dex());
+
+               if (random(100) < skill)
+               {
+                  this_body->targetted_action("$N $vtry to stab $t and $vfail terribly, injuring $r in the process!\n", living);
+
+                  this_body->weaken_us(random(this_body->query_weapon()->query_weapon_class()) + 1);
+
+                  this_body->my_action("$O wonders what you were trying to do.", living);
+                  this_body->other_action("$O $vwonder what $N was trying to do.", living);
+               }
+               else
+               {
+                  this_body->targetted_action("$N $vtry to stab $t with $p $o2, and $vfail.\n", living, this_body->query_weapon());
+               }
+            }
+         }
+      }
+   }
+   else
+   {
+      write("Only assassins know how to backstab someone.\n");
+   }
+}
+
+void do_backstab()
+{
+   write("Backstab who?\n");
+}
+
+void backstab(object body)
+{
+   object this_body = this_body();
+   object weapon = this_body->query_weapon();
+   int rank = to_int(floor(this_body->query_skill("backstab") / 100.0));
+   int damage = to_int(floor(rank * ((random(3) + 1) / 10.0) * weapon->query_weapon_class()));
+   damage += weapon->query_weapon_class();
+
+   this_body->targetted_action(weapon->query_backstab_message() + "\n", body, weapon);
+
+   this_body->add_event(body, weapon, "torso", damage);
+
+   this_body->start_fight(body);
+}
+
+void create()
+{
+   add_rules( ({ "", "LIV" }) );
+}

@@ -1,0 +1,72 @@
+// Last edited by deforce on 12-03-2007
+inherit VERB_OB;
+
+void perform_healing(object body);
+
+void do_heal_liv(object living)
+{
+   if (this_body()->query_guild_level("jedi"))
+   {
+      if (this_body()->query_guild_level("assassin"))
+      {
+         write("You are too dedicated to the Dark side of the Force to use it for healing.\n");
+      }
+      else if (this_body()->has_skill_delay())
+      {
+         write("You are too busy to concentrate on healing.\n");
+      }
+      else
+      {
+         perform_healing(living);
+      }
+   }
+   else
+   {
+      write("Only Jedi know how to use the Force for healing.\n");
+   }
+}
+
+void do_heal()
+{
+   if (this_body()->query_guild_level("jedi"))
+   {
+      if (this_body()->query_guild_level("assassin"))
+      {
+         write("You are too dedicated to the Dark side of the Force to use it for healing.\n");
+      }
+      else
+      {
+         perform_healing(this_body());
+      }
+   }
+   else
+   {
+      write("Only Jedi know how to use the Force for healing.\n");
+   }
+}
+
+void perform_healing(object body)
+{
+   object this_body = this_body();
+   int force = this_body->query_for();
+   int level = this_body->query_guild_level("jedi");
+   int skill = this_body->query_skill("healing");
+   float modifier = (skill >= 800 ? 100 : (skill >= 200 ? 200 : 400));
+   int amount = ((force / 100.0) * (level / 50.0) * 50.0) + (force * (force / modifier));
+
+   if (body == this_body)
+   {
+      this_body->simple_action("$N can heal $r for " + amount + " hit points.\n", body);
+   }
+   else
+   {
+      this_body->targetted_action("$N can heal $t for " + amount + " hit points.\n", body);
+   }
+
+   this_body->add_skill_delay(8);
+}
+
+void create()
+{
+   add_rules( ({ "", "LIV" }) );
+}

@@ -1,0 +1,35 @@
+// Last edited by deforce on 11-20-2007
+// Add Guest Command for Admins
+// Vette 04-04-1997
+
+//:COMMAND
+// This command adds a guest to the guestlist for when the mud
+// does not allow new players
+// Syntax: addguest <name>
+
+#include <mudlib.h>
+#include <log.h>
+
+inherit CMD;
+
+#define USAGE "Usage: addguest <name>\n"
+
+private void main(string arg)
+{
+   if (!arg)
+   {
+      out(USAGE);
+
+      return;
+   }
+
+   if (!check_privilege(1))
+   {
+      out("You need to be an administrator in order to add guests.\n");
+
+      return;
+   }
+
+   GUEST_D->add_guest(arg);
+   write(capitalize(arg) + " added as a guest.\n");
+}

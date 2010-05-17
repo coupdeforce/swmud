@@ -1,0 +1,64 @@
+// Last modified by deforce on 12-08-2007
+
+#include <mudlib.h>
+#include <config.h>
+#include <classes.h>
+
+inherit CMD;
+inherit CLASS_SKILL;
+
+private void main(string arg)
+{
+   object body;
+   mapping skills;
+   string array lines = ({ });
+
+   if (wizardp(this_body()) && find_body(arg)) { body = find_body(arg); }
+   else { body = this_body(); }
+
+   skills = body->get_skills();
+
+   if (!sizeof(skills))
+   {
+      out("You have no skills.\n");
+
+      return;
+   }
+
+   foreach (string name in keys(skills))
+   {
+      string capname;
+      int skill_value;
+      mixed data = SKILL_D->query_skill(name);
+
+      if (!data) { capname = name + " (invalid)"; }
+      else
+      {
+         capname = data[0];
+      }
+
+      skill_value = body->query_skill(name);
+
+      if (skill_value > 0)
+      {
+         int rank = to_int(floor(skill_value / 100));
+         int to_next = skill_value - (rank * 100);
+         string output = sprintf("%-27s : %2i", capname[0..26], rank);
+
+         if (rank < 10) { output += sprintf("  %2i%%", to_next); }
+         else if (rank == 10) { output += "  ***"; }
+
+         lines += ({ output });
+      }
+   }
+
+   lines = sort_array(lines, 1);
+
+   outf("\n\n%-28s %5s\n", "Skill", "Rank");
+   out(repeat_string("-", 37) + "\n");
+
+   foreach (string line in lines)
+   {
+      out(line + "\n");
+   }
+}
