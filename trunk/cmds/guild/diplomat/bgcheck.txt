@@ -2,7 +2,6 @@
 inherit VERB_OB;
 
 void get_info(object body);
-string compare_values(int first, int second);
 
 void do_bgcheck_liv(object living)
 {
@@ -54,55 +53,131 @@ void do_bgcheck()
    write("Get information about what?\n");
 }
 
+string compare_basic(int first, int second)
+{
+   switch (to_int(((first + 1) / ((second + 1) * 1.0)) * 100))
+   {
+      case 0..90: return "worse";
+      case 91..110: return "about equal";
+      default: return "better";
+   }
+}
+
+string compare_advanced(int first, int second)
+{
+   switch (to_int(((first + 1) / ((second + 1) * 1.0)) * 100))
+   {
+      case 0..25: return "very insignificant";
+      case 26..40: return "somewhat insignificant";
+      case 41..60: return "much weaker";
+      case 61..80: return "somewhat weaker";
+      case 81..99: return "slightly weaker";
+      case 100: return "exactly equal";
+      case 101..120: return "slightly better";
+      case 121..140: return "somewhat better";
+      case 141..160: return "much greater";
+      case 161..175: return "superior";
+      default: return "far superior";
+   }
+
+   return "incomparable";
+}
+
 void get_info(object body)
 {
    object this_body = this_body();
-   string array stat_list = ({ "str", "con", "agi", "dex", "per", "int", "cha", "luc", "for" });
-   string array guild_list = ({ "assassin", "bounty hunter", "diplomat", "jedi", "mechanic", "mercenary", "merchant", "physician", "pilot", "slicer", "smuggler" });
-   int array stats = ({ });
-   int array stats_other = ({ });
    int array guilds = ({ });
    int array guilds_other = ({ });
+   int array stats = ({ });
+   int array stats_other = ({ });
    int health = this_body->query_max_health();
    int health_other = body->query_max_health();
+   int rank = to_int(floor(this_body->query_skill("bground_check") / 100.0));
    string output = "";
 
-   foreach (string stat in stat_list)
+   // Guilds
+   if (rank >= 3)
    {
-      stats += ({ call_other(this_body, "query_" + stat) });
-      stats_other += ({ call_other(body, "query_" + stat) });
+      string array guild_list = ({ "assassin", "bounty hunter", "diplomat", "jedi", "mechanic", "mercenary", "merchant", "physician", "pilot", "slicer", "smuggler" });
+
+      foreach (string guild in guild_list)
+      {
+         guilds += ({ call_other(this_body, "query_guild_level", guild) });
+         guilds_other += ({ call_other(body, "query_guild_level", guild) });
+      }
    }
 
-   foreach (string guild in guild_list)
+   // Stats
+   if (rank >= 4)
    {
-      guilds += ({ call_other(this_body, "query_guild_level", guild) });
-      guilds_other += ({ call_other(body, "query_guild_level", guild) });
+      string array stat_list = ({ "str", "con", "agi", "dex", "per", "int", "cha", "luc", "for" });
+
+      foreach (string stat in stat_list)
+      {
+         stats += ({ call_other(this_body, "query_" + stat) });
+         stats_other += ({ call_other(body, "query_" + stat) });
+      }
    }
 
    this_body->other_action("$N $vfind out some interesting information about " + body->short() + ".\n");
 
    output += "\nYou find out the following about " + body->short() + " in comparison to yourself:\n\n";
 
-   output += "Your vitality is " + compare_values(health, health_other)  + ".\n\n";
+   output += "Your vitality is " + compare_advanced(health, health_other)  + ".\n\n";
 
-   for (int count = 0; count < sizeof(guild_list); count++)
+   // Guilds
+   if (rank >= 3)
    {
-      output += "Your " + guild_list[count] + " is " + compare_values(guilds[count], guilds_other[count])  + ".\n";
+      string array guild_desc = ({ "lethality", "tracking skill", "political acumen", "strength in the Force", "engineering aptitude", "combat training", "business sense", "medical knowledge", "piloting ability", "technological proficiency", "capacity for clandestine dealings" });
+
+      if (rank < 10)
+      {
+         for (int count = 0; count < sizeof(guild_desc); count++)
+         {
+            output += "Your " + guild_desc[count] + " is " + compare_basic(guilds[count], guilds_other[count])  + ".\n";
+         }
+      }
+      else
+      {
+         for (int count = 0; count < sizeof(guild_desc); count++)
+         {
+            if (guilds_other[count] > 0)
+            {
+               output += "Your " + guild_desc[count] + " is " + compare_advanced(guilds[count], guilds_other[count])  + ".\n";
+            }
+         }
+      }
+
+      if (output[<2..<1] != "\n\n") { output += "\n"; }
    }
 
-   output += "\n";
-
-   for (int count = 0; count < sizeof(stat_list); count++)
+   // Stats
+   if (rank >= 4)
    {
-      output += "Your " + stat_list[count] + " is " + compare_values(stats[count], stats_other[count])  + ".\n";
+      string array stat_desc = ({ "strength", "constitution", "agility", "dexterity", "perception", "intelligence", "charisma", "fortune", "connection to the force" });
+
+      if (rank < 9)
+      {
+         for (int count = 0; count < sizeof(stat_desc); count++)
+         {
+            output += "Your " + stat_desc[count] + " is " + compare_basic(stats[count], stats_other[count])  + ".\n";
+         }
+      }
+      else
+      {
+         for (int count = 0; count < sizeof(stat_desc); count++)
+         {
+            if (stats_other[count] > 0)
+            {
+               output += "Your " + stat_desc[count] + " is " + compare_advanced(stats[count], stats_other[count])  + ".\n";
+            }
+         }
+      }
+
+      output += "\n";
    }
 
    write(output);
-}
-
-string compare_values(int first, int second)
-{
-   return (first > second ? "higher" : (first < second ? "lower" : "exactly equal"));
 }
 
 void create()

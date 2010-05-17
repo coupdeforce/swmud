@@ -1,64 +1,41 @@
-// Last edited by deforce on 10-01-2008
+// Last edited by deforce on 03-10-2010
 #include <mudlib.h>
 #include <setbit.h>
 
 inherit VERB_OB;
 
-int do_fill_it(object bottle, object fluid)
-{
-   if (!fluid ) {
-        fluid = present("fill_source", environment( this_body () ));
-        if (fluid) { fluid -> fill_up( bottle) ;
-                return 1;};
-
-        fluid = present("fluid", environment(this_body()))
-                    || present("fluid", this_body()); // This should never be!
-
-        if (!fluid) {
-            write("With what?\n");
-            return 1;}
-        };
-    write("(with " + fluid -> short() +")\n");
-    bottle ->fill_with( fluid ); //fluid_obj: check to see if it is in presence of source.
-    return 1;
-}
-
-// This function looks for an object with id ("<string>_source")
-// and calls the fill_up( ob ) function in that object.
-// To have a source of any <fluid>, add an id of <fluid>_source.
-//  Use the function fill_up( ob ) to move the fluid into ob.
-
-int source( object bottle, string fluid )
-{
-   object source;
-
-   source = present( fluid +"_source", environment( this_body()) );
-   if (!source ) {
-        write("You cannot fill "
-        + bottle -> the_short() +
-        " with " + fluid + ". \n");
-        return 1; };
-   return source -> fill_up( bottle );
-}
-
 void do_fill_obj(object ob)
 {
-    do_fill_it(ob, 0);
+   object source = present("syringe_bottle", this_body());
+
+   if (present(ob, this_body()) && source)
+   {
+      ob->fill_with(source);
+   }
+   else
+   {
+      write("\nFill " + ob->the_short() + " with what?\n");
+   }
 }
 
-void do_fill_obj_with_obj(object ob1, object ob2) {
-    do_fill_it(ob1, ob2);
+void do_fill_obj_with_obj(object ob1, object ob2)
+{
+   if (present(ob1, this_body()) && present(ob2, this_body()))
+   {
+      ob1->fill_with(ob2);
+   }
+   else
+   {
+      write("\nYou'll need to hold both " + ob1->the_short() + " and " + ob2->the_short() + " in order to fill " + ob1->the_short() + " with " + ob2->the_short() + ".\n");
+   }
 }
 
-void do_fill_obj_with_str(object ob1, string str ){
-  source( ob1, str );
-}
-
-void do_fill_obj_from_obj( object ob1, object ob2){
-  ob2 -> fill_up( ob1 );
+void do_fill()
+{
+   write("\nFill what with what?\n");
 }
 
 void create()
 {
-   add_rules ( ({ "OBJ",  "OBJ with OBJ" , "OBJ with STR" , "OBJ from OBJ" }) );
+   add_rules ( ({ "", "OBJ", "OBJ with OBJ" }) );
 }

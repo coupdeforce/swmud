@@ -1,8 +1,10 @@
-// Last modified by deforce on 11-20-2007
+// Last modified by deforce on 12-10-2007
 #include <mudlib.h>
 #include <channel.h>
 
 inherit CMD;
+
+#include <channel_associations.h>
 
 void main()
 {
@@ -45,7 +47,7 @@ void main()
                   ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
                   "team" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
             }
-            else if (this_body()->query_active_organization() == chan)
+            else if (channel_teams[this_body()->query_team()] == chan)
             {
                out(sprintf("%-14s %-13s %s\n", chan,
                   ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
@@ -60,7 +62,8 @@ void main()
                   ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
                   "guild" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
             }
-            else if (this_body()->query_active_organization() == chan)
+            else if ((this_body()->query_primary_guild() == chan)
+               || (channel_guilds[this_body()->query_primary_guild()] == chan))
             {
                out(sprintf("%-14s %-13s %s\n", chan,
                   ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
@@ -75,7 +78,23 @@ void main()
                   ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
                   "race" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
             }
-            else if (this_body()->query_active_organization() == chan)
+            else if ((this_body()->query_race() == chan)
+               || (channel_races[this_body()->query_race()] == chan))
+            {
+               out(sprintf("%-14s %-13s %s\n", chan,
+                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+                  ((flags & CHANNEL_PERMANENT) ? "permanent" : "temporary")));
+            }
+         }
+         else if (flags & CHANNEL_PK_ONLY)
+         {
+            if (wizardp(this_user()))
+            {
+               out(sprintf("%-14s %-13s %s\n", chan,
+                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+                  "pk" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+            }
+            else if (this_body()->is_player_killer())
             {
                out(sprintf("%-14s %-13s %s\n", chan,
                   ((member_array(chan, listening) > -1) ? "listening" : "blocking"),

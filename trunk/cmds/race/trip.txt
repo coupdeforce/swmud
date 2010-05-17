@@ -1,4 +1,4 @@
-// Last edited by deforce on 06-10-2008
+// Last edited by deforce on 07-09-2008
 // Twi'lek racial skill
 inherit VERB_OB;
 
@@ -38,7 +38,7 @@ void do_trip_liv(object living)
 
                // Perception check, if not in combat with an NPC
                // Did they notice you just tried to trip them?
-               if ((living != this_body->query_target()) && !living->is_body() && (random(living->query_per() + 1) > random(100)))
+               if ((living != this_body->query_target()) && !living->is_body() && (living->query_per() > random(100)))
                {
                   living->attacked_by(this_body, 1);
                }
@@ -87,16 +87,15 @@ void trip(object body)
    int damage = 0;
 
    // Chance to do damage
-   if ((((rank * 2) * (primary_level / 2)) / 6.25) > random(50))
+   if (rank > random(10))
    {
-      damage = to_int(floor(((random(rank + 1)) / 5.0) * (primary_level * 0.3)));
-      damage += random(11 + (primary_level * 0.6));
+      damage = random(floor((rank * 0.2) * primary_level)) + 1;
 
       this_body->add_event(body, this_body, body->query_random_armor_slot(), damage);
    }
 
-   // Stun for 1 round, or 2 rounds at rank 5
-   body->stun(2 + ((rank >= 5 ? 1 : 0) * 2));
+   // Stun for 1 round, and chance to stun for 2 rounds
+   body->stun(2 + (rank > random(10) ? 2 : 0));
 
    this_body->targetted_action("$N $vtrip $t with a clever maneuver" + (damage > 0 ? ", sending $t reeling" : "") + ".", body);
 

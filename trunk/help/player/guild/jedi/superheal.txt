@@ -1,11 +1,8 @@
- -= Superheal =-  (Jedi Guild Command)
+$$ see: jedi, light_jedi, heal, healaccel
+--=== Superheal (Jedi Guild Command) ===--
 
  Usage: superheal [living]
 
  The Jedi will attempt to superheal him or herself, or the specified living being.
 
  A Jedi who uses this will be drawn closer to the Light side of the Force.
-
- This command uses the Force Healing skill (healing), and is gained with its mastery.
-
- See also: jedi, light_jedi, healing, heal, healaccel

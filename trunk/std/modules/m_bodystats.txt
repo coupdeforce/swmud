@@ -16,15 +16,15 @@ private int stat_cha; // Charisma
 private int stat_luc; // Luck
 private int stat_for; // Force
 
-private nosave int cur_str;
-private nosave int cur_con;
-private nosave int cur_agi;
-private nosave int cur_dex;
-private nosave int cur_per;
-private nosave int cur_int;
-private nosave int cur_cha;
-private nosave int cur_luc;
-private nosave int cur_for;
+private nosave int cur_str = 40;
+private nosave int cur_con = 40;
+private nosave int cur_agi = 40;
+private nosave int cur_dex = 40;
+private nosave int cur_per = 40;
+private nosave int cur_int = 40;
+private nosave int cur_cha = 40;
+private nosave int cur_luc = 40;
+private nosave int cur_for = 40;
 
 private int points_remaining; // Used for character creation
 
@@ -214,21 +214,25 @@ void refresh_stats()
    int adj_str, adj_con, adj_agi, adj_dex, adj_per, adj_int, adj_cha, adj_luc, adj_for;
    int limb_health;
 
-   cur_str = stat_str + (adj_str = call_hooks("str_bonus", HOOK_SUM) + call_hooks("str_enhatt", HOOK_SUM));
-   cur_con = stat_con + (adj_con = call_hooks("con_bonus", HOOK_SUM) + call_hooks("con_enhatt", HOOK_SUM));
-   cur_agi = stat_agi + (adj_agi = call_hooks("agi_bonus", HOOK_SUM) + call_hooks("agi_enhatt", HOOK_SUM));
-   cur_dex = stat_dex + (adj_dex = call_hooks("dex_bonus", HOOK_SUM) + call_hooks("dex_enhatt", HOOK_SUM));
-   cur_per = stat_per + (adj_per = call_hooks("per_bonus", HOOK_SUM) + call_hooks("per_enhatt", HOOK_SUM));
-   cur_int = stat_int + (adj_int = call_hooks("int_bonus", HOOK_SUM) + call_hooks("int_enhatt", HOOK_SUM));
-   cur_cha = stat_cha + (adj_cha = call_hooks("cha_bonus", HOOK_SUM) + call_hooks("cha_enhatt", HOOK_SUM));
-   cur_luc = stat_luc + (adj_luc = call_hooks("luc_bonus", HOOK_SUM) + call_hooks("luc_enhatt", HOOK_SUM));
-   cur_for = stat_for + (adj_for = call_hooks("for_bonus", HOOK_SUM) + call_hooks("for_enhatt", HOOK_SUM));
+   cur_str = stat_str + (adj_str = call_hooks("str_bonus", HOOK_SUM));
+   cur_con = stat_con + (adj_con = call_hooks("con_bonus", HOOK_SUM));
+   cur_agi = stat_agi + (adj_agi = call_hooks("agi_bonus", HOOK_SUM));
+   cur_dex = stat_dex + (adj_dex = call_hooks("dex_bonus", HOOK_SUM));
+   cur_per = stat_per + (adj_per = call_hooks("per_bonus", HOOK_SUM));
+   cur_int = stat_int + (adj_int = call_hooks("int_bonus", HOOK_SUM));
+   cur_cha = stat_cha + (adj_cha = call_hooks("cha_bonus", HOOK_SUM));
+   cur_luc = stat_luc + (adj_luc = call_hooks("luc_bonus", HOOK_SUM));
+   cur_for = stat_for + (adj_for = call_hooks("for_bonus", HOOK_SUM));
 
 //   this_object()->set_max_capacity(cur_str * 3);
    this_object()->set_max_capacity(to_int(floor((cur_str + 100) * (1.25 * (cur_str / 100.0)))) + 50);
-   this_object()->set_weapon_class(cur_str ? to_int(floor(cur_str / 3.3)) : 9);
-   this_object()->set_armor_class(cur_con ? to_int(floor(cur_con / 4)) : 10);
-   this_object()->set_to_hit_bonus(to_int(ceil(cur_agi / 2)) - 35);  // Unarmed to-hit penalty or bonus
+
+//   Now handled with m_damage_source_body
+//   this_object()->set_weapon_class(6 + to_int(floor((this_object()->query_primary_level() / 10.0) + (pow(cur_str / 100.0, 2) * (this_object()->query_primary_level() / 2.0)))));
+//   this_object()->set_to_hit_bonus(to_int(ceil(cur_agi / 2)) - 35);  // Unarmed to-hit penalty or bonus
+
+//   Now handled with m_damage_sink_body
+//   this_object()->set_armor_class(to_int(floor(this_object()->query_primary_level() / 5) + floor((this_object()->query_primary_level() / 50) * (cur_con / 5))));
 
    // Recalculate limb health
    limb_health = (this_object()->query_max_health() * (((cur_con / 3) + (cur_con * (cur_con / 300))) / (133.3 - (cur_con / 3)))) + (this_object()->query_max_health() / 3);

@@ -1,19 +1,45 @@
-// Last edited by deforce on 12-03-2007
+// Last edited by deforce on 12-09-2007
 inherit VERB_OB;
 
-void zap_target(object body);
+int floor();
+int ceiling();
+void zap_target(object thing);
+void concentration(object thing);
+
+object this_body;
 
 void do_lightning_obj(object thing)
 {
-   if (this_body()->query_guild_level("jedi"))
+   this_body = this_body();
+
+   if (this_body->query_guild_level("jedi"))
    {
-      if (thing->is_adversary())
+      if (this_body->has_skill_delay())
       {
-         zap_target(thing);
+         write("You are too busy to concentrate on manipulating the Force.\n");
       }
       else
       {
-         write("That would be a waste of energy.\n");
+         if (thing->is_adversary())
+         {
+            if (thing != this_body)
+            {
+               int alignment = this_body->query_jedi_alignment();
+               int max_alignment = this_body->query_max_jedi_alignment();
+
+               this_body->adjust_jedi_alignment(alignment < 0 ? -5 : (max_alignment - 1));
+
+               concentration(thing);
+            }
+            else
+            {
+               write("That would be incredibly painful, and although maximum pain is the right idea, it would be much better to inflict that pain on something else.\n");
+            }
+         }
+         else
+         {
+            write("That would be a waste of energy.\n");
+         }
       }
    }
    else
@@ -22,26 +48,64 @@ void do_lightning_obj(object thing)
    }
 }
 
+void do_lightning()
+{
+   object target = this_body()->get_target();
+
+   if (target) { do_lightning_obj(target); }
+   else { write("Lightning what?\n"); }
+}
+
 void zap_target(object thing)
 {
-   object this_body = this_body();
-   int force = this_body->query_for();
-   int level = this_body->query_guild_level("jedi");
-   int skill = this_body->query_skill("healing");
-   float modifier = (skill >= 800 ? 100 : (skill >= 200 ? 200 : 400));
-   int amount = ((force / 100.0) * (level / 50.0) * 50.0) + (force * (force / modifier));
+   int floor = floor();
+   int ceiling = ceiling();
+   int amount = floor + random(ceiling - floor + 1);
 
-   if (body == this_body)
+   this_body->simple_action("$N can do lightning from " + floor + " to " + ceiling + ", and had a damage roll of " + amount + ".\n");
+   thipas_body->targetted_action("$N $vsend bolts of lightning from $p hands to $t!\n", thing);
+   this_body->start_fight(thing);
+   this_body->add_event(thing, this_body, choice(({ "head", "torso" })), amount);
+}
+
+int floor()
+{
+   float force = this_body->query_for();
+   float level = this_body->query_guild_level("jedi");
+   float skill = this_body->query_skill("lightning");
+   float level_mod = (skill >= 800 ? 1 : (skill >= 500 ? 2 : (skill >= 200 ? 3 : 4)));
+   int amount = ((level / level_mod) * (force / 100.0));
+
+   return (amount > 0 ? amount : 1);
+}
+
+int ceiling()
+{
+   float force = this_body->query_for();
+   float level = this_body->query_guild_level("jedi");
+   float skill = this_body->query_skill("lightning");
+   float level_mod = (skill >= 100 ? 50 : 25);
+   float force_mod = (skill >= 700 ? 100 : (skill >= 400 ? 200 : 400));
+   int amount = ((force / 100.0) * (level / 50.0) * level_mod) + (force * (force / force_mod));
+
+   return (amount > 0 ? amount : 1);
+}
+
+void concentration(object thing)
+{
+   if (this_body->test_skill("lightning", this_body->query_jedi_alignment() * -10))
    {
-      this_body->simple_action("$N can heal $r for " + amount + " hit points.\n", body);
+      zap_target(thing);
    }
    else
    {
-      this_body->targetted_action("$N can heal $t for " + amount + " hit points.\n", body);
+      this_body->simple_action("$N $vattempt to channel Force energy through $p arms and $vlose focus.\n");
    }
+
+   this_body->add_skill_delay(12);
 }
 
 void create()
 {
-   add_rules( ({ "OBJ" }) );
+   add_rules( ({ "", "OBJ" }) );
 }

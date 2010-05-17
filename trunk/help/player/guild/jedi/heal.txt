@@ -1,21 +1,8 @@
- -= Heal =-  (Jedi Guild Command)
+$$ see: jedi, light_jedi, healaccel, superheal
+--=== Force Healing (Jedi Guild Command) ===--
 
  Usage: heal [living]
 
  The Jedi will attempt to heal him or herself, or the specified living being.
 
  A Jedi who uses this will be drawn closer to the Light side of the Force.
-
- This command uses the Force Healing skill (healing), and gains the following abilities:
-
-    1 Heal Other's Wounds
-    2 Adept Heal
-    3 Cure Poison*
-    4 Cure Other's Poison*
-    5 Adept Cure*
-    8 Master Heal
-    9 Master Cure*
-
- * This is not yet coded.
-
- See also: jedi, light_jedi, healing, healaccel, superheal
