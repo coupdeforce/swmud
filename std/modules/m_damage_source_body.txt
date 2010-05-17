@@ -1,0 +1,135 @@
+// Last edited by deforce on 06-09-2008
+// Adversary's unarmed weapon
+
+inherit CLASS_EVENT_INFO;
+
+private nosave int damage_bonus;
+private nosave mapping combat_messages = ([]);
+
+int can_swing()
+{
+   return 1;
+}
+
+mixed adjust_my_result(mixed result)
+{
+   return result;
+}
+
+int query_to_hit_bonus(object target)
+{
+   return to_int(ceil(this_body()->query_agi() / 2)) - 35;  // Unarmed to-hit penalty or bonus
+}
+
+string array query_damage_type()
+{
+   return ({ "combat-unarmed" });
+}
+
+//:FUNCTION set_combat_messages
+// Set the set of combat messages which are used by default
+void set_combat_messages(string type)
+{
+   if (!(combat_messages = MESSAGES_D->get_messages(type)))
+   {
+      error("No messages of that type.\n");
+   }
+}
+
+//:FUNCTION query_combat_message
+// Returns the combat message for a given type
+mixed query_combat_message(string type)
+{
+   return combat_messages[type] || MESSAGES_D->get_messages(type);
+}
+
+mixed query_combat_messages()
+{
+   return combat_messages;MESSAGES_D->get_messages("combat-unarmed");
+}
+
+int is_weapon()
+{
+   return 1;
+}
+
+//:FUNCTION query_backstab_message
+// Returns the targetted_action displayed on a successful backstab with this weapon
+string query_backstab_message()
+{
+   return "$N $vdeliver a surprising blow to the back of $p1 neck!";
+}
+
+//:FUNCTION query_death_message
+// Returns the targetted_action for the death message when something is killed with this weapon
+string query_death_message()
+{
+   return "$N was killed by $N1 with $p1 bare hands at $o1.";
+}
+
+//:FUNCTION query_durability
+// Query the current durability of an object.  Higher is better.
+int query_durability()
+{
+   return 100;
+}
+
+//:FUNCTION query_max_durability
+// Query the current max durability of an object.  Higher is better.
+int query_max_durability()
+{
+   return 100;
+}
+
+//:FUNCTION query_chance_to_be_damaged
+// Query the probability for this to be damaged
+int query_chance_to_be_damaged()
+{
+   return 0;
+}
+
+//:FUNCTION set_damage_bonus
+// Set an overall modifier of weapon class on the object.  The bonus
+// does not get saved, so should only be used for temporary bonuses. (i.e. buffs)
+void set_damage_bonus(int bonus)
+{
+   damage_bonus = bonus;
+}
+
+void add_damage_bonus(int value)
+{
+   damage_bonus += value;
+}
+
+int query_damage_bonus()
+{
+   return damage_bonus;
+}
+
+int query_weapon_class()
+{
+   object this_ob = this_object();
+
+//   return 6 + to_int(floor((this_ob->query_primary_level() / 10.0) + (pow(this_ob->query_str() / 100.0, 2) * (this_ob->query_primary_level() / 2.0))));
+   return to_int(floor(this_ob->query_primary_level() / 5.0) + floor(this_ob->query_str() / 5.0) + (floor(this_ob->query_skill("unarmed") / 100.0) * 2));
+}
+
+int query_max_weapon_class()
+{
+   return query_weapon_class();
+}
+
+int query_weapon_speed()
+{
+   return 1;
+}
+
+string query_skill_used()
+{
+   return "unarmed";
+}
+
+class event_info source_modify_event(class event_info evt)
+{
+   return evt;
+}

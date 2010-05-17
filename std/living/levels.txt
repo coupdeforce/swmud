@@ -1,0 +1,240 @@
+// Last edited by deforce on 12-22-2007
+void remove_guild(string guild_name);
+
+mapping guild_levels = ([ ]);
+string primary_guild = "";
+int primary_level = 0;
+
+//:FUNCTION query_primary_guild
+//Returns string with primary guild (ex., "jedi", "diplomat")
+string query_primary_guild()
+{
+   return primary_guild;
+}
+
+//:FUNCTION set_primary_guild
+//Parameter is guild name (ex., "jedi", "diplomat")
+void set_primary_guild(string value)
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set " + this_object()->short() + "'s primary guild from " + primary_guild + " to " + value + ".\n");
+   }
+*/
+
+   if (strlen(value))
+   {
+      value = lower_case(value);
+      primary_guild = value;
+      primary_level = guild_levels[value];
+   }
+}
+
+//:FUNCTION query_primary_level
+//Returns primary level (ex., 1, 50)
+int query_primary_level()
+{
+   return primary_level;
+}
+
+//:FUNCTION set_primary_level
+//Parameter is from 0 to 50
+void set_primary_level(int value)
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set " + this_object()->short() + "'s primary level from " + primary_level + " to " + value + ".\n");
+   }
+*/
+
+   if ((value >= 0) && (value <= 50))
+   {
+      primary_level = value;
+
+      if ((value > 0) && strlen(primary_guild) && guild_levels[primary_guild])
+      {
+         guild_levels[primary_guild] = value;
+      }
+      else if ((value < 1) && strlen(primary_guild) && guild_levels[primary_guild])
+      {
+         foreach (string guild_name in keys(guild_levels))
+         {
+            remove_guild(guild_name);
+         }
+      }
+   }
+}
+
+//:FUNCTION query_guild_names
+//Returns array of all guild names
+string array query_guild_names()
+{
+   return keys(guild_levels);
+}
+
+//:FUNCTION query_guild_levels
+//Returns array of all guild levels
+int array query_guild_levels()
+{
+   return values(guild_levels);
+}
+
+//:FUNCTION query_guilds
+//Returns mapping of all guild names and levels
+mapping query_guilds()
+{
+   return guild_levels;
+}
+
+//:FUNCTION query_guild_level
+//Returns guild level (ex., 1, 50) with guild name as parameter
+int query_guild_level(string guild_name)
+{
+   if (guild_levels[guild_name])
+   {
+      return guild_levels[guild_name];
+   }
+
+   return 0;
+}
+
+//:FUNCTION set_guild_level
+//Parameters are guild name, guild level
+void set_guild_level(string guild_name, int guild_level)
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to set " + this_object()->short() + "'s " + guild_name + " level from " + guild_levels[guild_name] + " to " + guild_level + ".\n");
+   }
+*/
+
+   if (strlen(guild_name) && (guild_level > 0) && (guild_level <= 50))
+   {
+      guild_name = lower_case(guild_name);
+      guild_levels[guild_name] = guild_level;
+
+      if (guild_name == primary_guild)
+      {
+         primary_level = guild_level;
+      }
+
+      if (this_object()->is_body())
+      {
+         string guild_path = "/cmds/guild/" + replace_string(guild_name, " ", "_");
+         object shell = this_object()->query_shell_ob();
+
+         if (member_array(guild_path, shell->query_path()) == -1)
+         {
+            shell->set_variable("path", shell->query_path() + ({ guild_path }));
+         }
+      }
+   }
+}
+
+//:FUNCTION can_advance_guild_level
+//Parameter is guild name
+//Returns 1 for yes and 0 for no
+int can_advance_guild_level(string guild_name)
+{
+   if (!strlen(guild_name)) { return 0; }
+   else if ((primary_level > 0) && (primary_level == guild_levels[guild_name])) { return 0; }
+   else if ((member_array(guild_name, keys(guild_levels)) == -1) && (sizeof(guild_levels) == 3))
+   {
+      int level_count = 0;
+
+      foreach (string guild in keys(guild_levels))
+      {
+         level_count += guild_levels[guild];
+      }
+
+      if (level_count < 80) { return 0; }
+   }
+   else if (sizeof(guild_levels) == 4) { return 0; }
+
+   return 1;
+}
+
+//:FUNCTION advance_guild_level
+//Parameter is guild name
+void advance_guild_level(string guild_name)
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to advance " + this_object()->short() + "'s level in " + guild_name + " from " + guild_levels[guild_name] + " to " + (guild_levels[guild_name] + 1) + ".\n");
+   }
+*/
+
+   if (strlen(guild_name))
+   {
+      guild_name = lower_case(guild_name);
+
+      if (guild_levels[guild_name])
+      {
+         guild_levels[guild_name] += 1;
+      }
+      else
+      {
+         guild_levels[guild_name] = 1;
+
+         if (this_object()->is_body())
+         {
+            string guild_path = "/cmds/guild/" + replace_string(guild_name, " ", "_");
+            object shell = this_object()->query_shell_ob();
+
+            shell->set_variable("path", shell->query_path() + ({ guild_path }));
+         }
+      }
+
+      if (primary_guild == guild_name)
+      {
+         primary_level = guild_levels[guild_name];
+         
+      }
+   }
+}
+
+//:FUNCTION remove_guild
+//Parameter is guild name
+void remove_guild(string guild_name)
+{
+/*
+   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
+   {
+      error("Invalid attempt to remove " + this_object()->short() + "'s guild membership in " + guild_name + ".\n");
+   }
+*/
+
+   if (strlen(guild_name))
+   {
+      guild_name = lower_case(guild_name);
+      map_delete(guild_levels, guild_name);
+
+      if (primary_guild == guild_name)
+      {
+         primary_guild = "";
+         primary_level = 0;
+         
+      }
+
+      foreach (string secondary_guild in keys(guild_levels))
+      {
+         if (guild_levels[secondary_guild] > primary_level)
+         {
+            primary_guild = secondary_guild;
+            primary_level = guild_levels[secondary_guild];
+         }
+      }
+
+      if (this_object()->is_body())
+      {
+         string guild_path = "/cmds/guild/" + replace_string(guild_name, " ", "_");
+         object shell = this_object()->query_shell_ob();
+
+         shell->set_variable("path", shell->query_path() - ({ guild_path }));
+      }
+   }
+}
