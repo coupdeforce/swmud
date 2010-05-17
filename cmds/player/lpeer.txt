@@ -1,0 +1,57 @@
+// Last modified by deforce on 11-14-2007
+#include <mudlib.h>
+inherit CMD;
+inherit M_EXIT;
+
+private mapping translations = ([ "n" : "north", "s" : "south", "e" : "east", "w" : "west", "ne" : "northeast", "nw" : "northwest", "se" : "southeast", "sw" : "southwest", "u" : "up", "d" : "down" ]);
+
+private void main(string direction)
+{
+   if (direction)
+   {
+      object room;
+      object dir_room;
+
+      if (translations[direction]) { direction = translations[direction]; }
+
+      room = environment(this_body());
+      dir_room = room->query_exit_destination(direction);
+
+      if (dir_room && ((member_array(direction, environment(this_body())->query_hidden_exits()) == -1) || wizardp(this_body())))
+      {
+         string exits = dir_room->show_exits();
+         int room_count = 1;
+
+//         out("You look " + direction + " and see:\n\n");
+
+         out("%^ROOM_SHORT%^" + dir_room->short() + "%^RESET%^\n");
+
+         if (exits) { out("Exits: %^ROOM_EXIT%^" + exits + "%^RESET%^"); }
+         else { out("No exits."); }
+
+         out("\n" + dir_room->show_objects());
+
+         while (strlen(exits) && (wizardp(this_user()) || (room_count < 5)))
+         {
+            dir_room = dir_room->query_exit_destination(direction);
+
+            if (dir_room && ((member_array(direction, environment(this_body())->query_hidden_exits()) == -1) || wizardp(this_body())))
+            {
+               exits = dir_room->show_exits();
+
+               out("\n%^ROOM_SHORT%^" + dir_room->short() + "%^RESET%^\n");
+
+               if (exits) { out("Exits: %^ROOM_EXIT%^" + exits + "%^RESET%^"); }
+               else { out("No exits."); }
+
+               out("\n" + dir_room->show_objects());
+            }
+            else { exits = ""; }
+
+            room_count++;
+         }
+      }
+      else { out("You don't see anything in that direction.\n"); }
+   }
+   else { out("Usage: lpeer <direction>\n"); }
+}

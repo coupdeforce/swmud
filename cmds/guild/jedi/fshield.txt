@@ -1,0 +1,122 @@
+// Last edited by deforce on 07-12-2008
+#include <hooks.h>
+
+inherit CMD; 
+inherit M_EXIT;
+
+int get_reduction();
+int get_duration();
+string format_time_left(int time);
+void concentration();
+void clear_force_shield(object body, int amount);
+
+void main(string arg)
+{
+   object this_body = this_body();
+
+   if (this_body->query_guild_level("jedi"))
+   {
+      if (this_body->query_guild_level("assassin"))
+      {
+         write("You are too dedicated to the Dark side of the Force to use it for defense.\n");
+      }
+      else if (!this_body->has_learned_skill("force shield"))
+      {
+         out("You have not learned how to create a Force shield.\n");
+      }
+      else if (this_body->has_blocked_skill("force shield"))
+      {
+         out("Your ability to use this command has been disabled.\n");
+      }
+      else if (this_body->has_skill_delay())
+      {
+         out("You are too busy to concentrate on manipulating the Force.\n");
+      }
+      else if (this_body->has_special_skill_delay("force shield"))
+      {
+         write("You need to wait " + format_time_left(this_body->has_special_skill_delay("force shield")) + " before you can create another Force shield.\n");
+      }
+      else
+      {
+         this_body->adjust_jedi_alignment(2);
+         this_body->add_skill_delay(8);
+
+         concentration();
+      }
+   }
+   else
+   {
+      out("Only Jedi know how to manipulate the Force.\n");
+   }
+}
+
+string format_time_left(int time)
+{
+   string output = "";
+
+   if (time > 59)
+   {
+      if ((time / 60) > 0) { output += (time / 60) + " minute" + ((time / 60) != 1 ? "s" : "") + ", "; }
+   }
+
+   output += (time % 60) + " second" + ((time % 60) != 1 ? "s" : "");
+
+   return output;
+}
+
+int get_reduction()
+{
+   object this_body = this_body();
+   float force = this_body->query_for();
+   float level = this_body->query_guild_level("jedi");
+   int rank = this_body->query_skill("force_shield") / 100;
+   int amount = 5 + floor((level / 50.0) * (force / 100.0) * (rank * 9.0));
+
+   return amount;
+}
+
+int get_duration()
+{
+   object this_body = this_body();
+   float force = this_body->query_for();
+   float level = this_body->query_guild_level("jedi");
+   int rank = this_body->query_skill("force_shield") / 100;
+   int amount = 2 + (floor((level / 50.0) * (force / 100.0) * (rank * 4.0)) * 2);
+
+   return amount;
+}
+
+void concentration(object room)
+{
+   object this_body = this_body();
+   int alignment = this_body->query_jedi_alignment();
+   int level = this_body->query_guild_level("jedi");
+
+   if (this_body->test_skill("force_shield", (alignment * (alignment < 0 ? 50 : 4))))
+   {
+      int amount = get_reduction();
+
+      this_body->add_hook("force_shield", amount);
+
+      call_out("clear_force_shield", get_duration(), this_body, amount);
+
+      this_body->add_special_skill_delay("force shield", (240 - ((level + (level / 5)) * 2)));
+
+      this_body->simple_action("$N $vsurround $r with a shield of the Force.\n");
+   }
+   else
+   {
+      this_body->simple_action("$N $vlose focus.\n");
+   }
+}
+
+void clear_force_shield(object body, int amount)
+{
+   if (!body) { return; }
+
+   body->remove_hook("force_shield", amount);
+
+   body->other_action("The Force shield surrounding $N dissipates.\n");
+
+   tell(body, "%^BOLD%^Your Force shield dissipates.%^RESET%^\n");
+}

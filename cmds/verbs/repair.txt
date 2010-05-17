@@ -1,0 +1,38 @@
+inherit VERB_OB;
+
+void do_repair_obj(object thing)
+{
+   thing->do_repair();
+}
+
+void do_repair_str(string thing)
+{
+   object target;
+
+   if (target = get_object(thing))
+   {
+      target->do_repair();
+   }
+   else
+   {
+      foreach (object item in all_inventory(environment(this_body())))
+      {
+         if (item->id(thing))
+         {
+            item->do_repair();
+
+            return;
+         }
+      }
+   }
+}
+
+void do_repair()
+{
+   write("What do you want to repair?\n");
+}
+
+void create()
+{
+   add_rules( ({ "", "STR", "OBJ" }) );
+}

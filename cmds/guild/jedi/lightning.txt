@@ -1,0 +1,47 @@
+// Last edited by deforce on 12-03-2007
+inherit VERB_OB;
+
+void zap_target(object body);
+
+void do_lightning_obj(object thing)
+{
+   if (this_body()->query_guild_level("jedi"))
+   {
+      if (thing->is_adversary())
+      {
+         zap_target(thing);
+      }
+      else
+      {
+         write("That would be a waste of energy.\n");
+      }
+   }
+   else
+   {
+      write("Only Jedi know how to manipulate the Force.\n");
+   }
+}
+
+void zap_target(object thing)
+{
+   object this_body = this_body();
+   int force = this_body->query_for();
+   int level = this_body->query_guild_level("jedi");
+   int skill = this_body->query_skill("healing");
+   float modifier = (skill >= 800 ? 100 : (skill >= 200 ? 200 : 400));
+   int amount = ((force / 100.0) * (level / 50.0) * 50.0) + (force * (force / modifier));
+
+   if (body == this_body)
+   {
+      this_body->simple_action("$N can heal $r for " + amount + " hit points.\n", body);
+   }
+   else
+   {
+      this_body->targetted_action("$N can heal $t for " + amount + " hit points.\n", body);
+   }
+}
+
+void create()
+{
+   add_rules( ({ "OBJ" }) );
+}

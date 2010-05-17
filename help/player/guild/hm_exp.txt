@@ -1,0 +1,41 @@
+$$ see: exp, expcheck, quaternary
+--=== High Mortal Experience (Guild Help) ===--
+
+The following are the amounts of experience necessary to obtain each level.
+These are the amounts of spent experience, and are non-cumulative.
+Primary Jedi will spend secondary experience for both high mortal guilds.
+Refer to help file on exp for levels below 21.
+It is necessary to complete a rite of passage in a guild to advance beyond 20.
+
+ Level   Primary          Secondary        Jedi
+
+ 21       362900           725800          1088700
+ 22       407500           815000          1222500
+ 23       455000           910000          1365000
+ 24       505400          1010800          1516200
+ 25       558800          1117600          1676400
+ 26       615200          1230400          1845600
+ 27       674700          1349400          2024100
+ 28       737300          1474600          2211900
+ 29       803100          1606200          2409300
+ 30       872100          1744200          2616300
+ 31       944400          1888800
+ 32      1020000          2040000
+ 33      1098900          2197800
+ 34      1181200          2362400
+ 35      1266900          2533800
+ 36      1356100          2712200
+ 37      1448800          2897600
+ 38      1545100          3090200
+ 39      1645000          3290000
+ 40      1748600          3497200
+ 41      1855900          3711800
+ 42      1966900          3933800
+ 43      2081700          4163400
+ 44      2200300          4400600
+ 45      2322800          4645600
+ 46      2449200          4898400
+ 47      2579600          5159200
+ 48      2714000          5428000
+ 49      2852500          5705000
+ 50      3000000          6000000

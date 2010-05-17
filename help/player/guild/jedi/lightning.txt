@@ -1,0 +1,21 @@
+ -= Lightning =-  (Jedi Guild Command)
+
+ Usage: lightning [target] [room exit]
+
+ The Jedi will attempt to channel lightning from their arms to the current target or a specified target.
+
+ A Jedi who uses this will be drawn closer to the Dark side of the Force.
+
+ This command uses the Force Lightning skill (lightning), and gains the following abilities:
+
+    1  Focus
+    2  Concentration
+    3  Chain Lightning
+    4  Adept Focus
+    5  Adept Concentration
+    6  Ranged Lightning
+    7  Master Focus
+    8  Master Concentration
+    9  Divergent Lightning
+
+ See also: jedi, dark_jedi, lightning, fstorm

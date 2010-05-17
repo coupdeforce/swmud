@@ -1,0 +1,95 @@
+// Last modified by deforce on 11-20-2007
+#include <mudlib.h>
+#include <channel.h>
+
+inherit CMD;
+
+void main()
+{
+   string array channels = sort_array(CHANNEL_D->query_channels(), 1);
+
+   if (sizeof(channels))
+   {
+      string array listening = this_user()->query_channel_list();
+
+      out("\n\n" + sprintf("%-14s %-13s %s\n", "Name", "Status", "Availability"));
+      out(repeat_string("-", 47) + "\n");
+
+      foreach (string chan in channels)
+      {
+         int flags = CHANNEL_D->query_flags(chan);
+
+         if (flags & CHANNEL_ADMIN_ONLY)
+         {
+            if (adminp(this_user()))
+            {
+               out(sprintf("%-14s %-13s %s\n", chan,
+                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+                  "admin" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+            }
+         }
+         else if (flags & CHANNEL_WIZ_ONLY)
+         {
+            if (wizardp(this_user()))
+            {
+               out(sprintf("%-14s %-13s %s\n", chan,
+                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+                  "wizard" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+            }
+         }
+         else if (flags & CHANNEL_TEAM_ONLY)
+         {
+            if (wizardp(this_user()))
+            {
+               out(sprintf("%-14s %-13s %s\n", chan,
+                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+                  "team" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+            }
+            else if (this_body()->query_active_organization() == chan)
+            {
+               out(sprintf("%-14s %-13s %s\n", chan,
+                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+                  ((flags & CHANNEL_PERMANENT) ? "permanent" : "temporary")));
+            }
+         }
+         else if (flags & CHANNEL_GUILD_ONLY)
+         {
+            if (wizardp(this_user()))
+            {
+               out(sprintf("%-14s %-13s %s\n", chan,
+                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+                  "guild" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+            }
+            else if (this_body()->query_active_organization() == chan)
+            {
+               out(sprintf("%-14s %-13s %s\n", chan,
+                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+                  ((flags & CHANNEL_PERMANENT) ? "permanent" : "temporary")));
+            }
+         }
+         else if (flags & CHANNEL_RACE_ONLY)
+         {
+            if (wizardp(this_user()))
+            {
+               out(sprintf("%-14s %-13s %s\n", chan,
+                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+                  "race" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+            }
+            else if (this_body()->query_active_organization() == chan)
+            {
+               out(sprintf("%-14s %-13s %s\n", chan,
+                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+                  ((flags & CHANNEL_PERMANENT) ? "permanent" : "temporary")));
+            }
+         }
+         else
+         {
+            out(sprintf("%-14s %-13s %s\n", chan,
+               ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
+               ((flags & CHANNEL_PERMANENT) ? "permanent" : "temporary")));
+         }
+      }
+
+      out("\n");
+   }
+}

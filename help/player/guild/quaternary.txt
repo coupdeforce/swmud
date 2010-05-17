@@ -1,0 +1,22 @@
+$$ see: expcheck, exp, hm_exp
+--=== Quaternary Experience (Guild Help) ===--
+
+Players who have obtained at least levels 30/30/20 may advance another guild
+up to level 10.  Advancing the first level also requires one million credits.
+Dropping your primary level or high mortal secondary guild below 30 will
+result in your loss of the guild.
+The following are the amounts of experience necessary to obtain each level.
+These are the amounts of spent experience, and are non-cumulative.
+
+ Level   Quaternary       Jedi Quaternary
+
+  1         5000             5000
+  2        15000            22500
+  3        30000            45000
+  4        60000            90000
+  5        81000           121500
+  6       123000           184500
+  7       187000           280500
+  8       273000           409500
+  9       382000           573000
+ 10       514000           771000

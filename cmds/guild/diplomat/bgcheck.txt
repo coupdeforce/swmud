@@ -1,0 +1,111 @@
+// Last edited by deforce on 06-04-2008
+inherit VERB_OB;
+
+void get_info(object body);
+string compare_values(int first, int second);
+
+void do_bgcheck_liv(object living)
+{
+   object this_body = this_body();
+
+   if (this_body->query_guild_level("diplomat"))
+   {
+      if (!this_body->has_learned_skill("background checking"))
+      {
+         write("You have not learned how to check out someone's background.\n");
+      }
+      else if (this_body->get_target())
+      {
+         write("You are unable to get information while in combat.\n");
+      }
+      else if (this_body->has_skill_delay())
+      {
+         write("You are too busy to conduct a background check.\n");
+      }
+      else
+      {
+         if (living == this_body)
+         {
+            write("You find out that your mother was a bantha.\n");
+         }
+         else
+         {
+            this_body->add_skill_delay(4);
+
+            if (this_body->test_skill("bground_check", 250 + (this_body->query_guild_level("diplomat") * 5)))
+            {
+               get_info(living);
+            }
+            else
+            {
+               this_body->targetted_action("$N $vtry to get some information about $t and $vfail.\n", living);
+            }
+         }
+      }
+   }
+   else
+   {
+      write("Only diplomats know how to check out someone's background.\n");
+   }
+}
+
+void do_bgcheck()
+{
+   write("Get information about what?\n");
+}
+
+void get_info(object body)
+{
+   object this_body = this_body();
+   string array stat_list = ({ "str", "con", "agi", "dex", "per", "int", "cha", "luc", "for" });
+   string array guild_list = ({ "assassin", "bounty hunter", "diplomat", "jedi", "mechanic", "mercenary", "merchant", "physician", "pilot", "slicer", "smuggler" });
+   int array stats = ({ });
+   int array stats_other = ({ });
+   int array guilds = ({ });
+   int array guilds_other = ({ });
+   int health = this_body->query_max_health();
+   int health_other = body->query_max_health();
+   string output = "";
+
+   foreach (string stat in stat_list)
+   {
+      stats += ({ call_other(this_body, "query_" + stat) });
+      stats_other += ({ call_other(body, "query_" + stat) });
+   }
+
+   foreach (string guild in guild_list)
+   {
+      guilds += ({ call_other(this_body, "query_guild_level", guild) });
+      guilds_other += ({ call_other(body, "query_guild_level", guild) });
+   }
+
+   this_body->other_action("$N $vfind out some interesting information about " + body->short() + ".\n");
+
+   output += "\nYou find out the following about " + body->short() + " in comparison to yourself:\n\n";
+
+   output += "Your vitality is " + compare_values(health, health_other)  + ".\n\n";
+
+   for (int count = 0; count < sizeof(guild_list); count++)
+   {
+      output += "Your " + guild_list[count] + " is " + compare_values(guilds[count], guilds_other[count])  + ".\n";
+   }
+
+   output += "\n";
+
+   for (int count = 0; count < sizeof(stat_list); count++)
+   {
+      output += "Your " + stat_list[count] + " is " + compare_values(stats[count], stats_other[count])  + ".\n";
+   }
+
+   write(output);
+}
+
+string compare_values(int first, int second)
+{
+   return (first > second ? "higher" : (first < second ? "lower" : "exactly equal"));
+}
+
+void create()
+{
+   add_rules( ({ "", "LIV" }) );
+}
