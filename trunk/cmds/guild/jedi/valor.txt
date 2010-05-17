@@ -1,18 +1,22 @@
-// Last edited by deforce on 07-09-2008
-#include <hooks.h>
-
-inherit VERB_OB;
+// Last edited by deforce on 07-12-2008
+inherit CMD;
 
 void perform_enhance_attribute(string attribute);
 void meditation_time(string attribute);
-void clear_enhance_attribute(object body, string attribute, int amount);
 string format_time_left(int time);
 string get_stat_name(string stat);
 string get_stat_full_name(string stat);
 
-void do_enhatt_wrd(string attribute)
+void main(string attribute)
 {
    object this_body = this_body();
+
+   if (!attribute)
+   {
+      write("Enhance which attribute?\n");
+
+      return;
+   }
 
    if (!this_body->query_guild_level("jedi"))
    {
@@ -50,11 +54,6 @@ void do_enhatt_wrd(string attribute)
    }
 }
 
-void do_enhatt()
-{
-   write("Enhance which attribute?\n");
-}
-
 void perform_enhance_attribute(string attribute)
 {
    object this_body = this_body();
@@ -68,13 +67,8 @@ void perform_enhance_attribute(string attribute)
 
    if (amount < 1) { amount = 1; }
 
-   this_body->add_hook(stat_name + "_enhatt", amount);
-   this_body->refresh_stats();
-   this_body->other_action("$N $vare surrounded by a steady, yellow glow.\n");
-
-   call_out("clear_enhance_attribute", duration, this_body, stat_name, amount);
-
-   tell(this_body, "You feel your " + get_stat_full_name(attribute) + " become greater.\n");
+   load_object("/d/buffs/enhatt");
+   this_body->add_buff(new("/d/buffs/enhatt", attribute, amount, duration));
 
    this_body->add_special_skill_delay("enhance attribute", delay);
 }
@@ -99,17 +93,6 @@ void meditation_time(string attribute)
          this_body->stun(2);
       }
    }
-}
-
-void clear_enhance_attribute(object body, string attribute, int amount)
-{
-   if (!body) { return; }
-
-   body->remove_hook(attribute + "_enhatt", amount);
-   body->refresh_stats();
-   body->other_action("The yellow glow around $N fades away.\n");
-
-   tell(body, "%^BOLD%^Your " + get_stat_full_name(attribute) + " is no longer enhanced.%^RESET%^\n");
 }
 
 string format_time_left(int time)
@@ -160,45 +143,4 @@ string get_stat_name(string stat)
    }
 
    return 0;
-}
-
-string get_stat_full_name(string stat)
-{
-   switch(lower_case(stat))
-   {
-      case "strength":
-      case "str":
-         return "strength";
-      case "constitution":
-      case "con":
-         return "constitution";
-      case "agility":
-      case "agi":
-         return "agility";
-      case "dexterity":
-      case "dex":
-         return "dexterity";
-      case "perception":
-      case "per":
-         return "perception";
-      case "intelligence":
-      case "int":
-         return "intelligence";
-      case "charisma":
-      case "cha":
-         return "charisma";
-      case "luck":
-      case "luc":
-         return "luck";
-      case "force":
-      case "for":
-         return "Force";
-   }
-
-   return 0;
-}
-
-void create()
-{
-   add_rules( ({ "", "WRD" }) );
 }

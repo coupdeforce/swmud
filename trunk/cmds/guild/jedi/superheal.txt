@@ -1,89 +1,62 @@
-// Last edited by deforce on 09-28-2009
+// Last edited by deforce on 03-13-2010
 inherit VERB_OB;
 
 void perform_healing(object body);
 void meditation_time(object body);
 int has_special_skill_delay(string skill);
-int all_healthy(object body);
-string format_time_left(int time);
 
 void do_superheal_liv(object living)
 {
    object this_body = this_body();
 
-   if (this_body->query_guild_level("jedi"))
+   if (living->all_healthy())
    {
-      if (!this_body->has_learned_skill("superhealing"))
+      if (living == this_body)
       {
-         write("You have not learned how to superheal wounds with the Force.\n");
-      }
-      else if (this_body->query_guild_level("assassin"))
-      {
-         write("You are too dedicated to the Dark side of the Force to use it for healing.\n");
-      }
-      else if (living->query_guild_level("assassin") && (living->query_jedi_alignment() < 0))
-      {
-         write(living->short() + " is too dedicated to the Dark side of the Force to be healed.\n");
-      }
-      else if (this_body->has_buff("/d/buffs/anger"))
-      {
-         write("You are too angry to use the Force for healing.\n");
-      }
-      else if (this_body->get_target())
-      {
-         write("You are unable to concentrate on healing while in combat.\n");
-      }
-      else if ((living->query_health() >= living->query_max_health()) && all_healthy(living))
-      {
-         if (living == this_body)
-         {
-            write("You are already at full health.\n");
-         }
-         else
-         {
-            write(living->short() + " is already at full health.\n");
-         }
-      }
-      else if (this_body->has_skill_delay())
-      {
-         write("You are too busy to concentrate on healing.\n");
-      }
-      else if ((living == this_body) && this_body->has_special_skill_delay("superheal"))
-      {
-         write("You need to wait " + format_time_left(this_body->has_special_skill_delay("superheal")) + " before you can superheal yourself again.\n");
-      }
-      else if ((living != this_body) && living->has_special_skill_delay("superheal"))
-      {
-         write(living->short() + " must wait " + format_time_left(living->has_special_skill_delay("superheal")) + " before they can undergo superhealing again.\n");
-      }
-      else if ((living != this_body) && this_body->has_special_skill_delay("superheal other"))
-      {
-         write("You need to wait " + format_time_left(this_body->has_special_skill_delay("superheal other")) + " before you can superheal another person again.\n");
+         write("You are already at full health.\n");
+         return;
       }
       else
       {
-         if (living == this_body)
-         {
-            this_body->simple_action("$N $vclose $p eyes and $vmeditate solemnly on healing $r with the Force...\n");
-         }
-         else
-         {
-            this_body->targetted_action("$N $vclose $p eyes and $vmeditate solemnly on healing $t with the Force...\n", living);
-         }
-
-         this_body->adjust_jedi_alignment(2);
-
-         call_out("meditation_time", 8, living);
-
-         this_body->add_skill_delay(12);
-
-         this_body->stun(6);
+         write(living->short() + " is already at full health.\n");
+         return;
       }
+   }
+   else if ((living == this_body) && this_body->has_special_skill_delay("superheal"))
+   {
+      write("You need to wait " + convert_time(this_body->has_special_skill_delay("superheal")) + " before you can superheal yourself again.\n");
+      return;
+   }
+   else if ((living != this_body) && living->has_special_skill_delay("superheal"))
+   {
+      write(living->short() + " must wait " + convert_time(living->has_special_skill_delay("superheal")) + " before they can undergo superhealing again.\n");
+      return;
+   }
+   else if ((living != this_body) && this_body->has_special_skill_delay("superheal other"))
+   {
+      write("You need to wait " + convert_time(this_body->has_special_skill_delay("superheal other")) + " before you can superheal another person again.\n");
+      return;
+   }
+   else if (living->query_guild_level("assassin") && (living->query_jedi_alignment() < 0))
+   {
+      write(living->short() + " is too dedicated to the Dark side of the Force to be healed.\n");
+      return;
+   }
+
+   if (living == this_body)
+   {
+      this_body->simple_action("$N $vclose $p eyes and $vmeditate solemnly on healing $r with the Force...\n");
    }
    else
    {
-      write("Only Jedi know how to use the Force for healing.\n");
+      this_body->targetted_action("$N $vclose $p eyes and $vmeditate solemnly on healing $t with the Force...\n", living);
    }
+
+   this_body->adjust_jedi_alignment(2);
+
+   call_out("meditation_time", 8, living);
+
+   this_body->add_skill_delay(12);
 }
 
 void do_superheal()
@@ -91,29 +64,61 @@ void do_superheal()
    do_superheal_liv(this_body());
 }
 
+mixed can_superheal_liv()
+{
+   object this_body = this_body();
+
+   if (!this_body->is_body()) { return 1; }
+
+   if (this_body->query_guild_level("jedi"))
+   {
+      if (!this_body->has_learned_skill("superhealing"))
+      {
+         return "You have not learned how to superheal wounds with the Force.\n";
+      }
+      else if (this_body->query_guild_level("assassin"))
+      {
+         return "You are too dedicated to the Dark side of the Force to use it for healing.\n";
+      }
+      else if (this_body->has_buff("/d/buffs/anger"))
+      {
+         return "You are too angry to use the Force for healing.\n";
+      }
+      else if (this_body->get_target())
+      {
+         return "You are unable to concentrate on healing while in combat.\n";
+      }
+      else if (this_body->has_skill_delay())
+      {
+         return "You are too busy to concentrate on healing.\n";
+      }
+   }
+   else
+   {
+      return "Only Jedi know how to use the Force for healing.\n";
+   }
+
+   return 1;
+}
+
 void perform_healing(object body)
 {
    object this_body = this_body();
-   float force = this_body->query_for();
-   float level = this_body->query_guild_level("jedi");
-   int rank = to_int(floor(this_body->query_skill("superhealing") / 100.0));
-   int amount = to_int(floor((body->query_max_health() / 100.0) * ((50.0 + (rank * 5.0)) * (force + level) / 150.0)));
-   int delay = 600 - (((floor(level / 5.0) + floor(level / 10.0)) * 2) + ((force * 12) / 10));
-   string output = "You " + (this_body == body ? "heal yourself" : "are healed by " + this_body->short()) + ".\n";
+   int force = this_body->query_for();
+   int level = this_body->query_guild_level("jedi");
+   int rank = this_body->query_skill("superhealing") / 100;
+   int spec = this_body->query_guild_specialization_rank("jedi", "healing");
+   int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
+   int amount = body->query_max_health() * (level + (level * rank_spec * force / 2000)) / 100;
+   int delay = 600 - (150 * rank_spec * level * force / 100000 * 2);
 
+   tell(body, "You " + (this_body == body ? "heal yourself" : "are healed by " + this_body->short()) + ".\n");
    body->other_action("$N $vare surrounded by a deep blue glow.\n");
    body->heal_us(amount);
 
-   output += "hp: " + body->query_health() + "/" + body->query_max_health() + "    dr: undrugged\n";
-
    foreach (string limb in body->query_limbs())
    {
-      if (body->query_limb_health(limb) < body->query_max_health(limb))
-      {
-         body->heal_us(amount * 0.5, limb);
-
-         output += limb + ": " + body->query_limb_health(limb) + "/" + body->query_max_health(limb) + "\n";
-      }
+      body->heal_limb(limb, amount * 0.5);
    }
 
    if (body != this_body)
@@ -127,8 +132,6 @@ void perform_healing(object body)
    {
       this_body->add_special_skill_delay("superheal", delay);
    }
-
-   tell(body, output);
 }
 
 void meditation_time(object body)
@@ -151,39 +154,7 @@ void meditation_time(object body)
    else
    {
       this_body->simple_action("$N $vlose focus.\n");
-
-      if (this_body->query_int() < random(100))
-      {
-         this_body->stun(2);
-      }
    }
-}
-
-string format_time_left(int time)
-{
-   string output = "";
-
-   if (time > 59)
-   {
-      if ((time / 60) > 0) { output += (time / 60) + " minute" + ((time / 60) != 1 ? "s" : "") + ", "; }
-   }
-
-   output += (time % 60) + " second" + ((time % 60) != 1 ? "s" : "");
-
-   return output;
-}
-
-int all_healthy(object body)
-{
-   foreach (string limb in body->query_limbs())
-   {
-      if (body->query_limb_health(limb) < body->query_max_health(limb))
-      {
-         return 0;
-      }
-   }
-
-   return 1;
 }
 
 void create()

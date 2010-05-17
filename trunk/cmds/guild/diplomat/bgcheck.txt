@@ -1,4 +1,4 @@
-// Last edited by deforce on 06-04-2008
+// Last edited by deforce on 10-07-2009
 inherit VERB_OB;
 
 void get_info(object body);
@@ -29,9 +29,9 @@ void do_bgcheck_liv(object living)
          }
          else
          {
-            this_body->add_skill_delay(4);
+            this_body->add_skill_delay(2);
 
-            if (this_body->test_skill("bground_check", 250 + (this_body->query_guild_level("diplomat") * 5)))
+            if (this_body->test_skill("bground_check", (this_body->query_guild_level("diplomat") * 20)))
             {
                get_info(living);
             }
@@ -86,96 +86,89 @@ string compare_advanced(int first, int second)
 void get_info(object body)
 {
    object this_body = this_body();
-   int array guilds = ({ });
-   int array guilds_other = ({ });
-   int array stats = ({ });
-   int array stats_other = ({ });
+   int leve = this_body->query_guild_level("diplomat");
+   int rank = to_int(floor(this_body->query_skill("bground_check") / 100.0));
    int health = this_body->query_max_health();
    int health_other = body->query_max_health();
-   int rank = to_int(floor(this_body->query_skill("bground_check") / 100.0));
-   string output = "";
+   string output = "\nYou find out the following about " + body->short() + " in comparison to yourself:\n\n";
 
-   // Guilds
-   if (rank >= 3)
+   if (this_body->test_skill("bground_check", (this_body->query_guild_level("diplomat") * 16)))
    {
+      output += "Your vitality is " + compare_advanced(health, health_other)  + ".\n\n";
+   }
+   else
+   {
+      output += "Your vitality is " + compare_basic(health, health_other)  + ".\n\n";
+   }
+
+   if (this_body->test_skill("bground_check", (this_body->query_guild_level("diplomat") * 12)))
+   {
+      int array guilds = ({ });
+      int array guilds_other = ({ });
       string array guild_list = ({ "assassin", "bounty hunter", "diplomat", "jedi", "mechanic", "mercenary", "merchant", "physician", "pilot", "slicer", "smuggler" });
+      string array guild_desc = ({ "lethality", "tracking skill", "political acumen", "strength in the Force", "engineering aptitude", "combat training", "business sense", "medical knowledge", "piloting ability", "technological proficiency", "capacity for clandestine dealings" });
 
       foreach (string guild in guild_list)
       {
          guilds += ({ call_other(this_body, "query_guild_level", guild) });
          guilds_other += ({ call_other(body, "query_guild_level", guild) });
       }
-   }
 
-   // Stats
-   if (rank >= 4)
-   {
-      string array stat_list = ({ "str", "con", "agi", "dex", "per", "int", "cha", "luc", "for" });
-
-      foreach (string stat in stat_list)
+      if (this_body->test_skill("bground_check", (this_body->query_guild_level("diplomat") * 8)))
       {
-         stats += ({ call_other(this_body, "query_" + stat) });
-         stats_other += ({ call_other(body, "query_" + stat) });
+         for (int count = 0; count < sizeof(guild_desc); count++)
+         {
+            if (((rank >= 10) && (guilds_other[count] > 0))
+               || (rank < 10))
+            {
+               output += "Your " + guild_desc[count] + " is " + compare_advanced(guilds[count], guilds_other[count])  + ".\n";
+            }
+         }
+
+         if (this_body->test_skill("bground_check", (this_body->query_guild_level("diplomat") * 4)))
+         {
+            int array stats = ({ });
+            int array stats_other = ({ });
+            string array stat_list = ({ "str", "con", "agi", "dex", "per", "int", "cha", "luc", "for" });
+            string array stat_desc = ({ "strength", "constitution", "agility", "dexterity", "perception", "intelligence", "charisma", "fortune", "connection to the force" });
+
+            foreach (string stat in stat_list)
+            {
+               stats += ({ call_other(this_body, "query_" + stat) });
+               stats_other += ({ call_other(body, "query_" + stat) });
+            }
+
+            output += "\n";
+
+            if (this_body->test_skill("bground_check", this_body->query_guild_level("diplomat")))
+            {
+               for (int count = 0; count < sizeof(stat_desc); count++)
+               {
+                  if (stats_other[count] > 0)
+                  {
+                     output += "Your " + stat_desc[count] + " is " + compare_advanced(stats[count], stats_other[count])  + ".\n";
+                  }
+               }
+            }
+            else
+            {
+               for (int count = 0; count < sizeof(stat_desc); count++)
+               {
+                  output += "Your " + stat_desc[count] + " is " + compare_basic(stats[count], stats_other[count])  + ".\n";
+               }
+            }
+         }
       }
-   }
-
-   this_body->other_action("$N $vfind out some interesting information about " + body->short() + ".\n");
-
-   output += "\nYou find out the following about " + body->short() + " in comparison to yourself:\n\n";
-
-   output += "Your vitality is " + compare_advanced(health, health_other)  + ".\n\n";
-
-   // Guilds
-   if (rank >= 3)
-   {
-      string array guild_desc = ({ "lethality", "tracking skill", "political acumen", "strength in the Force", "engineering aptitude", "combat training", "business sense", "medical knowledge", "piloting ability", "technological proficiency", "capacity for clandestine dealings" });
-
-      if (rank < 10)
+      else
       {
          for (int count = 0; count < sizeof(guild_desc); count++)
          {
             output += "Your " + guild_desc[count] + " is " + compare_basic(guilds[count], guilds_other[count])  + ".\n";
          }
       }
-      else
-      {
-         for (int count = 0; count < sizeof(guild_desc); count++)
-         {
-            if (guilds_other[count] > 0)
-            {
-               output += "Your " + guild_desc[count] + " is " + compare_advanced(guilds[count], guilds_other[count])  + ".\n";
-            }
-         }
-      }
-
-      if (output[<2..<1] != "\n\n") { output += "\n"; }
    }
 
-   // Stats
-   if (rank >= 4)
-   {
-      string array stat_desc = ({ "strength", "constitution", "agility", "dexterity", "perception", "intelligence", "charisma", "fortune", "connection to the force" });
-
-      if (rank < 9)
-      {
-         for (int count = 0; count < sizeof(stat_desc); count++)
-         {
-            output += "Your " + stat_desc[count] + " is " + compare_basic(stats[count], stats_other[count])  + ".\n";
-         }
-      }
-      else
-      {
-         for (int count = 0; count < sizeof(stat_desc); count++)
-         {
-            if (stats_other[count] > 0)
-            {
-               output += "Your " + stat_desc[count] + " is " + compare_advanced(stats[count], stats_other[count])  + ".\n";
-            }
-         }
-      }
-
-      output += "\n";
-   }
+   this_body->other_action("$N $vfind out some interesting information about $O.\n", body);
 
    write(output);
 }

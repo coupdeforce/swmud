@@ -1,4 +1,4 @@
-// Last edited by deforce on 03-16-2008
+// Last edited by deforce on 07-12-2008
 // Created by Deathblade 08-13-1995
 
 #include <classes.h>
@@ -224,6 +224,16 @@ void refresh_stats()
    cur_luc = stat_luc + (adj_luc = call_hooks("luc_bonus", HOOK_SUM));
    cur_for = stat_for + (adj_for = call_hooks("for_bonus", HOOK_SUM));
 
+   if (cur_str < this_object()->query_race_str_min()) { cur_str = this_object()->query_race_str_min(); }
+   if (cur_con < this_object()->query_race_con_min()) { cur_con = this_object()->query_race_con_min(); }
+   if (cur_agi < this_object()->query_race_agi_min()) { cur_agi = this_object()->query_race_agi_min(); }
+   if (cur_dex < this_object()->query_race_dex_min()) { cur_dex = this_object()->query_race_dex_min(); }
+   if (cur_per < this_object()->query_race_per_min()) { cur_per = this_object()->query_race_per_min(); }
+   if (cur_int < this_object()->query_race_int_min()) { cur_int = this_object()->query_race_int_min(); }
+   if (cur_cha < this_object()->query_race_cha_min()) { cur_cha = this_object()->query_race_cha_min(); }
+   if (cur_luc < this_object()->query_race_luc_min()) { cur_luc = this_object()->query_race_luc_min(); }
+   if (cur_for < this_object()->query_race_for_min()) { cur_for = this_object()->query_race_for_min(); }
+
 //   this_object()->set_max_capacity(cur_str * 3);
    this_object()->set_max_capacity(to_int(floor((cur_str + 100) * (1.25 * (cur_str / 100.0)))) + 50);
 
@@ -294,8 +304,8 @@ varargs int get_hp_gain(int primary)
    }
 
    gain += (primary ? 8 : 2);
-   gain += random(((primary ? 6 : 3) * (to_float(stat_luc) / 100)) + 1);
-   gain += random((8 * (to_float(bonus) / 100)) + 1);
+   gain += random(((primary ? 6 : 3) * (stat_luc / 100.0)) + 1);
+   gain += random((8 * (bonus / 100.0)) + 1);
 
    if (primary && (gain > 20)) { gain = 20; }
    else if (!primary && (gain > 10)) { gain = 10; }

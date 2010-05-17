@@ -13,12 +13,10 @@
 // Options which affect gameplay
 
 // Rooms
-#define START            "/domains/std/Wizroom"
-#define NEW_PLAYER_START "/domains/std/Create"
-#define LINKDEAD_FREEZER "/domains/common/freezer"
-
-// NOTE: If you define this, you have to modify the lib to save the correct variables
-#define EVERYTHING_SAVES
+#define START            "/d/coru/main"
+#define NEW_PLAYER_START "/d/coru/main"
+#define CREATE_ROOM      "/obj/mudlib/create_room"
+#define LINKDEAD_FREEZER "/d/common/freezer"
 
 // The default level of light for a room
 #define DEFAULT_LIGHT_LEVEL     1
@@ -40,7 +38,7 @@
 // Monster race support
 #define USE_MON_RACES
 
-# define USE_MASS
+#define USE_MASS
 
 #define USE_SKILLS
 /*
@@ -113,8 +111,9 @@
 // Disallow new character creation
 #define NO_NEW_PLAYERS
 
-// Define this next one to limit how many aliases a person can have
+// Define these to limit how many aliases and nicknames a person can have
 #define MAX_NUMBER_OF_ALIASES    150
+#define MAX_NUMBER_OF_NICKNAMES  150
 
 // Define the max number of entries in the channel history (the /last command)
 // This will also be used in say and tell histories
@@ -164,7 +163,7 @@
 
 // The administrator(s)' email address(es)
 // NOTE: This is required to be changed in order to have a working I3 system
-#define ADMIN_EMAIL             "coupdeforce@gmail.com"
+#define ADMIN_EMAIL             "starwarsmud@gmail.com"
 
 // Anonymous ftp users are limited to /ftp/pub
 #undef ALLOW_ANON_FTP
