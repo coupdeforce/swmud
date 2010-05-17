@@ -1,8 +1,7 @@
-// Last edited by deforce on 07-10-2008
+// Last edited by deforce on 02-10-2010
 #include <daemons.h>
 
 int query_max_health();
-void set_max_health(int value);
 int array query_guild_levels();
 int query_experience();
 void set_experience(int value);
@@ -16,6 +15,7 @@ void set_guild_level(string guild_name, int guild_level);
 void remove_guild(string guild_name);
 string query_name();
 void receive_private_msg(string message);
+void refresh_stats();
 
 int deaths;
 mapping killed_by = ([ ]);
@@ -25,12 +25,7 @@ void save_me();
 
 protected void add_a_death()
 {
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to add a death to " + this_object()->short() + ".\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("add a death to " + this_object()->short(), previous_object(-1)); }
 
    deaths++;
    save_me();
@@ -188,20 +183,17 @@ protected void death_penalty()
          int exp_penalty = 50;
          int kept_exp;
          int max_health = query_max_health();
-         int new_max_health = max_health;
          float level_count = 0.0;
          new_exp = experience;
 
          set_primary_level(level - 1);
 
-         killed_message += "Your primary guild, " + capitalize(query_primary_guild()) + ", has been decreased to level " + (level - 1) + ".\n";
+         killed_message += "Your primary guild, " + title_capitalize(query_primary_guild()) + ", has been decreased to level " + (level - 1) + ".\n";
 
          foreach (int value in query_guild_levels())
          {
             level_count += value;
          }
-
-         new_max_health -= ceil(((max_health * (level / level_count)) * 150.0) / (level * 100.0));
 
          foreach (string guild in query_guild_names())
          {
@@ -211,9 +203,7 @@ protected void death_penalty()
             {
                set_guild_level(guild, level - 1);
 
-               new_max_health -= ((secondary_level + 1 - level) * ceil(((max_health * ((level_count - level) / level_count)) * 75.0) / (level * 100.0)));
-
-               killed_message += "Your " + capitalize(guild) + " level has been decreased to " + (level - 1) + ".\n";
+               killed_message += "Your " + title_capitalize(guild) + " level has been decreased to " + (level - 1) + ".\n";
             }
          }
 
@@ -227,16 +217,14 @@ protected void death_penalty()
                {
                   remove_guild(guild);
 
-                  new_max_health -= (fourth_guild_level * ceil(((max_health * ((level_count - level) / level_count)) * 75.0) / (level * 100.0)));
-
                   killed_message += "Your membership in the " + capitalize(guild) + " guild has been lost.\n";
                }
             }
          }
 
-         killed_message += "You lose " + (max_health - new_max_health) + " hit points.\n";
+         refresh_stats();
 
-         set_max_health(new_max_health);
+         killed_message += "You lose " + (max_health - query_max_health()) + " hit points.\n";
 
          needed_exp = get_experience_to_advance_guild(query_primary_guild());
 
@@ -277,12 +265,7 @@ int query_deaths()
 
 void set_deaths(int new_deaths)
 {
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to set " + this_object()->short() + "'s deaths to " + new_deaths + ".\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("set " + this_object()->short() + "'s deaths to " + new_deaths, previous_object(-1)); }
 
    if (new_deaths >= 1)
    {
@@ -293,12 +276,7 @@ void set_deaths(int new_deaths)
 
 void reset_deaths()
 {
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to reset " + this_object()->short() + "'s deaths.\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("reset " + this_object()->short() + "'s deaths", previous_object(-1)); }
 
    deaths = 0;
    save_me();
@@ -316,12 +294,7 @@ mapping query_killed_where()
 
 void set_killed_by(int time, string name, string where)
 {
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to set " + this_object()->short() + " killed by " + name + " at " + where + " on " + ctime(time) + ".\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("set " + this_object()->short() + " killed by " + name + " at " + where + " on " + ctime(time), previous_object(-1)); }
 
    killed_by[time] = name;
    killed_where[time] = where;
@@ -329,12 +302,7 @@ void set_killed_by(int time, string name, string where)
 
 void reset_killed_by()
 {
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to reset " + this_object()->short() + "'s killed by info.\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("reset " + this_object()->short() + "'s killed by info", previous_object(-1)); }
 
    killed_by = ([ ]);
    killed_where = ([ ]);

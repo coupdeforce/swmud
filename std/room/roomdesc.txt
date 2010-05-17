@@ -1,4 +1,5 @@
-// Last edited by deforce on 06-30-2008
+// Last edited by deforce on 07-04-2008
+#include <flags.h>
 #include <playerflags.h>
 
 private nosave string remote_desc;
@@ -7,6 +8,7 @@ int query_light();
 string short();
 string show_exits();
 string long();
+void test_flag(int);
 
 private nosave int this_look_is_forced;
 
@@ -31,18 +33,21 @@ varargs string show_objects(object except)
 
    foreach (object thing in obs)
    {
-      if (thing->is_living())
+      if (thing->is_living() && !thing->test_flag(F_HIDDEN))
       {
-         user_show += ({ thing->in_room_desc() });
+         if (!duplicatep(thing))
+         {
+            user_show += ({ thing->show_in_room() });
+         }
       }
-      else
+      else if (!thing->test_flag(F_HIDDEN))
       {
          if (!duplicatep(thing))
          {
             if ((str = thing->show_in_room()) && strlen(str))
             {
-               if (except)
-               {
+               if (except && !except->is_body())
+               { 
                   str += sprintf(" (outside %s)", except->the_short());
                }
 
@@ -62,7 +67,7 @@ varargs string show_objects(object except)
       obj_show += ({ except->inventory_recurse(0, this_body()) });
    }
 
-   return (sizeof(user_show) ? "\n%^ROOM_LIVINGS%^" + implode(user_show, "\n") + "%^RESET%^" : "") + (sizeof(user_show) && sizeof(obj_show) ? "\n" : "") + (sizeof(obj_show) ? "\n%^ROOM_OBJECTS%^" + implode(obj_show, ", ") + "%^RESET%^" : "") + "\n";
+   return (sizeof(user_show) ? "\n%^ROOM_LIVINGS%^" + implode(sort_array(user_show, 1), "\n") + "%^RESET%^\n" : "") + (sizeof(obj_show) ? "\n%^ROOM_OBJECTS%^" + implode(sort_array(obj_show, 1), ", ") + "%^RESET%^\n" : "");
 }
 
 protected int dont_show_long()
@@ -78,7 +83,7 @@ varargs void do_looking(int force_long_desc, object who)
    {
       tell(who, "It is too dark to see anything.\n");
    }
-   if (query_light() > 9)
+   else if (query_light() > 9)
    {
       tell(who, "It is too bright to see anything.\n");
    }

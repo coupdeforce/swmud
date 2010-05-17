@@ -1,4 +1,4 @@
-// Last edited by deforce on 03-11-2010
+// Last edited by deforce on 04-06-2010
 #include <classes.h>
 #include <hooks.h>
 
@@ -20,12 +20,7 @@ int set_skill(string skill, int skill_points, int training_points)
       error("Illegal skill; cannot set new skill value for " + skill + " for " + this_object()->short() + ".\n");
    }
 
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to set " + this_object()->short() + "'s skill in " + skill + " to " + skill_points + ".\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("set " + this_object()->short() + "'s skill in " + skill + " to " + skill_points, previous_object(-1)); }
 
    if (skill_points < 1)
    {
@@ -41,12 +36,7 @@ int set_skill(string skill, int skill_points, int training_points)
 
 void remove_skill(string skill)
 {
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to remove " + this_object()->short() + "'s skill in " + skill + ".\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("remove " + this_object()->short() + "'s skill in " + skill, previous_object(-1)); }
 
    if (skills[skill])
    {
@@ -56,12 +46,7 @@ void remove_skill(string skill)
 
 void reset_skills()
 {
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to reset " + this_object()->short() + "'s skills.\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("reset " + this_object()->short() + "'s skills", previous_object(-1)); }
 
    skills = ([ ]);
 }
@@ -76,11 +61,32 @@ int array get_skill(string skill)
    return skills[skill];
 }
 
-int array query_skill(string skill)
+int array query_skill_pure(string skill)
 {
    if (skills[skill] && (sizeof(skills[skill]) == 2))
    {
       return skills[skill][0];
+   }
+
+   return 0;
+}
+
+int query_skill(string skill)
+{
+   if (skills[skill] && (sizeof(skills[skill]) == 2))
+   {
+      int skill_value = skills[skill][0] + call_hooks("all_skill_bonus", HOOK_SUM) + call_hooks(skill + "_skill_bonus", HOOK_SUM);
+
+      if (skill_value < 0)
+      {
+         skill_value = 0;
+      }
+      else if (skill_value > 1000)
+      {
+         skill_value = 1000;
+      }
+
+      return skill_value;
    }
 
    return 0;
@@ -93,17 +99,10 @@ void learn_skill(string skill, int value)
 {
    int array my_skill;
    int skill_value;
-   int advrate;
    mixed skill_data;
-   int roll;
    float chance;
 
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to use learn_skill on  " + this_object()->short() + ".\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("use learn_skill on  " + this_object()->short(), previous_object(-1)); }
 
    skill_data = SKILL_D->query_skill(skill);
 
@@ -123,22 +122,14 @@ void learn_skill(string skill, int value)
 
    if (skill_value < 1000)
    {
-      advrate = skill_data[1];
-
-      roll = random(skill_value * 10);
-      chance = (((1000 + value + skill_value) / 100) * ((1000 - value + skill_value) / 100) * (advrate / 100) * 10);
-      chance *= (advrate / 100);
-
-      if (chance > 950) { chance = 950; }
-      else if (chance < 200) { chance = 200; }
-
-      chance /= 10;
+      int advrate = skill_data[1];
+      int roll = random(advrate + ((skill_value + (advrate * 10)) / 100));
 
       // Debug code for advance roll
 //      tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " advance roll for " + skill + ": Is " + roll + " (" + (skill_value * 10) + ") less than " + to_int(ceil(chance)) + "?\n");
 //      tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill points for " + skill + ": Is " + my_skill[1] + " >= " + get_skill_point_minimum(advrate) + "?\n");
 
-      if (((roll < ceil(chance)) && (my_skill[1] >= get_skill_point_minimum(advrate))) || (my_skill[1] >= advrate))
+      if ((roll == 0) || (my_skill[1] >= advrate) || (my_skill[1] >= get_skill_point_minimum(advrate)))
       {
          // Advance
          my_skill[0] += 1;
@@ -168,12 +159,7 @@ int test_skill(string skill, int adjustment)
    int stat_bonus = get_stat_bonus(skill);
    float stat_weight = get_stat_weight(skill);
 
-/*
-   if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
-   {
-      error("Invalid attempt to use test_skill on  " + this_object()->short() + ".\n");
-   }
-*/
+   if (this_object()->is_body()) { this_object()->check_wizard_set("use test_skill on  " + this_object()->short(), previous_object(-1)); }
 
    if (sizeof(my_skill) != 2)
    {
@@ -183,7 +169,14 @@ int test_skill(string skill, int adjustment)
    skill_value = my_skill[0] + call_hooks("all_skill_bonus", HOOK_SUM) + call_hooks(skill + "_skill_bonus", HOOK_SUM);
 
 //   tell(this_object(), skill + " - bonus: " + stat_bonus + " weight: " + to_int(stat_weight));
-   destination_value = stat_bonus / stat_weight * (stat_weight + skill_value + adjustment);
+   if (stat_weight > 0)
+   {
+      destination_value = (stat_bonus / stat_weight * 500) + (skill_value / 2) + adjustment;
+   }
+   else
+   {
+      destination_value = skill_value + adjustment;
+   }
 
    if (destination_value > 950) { destination_value = 950; }
    else if (destination_value < 50) { destination_value = 50; }
@@ -214,7 +207,7 @@ int test_skill(string skill, int adjustment)
          }
          else
          {
-            my_skill[1] += random(2);
+            my_skill[1] += 1;
          }
       }
 
@@ -245,6 +238,8 @@ int query_skill_evaluation()
 
 void add_learned_skill(string skill)
 {
+   if (this_object()->is_body()) { this_object()->check_wizard_set("add " + skill + " to " + this_object()->short() + "'s learned skills", previous_object(-1)); }
+
    if (member_array(skill, learned_skills) == -1)
    {
       learned_skills += ({ skill });
@@ -253,10 +248,19 @@ void add_learned_skill(string skill)
 
 void remove_learned_skill(string skill)
 {
+   if (this_object()->is_body()) { this_object()->check_wizard_set("remove " + skill + " from " + this_object()->short() + "'s learned skills", previous_object(-1)); }
+
    if (member_array(skill, learned_skills) > -1)
    {
       learned_skills -= ({ skill });
    }
+}
+
+void reset_learned_skills()
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("reset " + this_object()->short() + "'s learned skills", previous_object(-1)); }
+
+   learned_skills = ({ });
 }
 
 int has_learned_skill(string skill)
@@ -276,6 +280,8 @@ string array query_learned_skills()
 
 void add_blocked_skill(string skill)
 {
+   if (this_object()->is_body()) { this_object()->check_wizard_set("add " + skill + " to " + this_object()->short() + "'s blocked skills", previous_object(-1)); }
+
    if (member_array(skill, blocked_skills) == -1)
    {
       blocked_skills += ({ skill });
@@ -284,6 +290,8 @@ void add_blocked_skill(string skill)
 
 void remove_blocked_skill(string skill)
 {
+   if (this_object()->is_body()) { this_object()->check_wizard_set("remove " + skill + " from " + this_object()->short() + "'s blocked skills", previous_object(-1)); }
+
    if (member_array(skill, blocked_skills) > -1)
    {
       blocked_skills -= ({ skill });
@@ -324,11 +332,11 @@ int get_skill_point_minimum(int adv_rate)
       case 55..59: min *= 0.86; break;
       case 60..64: min *= 0.84; break;
       case 65..69: min *= 0.82; break;
-      case 70..74: min *= 0.79; break;
-      case 75..79: min *= 0.76; break;
-      case 80..84: min *= 0.73; break;
-      case 85..89: min *= 0.70; break;
-      case 90..94: min *= 0.67; break;
+      case 70..74: min *= 0.80; break;
+      case 75..79: min *= 0.78; break;
+      case 80..84: min *= 0.75; break;
+      case 85..89: min *= 0.72; break;
+      case 90..94: min *= 0.68; break;
       case 95..99: min *= 0.64; break;
       case 100..999999: min *= 0.60; break;
    }

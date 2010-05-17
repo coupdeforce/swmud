@@ -154,7 +154,8 @@ void refresh_stats()
    cur_luc = stat_luc + (adj_luc = call_hooks("luc_bonus", HOOK_SUM));
    cur_for = stat_for + (adj_for = call_hooks("for_bonus", HOOK_SUM));
 
-   this_object()->set_max_capacity(cur_str * 3);
+//   this_object()->set_max_capacity(cur_str * 3);
+   this_object()->set_max_capacity(((cur_str + 100) * (1.25 * (cur_str / 100.0))) + 50);
    this_object()->set_weapon_class(cur_str ? to_int(cur_str / 3.3) : 9);
    this_object()->set_armor_class(cur_con ? to_int(cur_con / 4) : 10);
    this_object()->set_to_hit_bonus((cur_agi / 2) - 35);  // Unarmed to-hit penalty or bonus
