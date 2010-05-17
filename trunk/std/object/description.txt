@@ -1,4 +1,4 @@
-// Last edited by deforce on 06-24-2008
+// Last edited by deforce on 03-22-2010
 #include <mudlib.h>
 #include <setbit.h>
 
@@ -9,11 +9,9 @@ inherit M_GRAMMAR;
 // in_room_desc: A longer string for rooms.  Titles for players.
 // plural_in_room_desc: Message for more than 1.
 // If these are zero, sane defaults are used based on 'names'.
-private nosave mixed long;
+private mixed long;
 private nosave mixed in_room_desc;
 private nosave string plural_in_room_desc;
-// Our description when we haven't been touched.  Really an in_room_desc, not a long
-private string untouched_long;
 private nosave string listen_desc;
 private nosave string smell_desc;
 private nosave string feel_desc;
@@ -27,20 +25,21 @@ string the_short();
 string short();
 string plural_short();
 string a_short();
+string query_title();
 string sex_race();
 string team_health();
 private string health();
 string team_description(int alignment);
 string health_description(int percent);
+string size_description(int size);
 varargs mixed call_hooks();
-
 
 // This one is here, but this is a forward declaration.
 string query_in_room_desc();
 
 //:FUNCTION set_long
 // Set the long description of an object
-nomask void set_long(mixed str)
+void set_long(mixed str)
 {
    long = str;
    if (functionp(long)) { return; }
@@ -70,11 +69,37 @@ string get_extra_long()
 }
 
 //:FUNCTION long
-//Return the verbose description of an object that you see when you look
-//at it.
+//Return the verbose description of an object that you see when you look at it.
 string long()
 {
    string output = get_base_long() + team_health() + get_extra_long();
+
+   if (!this_object()->is_body())
+   {
+      if (this_object()->query_body_size())
+      {
+         output += "It is " + size_description(this_object()->query_body_size()) + " sized.\n";
+      }
+
+      if (test_flag(F_ADJUSTED))
+      {
+         output += "It has been adjusted by a Verpine.\n";
+      }
+
+      if (test_flag(F_ALTERED_WEIGHT) || test_flag(F_ALTERED_VALUE) || test_flag(F_ALTERED_CAPACITY))
+      {
+         output += "It has been altered by a merchant.\n";
+      }
+
+      if (test_flag(F_BROKEN))
+      {
+         output += "It is broken.\n";
+      }
+      else if (test_flag(F_DAMAGED))
+      {
+         output += "It is damaged.\n";
+      }
+   }
 
    if (this_user() && wizardp(this_user()))
    {
@@ -88,11 +113,6 @@ string long()
 }
 
 protected string array discarded_message, plural_discarded_message;
-
-string untouched_long()
-{
-   return untouched_long;
-}
 
 void set_listen(string str) { listen_desc = str; }
 
@@ -165,61 +185,34 @@ string show_in_room()
 {
    string str;
    int our_count;
-   // Jym removed visibility checks.  why have an invisible room??
-   // anyway it breaks room containers which cant have their inventory visible
-   //if(!is_visible()) return 0;
-   /* If an object is attached, it is considered part of its
-    * parent and it's the parent's responsibility to print an
-    * appropriate description.  For example, wielded weapons are
-    * attached and should be included in the monster's description.
-    * c.f. Zork's:
-    *    A nasty-looking troll, brandishing a bloody axe, blocks all
-    *         passages out of the room.
-    */
+   object link;
+
    if (is_attached()) { return 0; }
+
    our_count = count();
-
-   if (our_count > 9)
-   {
-      if (plural_in_room_desc) { return sprintf( plural_in_room_desc, "many"); }
-
-      str = short();
-      if (!str) return 0;
-
-      return "There are many " + plural_short() + " here.\n";
-   }
 
    if (our_count > 1 )
    {
-      if (plural_in_room_desc) { return sprintf(plural_in_room_desc, our_count + ""); }
+      if ((link = this_object()->query_link()) && userp(link) && (str = query_title())) { return capitalize(number_word(our_count)) + " " + pluralize(str); }
+
+      if (plural_in_room_desc) { return capitalize(number_word(our_count)) + " " + plural_in_room_desc; }
 
       str = short();
+
       if (!str) { return 0; }
 
-      //      if( query_ob_flag( AUTO_IN_ROOM_DESC ) )
-
-      if (!plural_discarded_message)
-      {
-         plural_discarded_message = MESSAGES_D->get_messages("discarded-plural");
-      }
-
-      return capitalize(sprintf( choice(plural_discarded_message),
-         sprintf("%d %s", our_count, plural_short())));
+      return capitalize(number_word(our_count)) + " " + plural_short();
    }
 
-   if (!test_flag(TOUCHED) && (str = untouched_long())) { return str; }
+   if ((link = this_object()->query_link()) && userp(link) && (str = query_title())) { return str; }
 
    if (str = query_in_room_desc()) { return str; }
 
-   str = a_short();
+   str = short();
 
    if (!str) { return 0; }
 
-   //    if( query_ob_flag( AUTO_IN_ROOM_DESC ) )
-
-   if (!discarded_message) { discarded_message = MESSAGES_D->get_messages("discarded"); }
-
-    return capitalize(sprintf( choice(discarded_message), str ));
+   return capitalize(str);
 }
 
 //:FUNCTION set_in_room_desc
@@ -233,18 +226,10 @@ void set_plural_in_room_desc(string arg) { plural_in_room_desc = arg; }
 
 string query_possessive() { return "its"; }
 
-//:FUNCTION set_untouched_desc
-//set the untouched description of the object.  This is the way the object
-//is described originally, but not after is has been taken or moved.
-void set_untouched_desc(string arg)
-{
-   if (stringp(arg)) { untouched_long = arg; }
-}
+int query_body_size() { return 0; }
 
 string query_in_room_desc()
 {
-   //if(!is_visible())
-   //  return "";
    return (string)evaluate(in_room_desc);
 }
 
@@ -309,7 +294,7 @@ string team_description(int alignment)
 
 string health_description(int percent)
 {
-   switch (percent)
+   switch (percent > 100 ? 100 : percent)
    {
       case 91..100: return "in top shape";
       case 76..90: return "in decent shape";
@@ -321,4 +306,18 @@ string health_description(int percent)
    }
 
    return "in an odd state of health";
+}
+
+string size_description(int size)
+{
+   switch (size)
+   {
+      case 1: return "very small";
+      case 2: return "small";
+      case 3: return "medium";
+      case 4: return "large";
+      case 5: return "very large";
+   }
+
+   return "odd";
 }

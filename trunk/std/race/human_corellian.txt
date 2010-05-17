@@ -3,6 +3,7 @@ inherit RACE;
 string race_name = "corellian";
 string human_race_sacrifice = "str";
 string human_race_bonus = "con";
+int body_size = 3;
 int human_race_modifier = 0;
 int human_race_str_min = 35;
 int human_race_str_max = 90;
@@ -27,6 +28,17 @@ int human_race_for_max = 90;
 string query_race()
 {
    return race_name;
+}
+
+// This is the body size of the race, from 1 to 5
+int query_body_size()
+{
+   return body_size;
+}
+
+void set_body_size(int value)
+{
+   if (value) { body_size = value; }
 }
 
 // This is the help description

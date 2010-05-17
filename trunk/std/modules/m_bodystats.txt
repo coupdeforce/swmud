@@ -142,6 +142,7 @@ void refresh_stats()
 //Used to modify force
 
    int adj_str, adj_con, adj_agi, adj_dex, adj_per, adj_int, adj_cha, adj_luc, adj_for;
+   int limb_health;
 
    cur_str = stat_str + (adj_str = call_hooks("str_bonus", HOOK_SUM));
    cur_con = stat_con + (adj_con = call_hooks("con_bonus", HOOK_SUM));
@@ -153,10 +154,18 @@ void refresh_stats()
    cur_luc = stat_luc + (adj_luc = call_hooks("luc_bonus", HOOK_SUM));
    cur_for = stat_for + (adj_for = call_hooks("for_bonus", HOOK_SUM));
 
-   this_object()->set_max_capacity(query_str() * 3);
-   this_object()->set_weapon_class(query_str() ? to_int(query_str() / 3.3) : 9);
-   this_object()->set_armor_class(query_con() ? to_int(query_con() / 4) : 10);
-   this_object()->set_to_hit_bonus((query_agi() / 2) - 35);  // Unarmed to-hit penalty or bonus
+   this_object()->set_max_capacity(cur_str * 3);
+   this_object()->set_weapon_class(cur_str ? to_int(cur_str / 3.3) : 9);
+   this_object()->set_armor_class(cur_con ? to_int(cur_con / 4) : 10);
+   this_object()->set_to_hit_bonus((cur_agi / 2) - 35);  // Unarmed to-hit penalty or bonus
+
+   // Recalculate limb health
+   limb_health = (this_object()->query_max_health() * (((cur_con / 3) + (cur_con * (cur_con / 300))) / (133.3 - (cur_con / 3)))) + (this_object()->query_max_health() / 3);
+
+   foreach (string limb in this_object()->query_limbs())
+   {
+      this_object()->set_max_limb_health(limb, limb_health);
+   }
 }
 
 // This is later modified by race

@@ -1,4 +1,4 @@
-// Last edited by deforce on 10-26-2009
+// Last edited by deforce on 04-22-2010
 inherit M_CONVERSATION;
 inherit M_MESSAGES;
 
@@ -6,6 +6,7 @@ array get_trainable_guilds();
 mapping get_trainable_abilities();
 void set_trainable_guild(string guild);
 varargs void set_trainable_ability(string ability, mapping prerequisites);
+varargs void set_trainable_specialization(string guild, string specialization, mapping prerequisites);
 void generate_training_options();
 void train(string ability);
 varargs void advance(string guild);
@@ -17,6 +18,8 @@ void set_nothing_to_teach(string text);
 
 array trainable_guilds = ({ });
 mapping trainable_abilities = ([ ]);
+mapping trainable_specializations = ([ ]);
+mapping specialization_guilds = ([ ]);
 string not_guild_member = "You're not a member of the guild.";
 string got_stuff_to_teach = "Here's what I can teach you with your current ability";
 string nothing_to_teach = "There is nothing more I can teach you.";
@@ -29,6 +32,16 @@ array get_trainable_guilds()
 mapping get_trainable_abilities()
 {
    return trainable_abilities;
+}
+
+mapping get_trainable_specializations()
+{
+   return trainable_specializations;
+}
+
+mapping get_specialization_guilds()
+{
+   return specialization_guilds;
 }
 
 void generate_training_options()
@@ -142,6 +155,68 @@ void generate_training_options()
    }
 
    add_start(({ "$ask_learn$" }));
+
+   foreach (string specialization in sort_array(keys(trainable_specializations), 1))
+   {
+      string guild = specialization_guilds[specialization];
+      string player_specialization = player->query_guild_specialization(guild);
+      int rank = player->query_guild_specialization_rank(guild, specialization);
+
+      if (!strlen(player_specialization)
+         || ((player_specialization == specialization) && (rank < 10)))
+      {
+         if (player_specialization == specialization)
+         {
+            if (rank < 9)
+            {
+               add_options(([ "$specialize$" + specialization : "I would like to further my " + title_capitalize(specialization) + " specialization in the " + title_capitalize(guild) + " guild." ]));
+            }
+            else
+            {
+               add_options(([ "$specialize$" + specialization : "I would like to complete my " + title_capitalize(specialization) + " specialization in the " + title_capitalize(guild) + " guild." ]));
+            }
+         }
+         else
+         {
+            add_options(([ "$specialize$" + specialization : "I would like to begin the " + title_capitalize(specialization) + " specialization in the " + title_capitalize(guild) + " guild." ]));
+         }
+
+         add_responses(([ "$specialize$" + specialization : "$specialize$" + specialization + "@@@@" + "$clear$" ]));
+         add_start(({ "$specialize$" + specialization }));
+      }
+   }
+}
+
+void specialize(string specialization)
+{
+   object player = get_current_player();
+   string guild = specialization_guilds[specialization];
+
+   if (player->query_guild_specialization(guild) == specialization)
+   {
+      int rank = player->query_guild_specialization_rank(guild, specialization);
+
+      if (rank < 10)
+      {
+         player->add_guild_specialization(guild, specialization);
+
+         do_game_command("say You have achieved Rank " + (rank + 1) + " of the " + title_capitalize(specialization) + " specialization in the " + title_capitalize(guild) + " guild" + (rank >= 9 ? ", and your specialization is now complete." : "") + ".");
+      }
+      else
+      {
+         do_game_command("say You have already achieved Rank 10 of the " + title_capitalize(specialization) + " specialization in the " + title_capitalize(guild) + " guild.  Please tell a wizard that you got this message.");
+      }
+   }
+   else if (strlen(player->query_guild_specialization(guild)))
+   {
+      do_game_command("say You are already specialized in " + title_capitalize(player->query_guild_specialization(guild)) + " for the " + title_capitalize(guild) + " guild.");
+   }
+   else
+   {
+      player->set_guild_specialization(guild, specialization, 1);
+
+      do_game_command("say You have achieved Rank 1 of the " + title_capitalize(specialization) + " specialization in the " + title_capitalize(guild) + " guild.");
+   }
 }
 
 void train(string ability)
@@ -155,7 +230,6 @@ void advance(string guild)
 {
    object player = get_current_player();
    int required_experience = player->get_experience_to_advance_guild(guild);
-   int hp_gain;
    string primary_guild = player->query_primary_guild();
 
    if ((player->query_guild_level(guild) >= 20) && (player->query_guild_rank(guild) < 2))
@@ -209,11 +283,7 @@ void advance(string guild)
 
    tell(player, "You advance to level " + player->query_guild_level(guild) + " in " + title_capitalize(guild) + " at the cost of " + required_experience + " experience.\n");
 
-   hp_gain = player->get_hp_gain((guild == primary_guild) ? 1 : 0);
-
-   player->set_max_health(player->query_max_health() + hp_gain);
-
-   tell(player, "You gain " + hp_gain + " hit points.\n");
+   player->refresh_stats();
 }
 
 void join(string guild)
@@ -250,10 +320,26 @@ varargs void set_trainable_ability(string ability, mapping prerequisites)
 
       if (sizeof(prerequisites))
       {
-         foreach (string key in keys(prerequisites))
-         {
-            trainable_abilities[ability] += ([ key : (prerequisites[key] < 100 ? prerequisites[key] * 100 : prerequisites[key]) ]);
-         }
+//         foreach (string key in keys(prerequisites))
+//         {
+//            trainable_abilities[ability] += ([ key : (prerequisites[key] < 100 ? prerequisites[key] * 100 : prerequisites[key]) ]);
+//         }
+
+           trainable_abilities[ability] = prerequisites;
+      }
+   }
+}
+
+varargs void set_trainable_specialization(string guild, string specialization, mapping prerequisites)
+{
+   if (strlen(specialization) && (member_array(specialization, keys(trainable_specializations)) == -1))
+   {
+      trainable_specializations[specialization] = ([ ]);
+      specialization_guilds[specialization] = guild;
+
+      if (sizeof(prerequisites))
+      {
+         trainable_specializations[specialization] = prerequisites;
       }
    }
 }

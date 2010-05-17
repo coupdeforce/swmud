@@ -1,33 +1,10 @@
-// Last edited by deforce on 09-28-2008
-inherit "/std/effect";
-
-int poison_strength = 1;
-
-//:FUNCTION set_poison_strength
-void set_poison_strength(int strength)
-{
-   poison_strength = strength;
-}
-
-int query_poison_strength()
-{
-   return poison_strength;
-}
-
-void add_poison_strength(int strength)
-{
-   if ((poison_strength + strength) <= 0)
-   {
-      poison_strength = 0;
-   }
-
-   poison_strength += strength;
-}
+// Last edited by deforce on 09-26-2009
+inherit "/std/effect/poison_blue";
 
 void setup(object target, object source, object apparatus, int rank, int level)
 {
    int damage = (rank * 2) + random(ceil(level / 5.0) + 5);
-   poison_strength = rank + ceil(level / 10.0) + 2;
+   set_poison_strength(rank + to_int(ceil(level / 10.0)) + 2);
 
    if (!present("inject_damage", source))
    {
@@ -39,39 +16,8 @@ void setup(object target, object source, object apparatus, int rank, int level)
    source->start_fight(target);
    source->handle_events();
 
-   set_effect_duration(poison_strength);
+   set_effect_duration(query_poison_strength());
    set_effect_delay(12);
    set_effect_type("poison damage");
    set_effect_name("poison");
-}
-
-void do_effect(object ob)
-{
-   if (poison_strength > 0)
-   {
-      int constitution;
-      int damage = (poison_strength / 2) + random((poison_strength / 2) + 1);
-
-      ob->refresh_stats();
-
-      constitution = ob->query_con();
-
-      if ((constitution >= 50) && (damage > constitution)) { damage = constitution; }
-
-      ob->simple_action("$N $vreel in pain from the poison.");
-      ob->weaken_us(damage);
-
-      poison_strength -= ceil(constitution / 10) + random((constitution / 10) + 1) + 1;
-   }
-
-   if (poison_strength <= 0)
-   {
-      destruct(this_object());
-   }
-}
-
-void transfer_to_existing_effect(object new_effect)
-{
-   add_poison_strength(new_effect->query_poison_strength());
-   add_effect_duration(new_effect->query_poison_strength());
 }

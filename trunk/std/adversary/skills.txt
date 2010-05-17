@@ -1,4 +1,4 @@
-// Last edited by deforce on 11-15-2007
+// Last edited by deforce on 12-05-2007
 #include <classes.h>
 
 inherit CLASS_SKILL;
@@ -162,10 +162,11 @@ int query_skill(string skill)
 // Attempts to learn a skill
 void learn_skill(string skill, int value)
 {
-   int my_skill;
+   int skill_value;
    int advrate;
    mixed skill_data;
    int roll;
+   float chance;
 
    skill_data = SKILL_D->query_skill(skill);
 
@@ -177,23 +178,37 @@ void learn_skill(string skill, int value)
       //return;
    }
 
-   my_skill = skills[skill];
+   skill_value = skills[skill];
 
-   if (my_skill < 1000)
+   if (skill_value < 1000)
    {
-      // random 1 through skill advancement rate.
       advrate = skill_data[1];
 
-      roll = random(10000);
-      // write("DEBUG: adjusting roll by " + (my_skill / 100) + ".\n");
-      roll += my_skill / (100 - value);
+      roll = random(skill_value * 10);
+      chance = (value + skill_value) * ((1000 - skill_value) / 100);
+      chance *= (advrate / 100);
 
-      // write("DEBUG: Learn Roll " + roll + " out of " + advrate + ".\n");
-      if (roll < advrate)
+      if (chance > 950) { chance = 950; }
+      else if (chance < 200) { chance = 200; }
+
+      chance /= 10;
+
+      // Debug code for advance roll
+      tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " advance roll for " + skill + ": Is " + roll + " (" + (skill_value * 10) + ") less than " + to_int(ceil(chance)) + "?\n");
+
+      if (roll < ceil(chance))
       {
-         // yay, advance.
+         // Advance
          skills[skill] += 1;
-         tell(this_object(), "%^SKILL_IMPROVE%^You notice improvement in " + skill_data[0] + ".%^RESET%^\n");
+
+         if (skills[skill] % 100)
+         {
+            tell(this_object(), "%^SKILL_IMPROVE%^You notice improvement in " + skill_data[0] + ".%^RESET%^\n");
+         }
+         else
+         {
+            tell(this_object(), "%^SKILL_IMPROVE%^You have acheived Rank " +  (skills[skill] / 100) + " in " + skill_data[0] + ".%^RESET%^\n");
+         }
       }
    }
 }
@@ -208,16 +223,15 @@ int test_skill(string skill, int adjustment)
    int destination_value;
    int stat_bonus = get_stat_bonus(skill);
 
-   if (skill_value < 1000) { learn_skill(skill, stat_bonus); }
+   if (skill_value < 1000) { learn_skill(skill, stat_bonus + adjustment); }
 
    destination_value = skill_value + stat_bonus + adjustment;
 
    if (destination_value > 950) { destination_value = 950; }
-
-   if (destination_value < 10) { destination_value = 10; }
+   else if (destination_value < 10) { destination_value = 10; }
 
    // Debug code for skillrolls
-   tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill roll for " + skill + ": Is " + destination_valie + " more than " + roll + "?\n");
+   tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill roll for " + skill + ": Is " + destination_value + " more than " + roll + "?\n");
 
    // semi-hack.. return 1 if roll == 0, 1 in 1000 chance of success
    if (roll == 0) { return 1; }

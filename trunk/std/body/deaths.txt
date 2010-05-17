@@ -1,8 +1,9 @@
-// Last edited by deforce on 07-05-2008
+// Last edited by deforce on 07-10-2008
 #include <daemons.h>
 
-int has_status_line();
-void update_status_line();
+int query_max_health();
+void set_max_health(int value);
+int array query_guild_levels();
 int query_experience();
 void set_experience(int value);
 void set_primary_level(int value);
@@ -33,8 +34,6 @@ protected void add_a_death()
 
    deaths++;
    save_me();
-
-   if (has_status_line()) { update_status_line(); }
 }
 
 protected void death_penalty()
@@ -49,11 +48,12 @@ protected void death_penalty()
    {
       int killer_level = killer->query_primary_level();
       string killer_message = "You have killed " + capitalize(query_name()) + ", who is ";
-      killed_message += "You were killed by " + killer->short() + ", who is ";
+      killed_message += "You were killed by " + killer->in_room_desc() + ", who is ";
 
       if (killer_level > level)
       {
          int percent_lost = 50 - ((killer_level - level) * 5);
+         int required_experience;
 
          killed_message += (killer_level - level) + " levels higher than you.\n";
          killer_message += (killer_level - level) + " levels lower than you.\n";
@@ -61,6 +61,32 @@ protected void death_penalty()
          if (percent_lost < 1) { percent_lost = 1; }
 
          new_exp = floor(experience * ((100.0 - percent_lost) / 100.0));
+
+         if (query_primary_guild() == "jedi")
+         {
+            if (level < 20)
+            {
+               required_experience = EXP_D->get_required_exp("ronin jedi", level + 1);
+            }
+            else
+            {
+               required_experience = EXP_D->get_required_exp("secondary", level + 1);
+            }
+         }
+         else
+         {
+            required_experience = EXP_D->get_required_exp("primary", level + 1);
+         }
+
+         if ((experience >= floor(required_experience * 0.5))
+            && (new_exp < floor(required_experience * 0.5)))
+         {
+            new_exp = floor(required_experience * 0.5);
+         }
+         else if (experience < floor(required_experience * 0.5))
+         {
+            new_exp = experience;
+         }
 
          killer->add_experience(experience - new_exp);
       }
@@ -71,9 +97,40 @@ protected void death_penalty()
          killed_message += (level - killer_level) + " levels lower than you.\n";
          killer_message += (level - killer_level) + " levels higher than you.\n";
 
-         if (percent_lost > 100) { percent_lost = 100; }
+         if (percent_lost > 50) { percent_lost = 50; }
 
          new_exp = floor(experience * ((100.0 - percent_lost) / 100.0));
+
+         if (level < 50)
+         {
+            int required_experience;
+
+            if (query_primary_guild() == "jedi")
+            {
+               if (level < 20)
+               {
+                  required_experience = EXP_D->get_required_exp("ronin jedi", level + 1);
+               }
+               else
+               {
+                  required_experience = EXP_D->get_required_exp("secondary", level + 1);
+               }
+            }
+            else
+            {
+               required_experience = EXP_D->get_required_exp("primary", level + 1);
+            }
+
+            if ((experience >= floor(required_experience * 0.5))
+               && (new_exp < floor(required_experience * 0.5)))
+            {
+               new_exp = floor(required_experience * 0.5);
+            }
+            else if (experience < floor(required_experience * 0.5))
+            {
+               new_exp = experience;
+            }
+         }
 
          killer->add_experience(experience - new_exp);
       }
@@ -84,6 +141,37 @@ protected void death_penalty()
 
          new_exp = experience / 2;
 
+         if (level < 50)
+         {
+            int required_experience;
+
+            if (query_primary_guild() == "jedi")
+            {
+               if (level < 20)
+               {
+                  required_experience = EXP_D->get_required_exp("ronin jedi", level + 1);
+               }
+               else
+               {
+                  required_experience = EXP_D->get_required_exp("secondary", level + 1);
+               }
+            }
+            else
+            {
+               required_experience = EXP_D->get_required_exp("primary", level + 1);
+            }
+
+            if ((experience >= floor(required_experience * 0.5))
+               && (new_exp < floor(required_experience * 0.5)))
+            {
+               new_exp = floor(required_experience * 0.5);
+            }
+            else if (experience < floor(required_experience * 0.5))
+            {
+               new_exp = experience;
+            }
+         }
+
          killer->add_experience(experience - new_exp);
       }
 
@@ -92,24 +180,38 @@ protected void death_penalty()
    }
    else if (killer && (killer != this_object()) && (environment(killer) != this_object()))
    {
-      killed_message += "You were killed by " + killer->short() + ".\n";
+      killed_message += "You were killed by " + killer->in_room_desc() + ".\n";
 
       if (level > 1)
       {
          int needed_exp;
          int exp_penalty = 50;
          int kept_exp;
+         int max_health = query_max_health();
+         int new_max_health = max_health;
+         float level_count = 0.0;
          new_exp = experience;
 
          set_primary_level(level - 1);
 
          killed_message += "Your primary guild, " + capitalize(query_primary_guild()) + ", has been decreased to level " + (level - 1) + ".\n";
 
+         foreach (int value in query_guild_levels())
+         {
+            level_count += value;
+         }
+
+         new_max_health -= ceil(((max_health * (level / level_count)) * 150.0) / (level * 100.0));
+
          foreach (string guild in query_guild_names())
          {
-            if (query_guild_level(guild) >= level)
+            int secondary_level = query_guild_level(guild);
+
+            if (secondary_level >= level)
             {
                set_guild_level(guild, level - 1);
+
+               new_max_health -= ((secondary_level + 1 - level) * ceil(((max_health * ((level_count - level) / level_count)) * 75.0) / (level * 100.0)));
 
                killed_message += "Your " + capitalize(guild) + " level has been decreased to " + (level - 1) + ".\n";
             }
@@ -119,14 +221,22 @@ protected void death_penalty()
          {
             foreach (string guild in query_guild_names())
             {
-               if (query_guild_level(guild) <= 10)
+               int fourth_guild_level = query_guild_level(guild);
+
+               if (fourth_guild_level <= 10)
                {
                   remove_guild(guild);
+
+                  new_max_health -= (fourth_guild_level * ceil(((max_health * ((level_count - level) / level_count)) * 75.0) / (level * 100.0)));
 
                   killed_message += "Your membership in the " + capitalize(guild) + " guild has been lost.\n";
                }
             }
          }
+
+         killed_message += "You lose " + (max_health - new_max_health) + " hit points.\n";
+
+         set_max_health(new_max_health);
 
          needed_exp = get_experience_to_advance_guild(query_primary_guild());
 

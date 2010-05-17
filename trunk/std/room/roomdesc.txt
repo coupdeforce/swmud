@@ -1,4 +1,4 @@
-// Last edited by deforce on 06-24-2008
+// Last edited by deforce on 06-30-2008
 #include <playerflags.h>
 
 private nosave string remote_desc;
@@ -15,10 +15,9 @@ private nosave int this_look_is_forced;
 varargs string show_objects(object except)
 {
    object *obs;
-   string user_show;
-   string obj_show;
+   string array user_show = ({ });
+   string array obj_show = ({ });
    string str;
-   int n;
    object link;
 
    obs = filter(all_inventory() - ({ this_body() }), (: $1->is_visible() :));
@@ -28,49 +27,31 @@ varargs string show_objects(object except)
       obs -= ({ except });
    }
 
-   n = sizeof(obs);
-   user_show = "";
-   obj_show = "";
+   if (!sizeof(obs)) { return ""; }
 
-   while (n--)
+   foreach (object thing in obs)
    {
-      if (obs[n]->is_living())
+      if (thing->is_living())
       {
-         if ((link = obs[n]->query_link()) && userp(link))
-         {
-            user_show += obs[n]->in_room_desc() + "\n";
-            continue;
-         }
-
-         str = obs[n]->in_room_desc();
-
-         if (strlen(str))
-         {
-            if (except)
-            {
-               str += sprintf(" (outside %s)", except->the_short());
-            }
-
-            obj_show += str + "\n";
-         }
+         user_show += ({ thing->in_room_desc() });
       }
       else
       {
-         if (!duplicatep(obs[n]))
+         if (!duplicatep(thing))
          {
-            if ((str = obs[n]->show_in_room()) && strlen(str))
+            if ((str = thing->show_in_room()) && strlen(str))
             {
                if (except)
                {
                   str += sprintf(" (outside %s)", except->the_short());
                }
 
-               obj_show += str + obs[n]->get_attributes() + "\n";
+               obj_show += ({ str + thing->get_attributes() });
             }
 
-            if (obs[n]->inventory_visible() && !obs[n]->query_hide_contents())
+            if (thing->inventory_visible() && !thing->query_hide_contents())
             {
-               obj_show += obs[n]->show_contents();
+               obj_show += ({ thing->show_contents() });
             }
          }
       }
@@ -78,20 +59,10 @@ varargs string show_objects(object except)
 
    if (except) // We're inside an object
    {
-      obj_show += except->inventory_recurse(0,this_body());
+      obj_show += ({ except->inventory_recurse(0, this_body()) });
    }
 
-   if (user_show != "")
-   {
-      if (obj_show != "")
-      {
-         obj_show += "\n";
-      }
-
-      obj_show += user_show;
-   }
-
-   return obj_show;
+   return (sizeof(user_show) ? "\n%^ROOM_LIVINGS%^" + implode(user_show, "\n") + "%^RESET%^" : "") + (sizeof(user_show) && sizeof(obj_show) ? "\n" : "") + (sizeof(obj_show) ? "\n%^ROOM_OBJECTS%^" + implode(obj_show, ", ") + "%^RESET%^" : "") + "\n";
 }
 
 protected int dont_show_long()

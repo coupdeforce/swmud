@@ -1,9 +1,7 @@
-#include <bodyslots.h>
-
+// Last edited by deforce on 06-09-2008
 inherit CLASS_BODYSLOTS;
 
-// Set some defaults. If you want other ones, override this.
-private mapping slots = ([
+private mapping armor_slots = ([
    "torso" : new(class slot, howmany: 1, name: "torso", max_size: LARGE, stuff: ({ })),
    "head" : new(class slot, howmany: 1, name: "head",  max_size: LARGE, stuff: ({ })),
    "left arm" : new(class slot, howmany: 1, name: "left arm",  max_size: LARGE, stuff: ({ })),
@@ -14,22 +12,24 @@ private mapping slots = ([
    "right hand" : new(class slot, howmany: 1, name: "right hand", max_size: LARGE, stuff: ({ })),
    "left foot" : new(class slot, howmany: 1, name: "left foot",  max_size: LARGE, stuff: ({ })),
    "right foot" : new(class slot, howmany: 1, name: "right foot",  max_size: LARGE, stuff: ({ })),
+]);
 
    // These are non-armor slots which can wear things, but don't offer any standard protection.
+private mapping clothing_slots = ([
    "neck" : new(class slot, howmany : 1, name : "neck", max_size : LARGE, non_armor : 1, stuff : ({ })),
    "waist" : new(class slot, howmany : 1, name : "waist", max_size : LARGE, non_armor : 1, stuff : ({ })),
 ]);
 
 protected nomask void set_body_slots(mapping what)
 {
-   slots = what;
+   body_slots = what;
 }
 
 protected nomask void add_body_slot(string sname, int num, int maxsize)
 {
-   if (slots[sname]) { error("Duplicate slot\n"); }
+   if (body_slots[sname]) { error("Duplicate slot\n"); }
 
-   slots[sname] = new(class slot, howmany: num, name: sname, stuff: ({ }), max_size: maxsize);
+   body_slots[sname] = new(class slot, howmany: num, name: sname, stuff: ({ }), max_size: maxsize);
 }
 
 #define SLOT(x) ((class slot)slots[x])
@@ -78,9 +78,9 @@ nomask string query_random_armor_slot()
 {
    string tmp;
 
-   if (!sizeof(slots)) { return 0; }
+   if (!sizeof(body_slots)) { return 0; }
 
-   tmp = choice(keys(slots));
+   tmp = choice(keys(body_slots));
 
    if (!tmp) { return 0; }
 
@@ -102,9 +102,24 @@ nomask mixed get_random_clothing()
    return choice(tmp->stuff);
 }
 
-protected nomask void reset_body_slots()
+nomask void reset_body_slots()
 {
-   slots = ([ ]);
+   slots = ([
+      "torso" : new(class slot, howmany: 1, name: "torso", max_size: LARGE, stuff: ({ })),
+      "head" : new(class slot, howmany: 1, name: "head",  max_size: LARGE, stuff: ({ })),
+      "left arm" : new(class slot, howmany: 1, name: "left arm",  max_size: LARGE, stuff: ({ })),
+      "right arm" : new(class slot, howmany: 1, name: "right arm",  max_size: LARGE, stuff: ({ })),
+      "left leg" : new(class slot, howmany: 1, name: "left leg",  max_size: LARGE, stuff: ({ })),
+      "right leg" : new(class slot, howmany: 1, name: "right leg",  max_size: LARGE, stuff: ({ })),
+      "left hand" : new(class slot, howmany: 1, name: "left hand", max_size: LARGE, stuff: ({ })),
+      "right hand" : new(class slot, howmany: 1, name: "right hand", max_size: LARGE, stuff: ({ })),
+      "left foot" : new(class slot, howmany: 1, name: "left foot",  max_size: LARGE, stuff: ({ })),
+      "right foot" : new(class slot, howmany: 1, name: "right foot",  max_size: LARGE, stuff: ({ })),
+
+      // These are non-armor slots which can wear things, but don't offer any standard protection.
+      "neck" : new(class slot, howmany : 1, name : "neck", max_size : LARGE, non_armor : 1, stuff : ({ })),
+      "waist" : new(class slot, howmany : 1, name : "waist", max_size : LARGE, non_armor : 1, stuff : ({ })),
+   ]);
 }
 
 //:FUNCTION has_body_slot
