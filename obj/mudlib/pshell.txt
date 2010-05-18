@@ -105,7 +105,14 @@ protected void execute_command(string original_input)
 
    // END OF EXPANSION
 
-   winner = CMD_D->find_cmd_in_path(argv[0], ({ CMD_DIR_PLAYER "/" }));
+   if (is_file("/cmds/guild/jedi/" + argv[0] + ".c") && !this_body()->can_feel_force())
+   {
+      write("You are unable to feel the Force.\n");
+      return;
+   }
+
+   winner = CMD_D->find_cmd_in_path(argv[0], ({ "/cmds/player", "/cmds/race" }) + query_path());
+
    if (!arrayp(winner))
    {
       string channel_name;

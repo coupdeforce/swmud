@@ -24,8 +24,7 @@ int query_n_gen();
 void incarnate(int isnew, string bfn);
 
 // The file name for the body object
-private string          body_fname;
-private string          format;
+private string body_fname;
 
 // The body object once it has been instantiated
 nosave private object body;
@@ -157,9 +156,11 @@ private nomask void incarnate(int is_new, string bfn)
    {
       //new(PLAYER_MENU)->start_menu();
 
+      this_body()->move(CREATE_ROOM);
       this_body()->init_stats();
-      this_body()->set_max_health(24);
-      this_body()->set_health(24);
+      this_body()->set_max_health(20);
+      this_body()->set_health(20);
+      this_body()->add_experience(1000);
       this_user()->query_shell_ob()->set_variable("path", ({ "/cmds/player" }));
       this_user()->query_shell_ob()->set_variable("PROMPT", "%h/%m > ");
       this_body()->set_points_remaining(225);
@@ -293,6 +294,16 @@ void got_entry(function when_done, string line)
 
    if (line == "list")
    {
+      string format;
+      int width = 0;
+
+      foreach (string name in races)
+      {
+         if (strlen(name) > width) { width = strlen(name); }
+      }
+
+      format = "%#-75." + (75 / (width + 3)) + "s\n\n";
+
       write("Please select a race from the following list:\n");
       printf(format, implode(sort_array(keys(races), 1), "\n"));
       return;
@@ -331,8 +342,6 @@ void create_body()
 
    string array races = sort_array(RACE_D->query_races(), 1);
    function when_done = (: incarnate, 1 :);
-   int width = 0;
-
 
    if (sizeof(races) == 1)
    {
@@ -342,6 +351,9 @@ void create_body()
    }
    else
    {
+      string format;
+      int width = 0;
+
       foreach (string name in races)
       {
          if (strlen(name) > width) { width = strlen(name); }

@@ -59,7 +59,6 @@ private void main(string who)
    else { info->spouse = "Married to " + capitalize(info->spouse); }
    if (!info->real_name) { info->real_name = ""; }
    if (!info->email) { info->email = ""; }
-   if (!info->nickname) { info->nickname = ""; }
    if (!info->position) { info->position = ""; }
    else { info->position = " Position: " + info->position; }
 
@@ -80,12 +79,12 @@ private void main(string who)
 
    if (info->mail_unread > 0)
    {
-      mailstring = info->visname + " has " + info->mail_unread + " unread message";
+      mailstring = capitalize(who) + " has " + info->mail_unread + " unread message";
       mailstring += (info->mail_unread > 1 ? "s" : "") + ".";
    }
-   else { mailstring = info->visname + " has no unread mail."; }
+   else { mailstring = capitalize(who) + " has no unread mail."; }
 
-   output += sprintf("%s\n", (info->title ? info->title : info->visname));
+   output += (info->title ? info->title : capitalize(who)) + "\n";
    if (info->describe) { output += info->describe + "\n"; }
    if (!wizardp(who)) { output += sprintf("%-45s Level: %i\n", sprintf("%s %s of the %s", sex, title_capitalize(info->race), (strlen(info->primary_guild) ? title_capitalize(get_guild_plural(info->primary_guild)) : "Players")), info->primary_level); }
    else
@@ -100,7 +99,6 @@ private void main(string who)
 
       output += sprintf("%-45s Level: %s\n", sprintf("%s %s of the %s", sex, title_capitalize(info->race), "Wizards"), wizard_title);
    }
-//   output += sprintf("Nickname: %-29s\n", info->nickname);
 //   output += sprintf("Team: %s %s\n", team, info->position);
    if (!wizardp(who)) { output += sprintf("Team: %s\n", team); }
    output += sprintf("In real life: %-31s %s\n", info->real_name[0..31], info->spouse);

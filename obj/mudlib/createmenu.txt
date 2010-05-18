@@ -1,4 +1,4 @@
-// Last edited by deforce on 03-10-2008
+// Last edited by deforce on 03-14-2008
 // @./path/createmenu->start_menu()
 #include <mudlib.h>
 #include <playerflags.h>
@@ -279,7 +279,7 @@ void set_human_sacrifice(string stat)
       return;
    }
 
-   this_body()->set_human_race_sacrifice_attribute(stat_shortname);
+   this_body->set_human_race_sacrifice_attribute(stat_shortname);
 
    write("\n%^BOLD%^%^RED%^Set " + get_stat_full_name(stat) + " as your sacrifice attribute.%^RESET%^\n");
 }
