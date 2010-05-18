@@ -1,4 +1,4 @@
-// Last edited by deforce on 12-05-2007
+// Last editied by deforce on 06-02-2008
 #include <playerflags.h>
 
 inherit CMD;
@@ -19,30 +19,31 @@ string get_who_string()
 {
    string output = "";
    string array users_all = sort_array(bodies()->query_userid(), 1);
-   string array users_admin;
    string array users_wizard;
    string array users_player;
 
-   users_admin = filter_array(users_all, (: adminp($1) :));
-   users_wizard = filter_array(filter_array(users_all, (: !adminp($1) :)), (: wizardp($1) :));
+   users_wizard = filter_array(users_all, (: wizardp($1) :));
    users_player = filter_array(users_all, (: !wizardp($1) :));
 
    output += "\n\n%^CYAN%^" + colour_center(implode(explode(upper_case(mud_name()), ""), " ")) + "%^RESET%^\n";
    output += "%^CYAN%^" + colour_center(ctime(time()) + "   -   " + sizeof(users_all) + " adventurers") + "%^RESET%^\n";
    output += DELIM;
 
-   foreach (string user in users_admin)
+   for (int count = 0; count < sizeof(users_wizard); count++)
    {
-      object body = find_body(user);
+      object body = find_body(users_wizard[count]);
+      int wizard_level = SECURE_D->query_is_wizard(users_wizard[count]);
 
-      if (body && (body->is_visible() || wizardp(this_body())))
-      {
-         string line = "%^BOLD%^[Admin] ";
+      users_wizard[count] = sprintf("%02d", wizard_level) + ":::" + users_wizard[count];
+   }
 
-         line += format_status(user);
+   users_wizard = sort_array(users_wizard, "sort_level_name");
 
-         output += show_location(line, body) + "\n";
-      }
+   for (int count = 0; count < sizeof(users_wizard); count++)
+   {
+      string array name = explode(users_wizard[count], ":::");
+
+      users_wizard[count] = name[1];
    }
 
    foreach (string user in users_wizard)
@@ -51,9 +52,15 @@ string get_who_string()
 
       if (body && (body->is_visible() || wizardp(this_body())))
       {
-         string line = "%^BOLD%^[Wizard] ";
+         int wizard_level = SECURE_D->query_is_wizard(user);
+         string line = "%^BOLD%^[";
 
-         line += format_status(user);
+         if (wizard_level > 3) { line += "Grand Moff"; }
+         else if (wizard_level > 2) { line += "Moff"; }
+         else if (wizard_level > 1) { line += "Officer"; }
+         else if (wizard_level > 0) { line += "Cadet"; }
+
+         line += "] " + format_status(user);
 
          output += show_location(line, body) + "\n";
       }
@@ -82,8 +89,7 @@ string get_who_string()
 
       if (body)
       {
-         string primary_guild = body->query_primary_guild();
-         string line = get_guild_color(primary_guild);
+         string line = get_guild_color(body->query_primary_guild());
 
          line += format_status(user);
 
@@ -149,11 +155,13 @@ string format_status(string user)
    if (!wizardp(body)) { output += sprintf("[%2i] ", body->query_primary_level()); }
 
    if (body->test_flag(F_IN_EDIT)) { output += (wizardp(user) ? "** " : "*"); }
+   output += (body->get_target() ? "!" : "");
    output += (!body->is_visible() ? "(" : "");
 
-   output += replace_string((user_info->title ? user_info->title : user_info->visname), "%^RESET%^", "");
+   output += replace_string((body->query_title()), "%^RESET%^", "");
 
    output += (!body->is_visible() ? ")" : "");
+   output += (body->get_target() ? "!" : "");
    if (body->test_flag(F_IN_EDIT)) { output += (wizardp(user) ? " **" : "*"); }
 
    output += " (" + title_capitalize(user_info->race) + ")";

@@ -1,4 +1,4 @@
-// Last modified by deforce on 12-10-2007
+// Last modified by deforce on 12-20-2007
 #include <mudlib.h>
 #include <channel.h>
 
@@ -6,109 +6,164 @@ inherit CMD;
 
 #include <channel_associations.h>
 
+#define WIDTH this_user()->query_screen_width()
+
 void main()
 {
    string array channels = sort_array(CHANNEL_D->query_channels(), 1);
+   string array lines = ({ });
+   float columns = floor(WIDTH / (wizardp(this_user()) ? 33 : 20));
+   int line_count;
+
+   if (columns > 1) { columns = floor((WIDTH - ((columns - 1) * 4)) / (wizardp(this_user()) ? 33 : 20)); }
 
    if (sizeof(channels))
    {
       string array listening = this_user()->query_channel_list();
-
-      out("\n\n" + sprintf("%-14s %-13s %s\n", "Name", "Status", "Availability"));
-      out(repeat_string("-", 47) + "\n");
+      string output;
+      int flags;
 
       foreach (string chan in channels)
       {
-         int flags = CHANNEL_D->query_flags(chan);
+         flags = CHANNEL_D->query_flags(chan);
 
          if (flags & CHANNEL_ADMIN_ONLY)
          {
-            if (adminp(this_user()))
+            if (adminp(this_user()) || (SECURE_D->query_is_wizard(this_user()->query_userid()) > 2))
             {
-               out(sprintf("%-14s %-13s %s\n", chan,
-                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-                  "admin" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+               output = sprintf("%-12s  %-6s  %-11s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"),
+                  "admin" + ((flags & CHANNEL_PERMANENT) ? ", perm" : ", temp"));
             }
          }
          else if (flags & CHANNEL_WIZ_ONLY)
          {
             if (wizardp(this_user()))
             {
-               out(sprintf("%-14s %-13s %s\n", chan,
-                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-                  "wizard" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+               output = sprintf("%-12s  %-6s  %-11s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"),
+                  "wiz" + ((flags & CHANNEL_PERMANENT) ? ", perm" : ", temp"));
             }
          }
          else if (flags & CHANNEL_TEAM_ONLY)
          {
             if (wizardp(this_user()))
             {
-               out(sprintf("%-14s %-13s %s\n", chan,
-                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-                  "team" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+               output = sprintf("%-12s  %-6s  %-11s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"),
+                  "team" + ((flags & CHANNEL_PERMANENT) ? ", perm" : ", temp"));
             }
             else if (channel_teams[this_body()->query_team()] == chan)
             {
-               out(sprintf("%-14s %-13s %s\n", chan,
-                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-                  ((flags & CHANNEL_PERMANENT) ? "permanent" : "temporary")));
+               output = sprintf("%-12s  %-6s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"));
             }
          }
          else if (flags & CHANNEL_GUILD_ONLY)
          {
             if (wizardp(this_user()))
             {
-               out(sprintf("%-14s %-13s %s\n", chan,
-                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-                  "guild" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+               output = sprintf("%-12s  %-6s  %-11s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"),
+                  "guild" + ((flags & CHANNEL_PERMANENT) ? ", perm" : ", temp"));
             }
             else if ((this_body()->query_primary_guild() == chan)
                || (channel_guilds[this_body()->query_primary_guild()] == chan))
             {
-               out(sprintf("%-14s %-13s %s\n", chan,
-                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-                  ((flags & CHANNEL_PERMANENT) ? "permanent" : "temporary")));
+               output = sprintf("%-12s  %-6s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"));
             }
          }
          else if (flags & CHANNEL_RACE_ONLY)
          {
             if (wizardp(this_user()))
             {
-               out(sprintf("%-14s %-13s %s\n", chan,
-                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-                  "race" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+               output = sprintf("%-12s  %-6s  %-11s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"),
+                  "race" + ((flags & CHANNEL_PERMANENT) ? ", perm" : ", temp"));
             }
             else if ((this_body()->query_race() == chan)
                || (channel_races[this_body()->query_race()] == chan))
             {
-               out(sprintf("%-14s %-13s %s\n", chan,
-                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-                  ((flags & CHANNEL_PERMANENT) ? "permanent" : "temporary")));
+               output = sprintf("%-12s  %-6s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"));
             }
          }
          else if (flags & CHANNEL_PK_ONLY)
          {
             if (wizardp(this_user()))
             {
-               out(sprintf("%-14s %-13s %s\n", chan,
-                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-                  "pk" + ((flags & CHANNEL_PERMANENT) ? ", permanent" : ", temporary")));
+               output = sprintf("%-12s  %-6s  %-11s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"),
+                  "pk" + ((flags & CHANNEL_PERMANENT) ? ", perm" : ", temp"));
             }
             else if (this_body()->is_player_killer())
             {
-               out(sprintf("%-14s %-13s %s\n", chan,
-                  ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-                  ((flags & CHANNEL_PERMANENT) ? "permanent" : "temporary")));
+               output = sprintf("%-12s  %-6s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"));
             }
          }
          else
          {
-            out(sprintf("%-14s %-13s %s\n", chan,
-               ((member_array(chan, listening) > -1) ? "listening" : "blocking"),
-               ((flags & CHANNEL_PERMANENT) ? "permanent" : "temporary")));
+            if (wizardp(this_user()))
+            {
+               output = sprintf("%-12s  %-6s  %-11s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"),
+                  ((flags & CHANNEL_PERMANENT) ? "perm" : "temp"));
+            }
+            else
+            {
+               output = sprintf("%-12s  %-6s", chan,
+                  ((member_array(chan, listening) > -1) ? "on" : "off"));
+            }
+         }
+
+         lines += ({ output });
+      }
+
+//      lines = sort_array(lines, 1);
+      line_count = ceil(sizeof(lines) / columns);
+
+      if ((columns > 1) && (sizeof(lines) > 1))
+      {
+         if (wizardp(this_user()))
+         {
+            out(sprintf("\n\n%-12s  %-6s  %-11s", "Name", "Status", "Options") + repeat_string("     " + sprintf("%-12s  %-6s  %-11s", "Name", "Status", "Options"), columns - 1) + "\n");
+            out(repeat_string("-", 33) + repeat_string("     " + repeat_string("-", 33), columns - 1) + "\n");
+         }
+         else
+         {
+            out(sprintf("\n\n%-12s  %-6s", "Name", "Status") + repeat_string("     " + sprintf("%-12s  %-6s", "Name", "Status"), columns - 1) + "\n");
+            out(repeat_string("-", 20) + repeat_string("     " + repeat_string("-", 20), columns - 1) + "\n");
+         }
+      }
+      else
+      {
+         if (wizardp(this_user()))
+         {
+            out(sprintf("\n\n%-12s  %-6s  %-11s\n", "Name", "Status", "Options"));
+            out(repeat_string("-", 33) + "\n");
+         }
+         else
+         {
+            out(sprintf("\n\n%-12s  %-6s\n", "Name", "Status"));
+            out(repeat_string("-", 20) + "\n");
          }
       }
 
-      out("\n");
+      for (int count = 0; count < line_count; count++)
+      {
+         for (int column_count = 0; column_count < columns; column_count++)
+         {
+            int index = count + (line_count * column_count);
+
+            if (index < sizeof(lines))
+            {
+               out((column_count > 0 ? "     " : "") + lines[index]);
+            }
+         }
+
+         out("\n");
+      }
    }
 }

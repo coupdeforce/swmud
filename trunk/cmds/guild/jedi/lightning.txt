@@ -1,4 +1,4 @@
-// Last edited by deforce on 06-02-2008
+// Last edited by deforce on 06-12-2008
 inherit VERB_OB;
 inherit M_DAMAGE_SOURCE;
 
@@ -25,7 +25,6 @@ void do_lightning_obj(object thing)
       }
       else
       {
-         this_body->simple_action("$N $vdo lightning.");
          if (thing->is_adversary())
          {
             if (thing != this_body)
@@ -76,7 +75,7 @@ void zap_target(object thing)
    object this_body = this_body();
    int floor = get_floor();
    int ceiling = get_ceiling();
-   int amount = floor + random(ceiling - floor + 1);
+   int amount = (floor < ceiling ? floor + random(ceiling - floor + 1) : floor);
 
 //   this_body->simple_action("$N can do lightning from " + floor + " to " + ceiling + ", and had a damage roll of " + amount + ".\n");
 //   this_body->targetted_action("$N $vsend bolts of lightning from $p hands to $t!\n", thing);
@@ -97,9 +96,8 @@ int get_floor()
    object this_body = this_body();
    float force = this_body->query_for();
    float level = this_body->query_guild_level("jedi");
-   float skill = this_body->query_skill("lightning");
-   float level_mod = (skill >= 800 ? 1 : (skill >= 500 ? 2 : (skill >= 200 ? 3 : 4)));
-   int amount = ((level / level_mod) * (force / 100.0));
+   int rank = to_int(floor(this_body->query_skill("lightning") / 200.0));
+   int amount = ((level / (6 - rank)) * (force / 100.0));
 
    return (amount > 0 ? amount : 1);
 }
@@ -109,10 +107,8 @@ int get_ceiling()
    object this_body = this_body();
    float force = this_body->query_for();
    float level = this_body->query_guild_level("jedi");
-   float skill = this_body->query_skill("lightning");
-   float level_mod = (skill >= 100 ? 50 : 25);
-   float force_mod = (skill >= 700 ? 100 : (skill >= 400 ? 200 : 400));
-   int amount = ((force / 100.0) * (level / 50.0) * level_mod) + (force * (force / force_mod));
+   int rank = to_int(floor((this_body->query_skill("lightning") + 100) / 200.0));
+   int amount = ((level / (50.0 - (9.8 * rank))) * (force / 100.0)) + (force * (1 + (rank * 0.1)) * (force / (600.0 - (rank * 100.0))));
 
    return (amount > 0 ? amount : 1);
 }

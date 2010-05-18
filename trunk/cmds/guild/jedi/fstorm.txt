@@ -1,10 +1,7 @@
-// Last edited by deforce on 12-15-2007
-inherit CMD;
+// Last edited by deforce on 05-03-2010
+inherit CMD; 
 inherit M_EXIT;
 
-int get_floor();
-int get_ceiling();
-string format_time_left(int time);
 void storm_room(object room, int floor, int ceiling, int rounds);
 void concentration(object room);
 void damage_everything(object room, int damage);
@@ -26,17 +23,9 @@ void main(string arg)
 
    if (this_body->query_guild_level("jedi"))
    {
-      if (this_body->query_skill("lightning") < 1000)
-      {
-         write("You are not experienced enough to know how to create Force storms.\n");
-      }
-      else if (!this_body->has_learned_skill("force storm"))
+      if (!this_body->has_learned_skill("force storm"))
       {
          out("You have not learned how to create Force storms.\n");
-      }
-      else if (this_body->has_blocked_skill("force storm"))
-      {
-         out("Your ability to use this command has been disabled.\n");
       }
       else if (this_body->has_skill_delay())
       {
@@ -44,7 +33,7 @@ void main(string arg)
       }
       else if (this_body->has_special_skill_delay("force storm"))
       {
-         write("You need to wait " + format_time_left(this_body->has_special_skill_delay("force storm")) + " before you can create another Force storm.\n");
+         write("You need to wait " + convert_time(this_body->has_special_skill_delay("force storm")) + " before you can create another Force storm.\n");
       }
       else
       {
@@ -84,38 +73,6 @@ void main(string arg)
    }
 }
 
-string format_time_left(int time)
-{
-   string output = "";
-
-   if (time > 59)
-   {
-      if ((time / 60) > 0) { output += (time / 60) + " minute" + ((time / 60) != 1 ? "s" : "") + ", "; }
-   }
-
-   output += (time % 60) + " second" + ((time % 60) != 1 ? "s" : "");
-
-   return output;
-}
-
-int get_floor()
-{
-   float force = this_body->query_for();
-   float level = this_body->query_guild_level("jedi");
-   int amount = floor((level / 2.0) * (force / 100.0));
-
-   return (amount > 0 ? amount : 1);
-}
-
-int get_ceiling()
-{
-   float force = this_body->query_for();
-   float level = this_body->query_guild_level("jedi");
-   int amount = floor((level * 1.5) * (force / 100.0));
-
-   return (amount > 0 ? amount : 1);
-}
-
 void concentration(object room)
 {
    int alignment;
@@ -129,18 +86,27 @@ void concentration(object room)
 
    alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("lightning", alignment * (alignment < 0 ? -2 : -50)))
+   if (this_body->test_skill("force_storm", alignment * (alignment < 0 ? -5 : -20)))
    {
-      int rounds = floor(this_body->query_guild_level("jedi") / 10.0);
+      int level = this_body->query_guild_level("jedi");
+      int force = this_body->query_for();
+      int rank = this_body->query_skill("force_storm") / 100;
+      int spec = this_body->query_guild_specialization_rank("jedi", "destruction");
+      int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
+      int floor = level * force * rank_spec / 500;
+      int ceiling = level * rank_spec * force * force / 20000;
+      int rounds = 1 + (level / 20) + (level / 30) + (level / 50);
+      int delay = 600 - ((level + rank) * 2) - (spec * 12);
 
-//      this_body->simple_action("$N $vcreate a Force storm in " + room->short() + ", with " + get_floor() + " min and " + get_ceiling() + " max damage, lasting " + (rounds > 0 ? rounds : 1) + " rounds.\n");
+//      this_body->simple_action("$N $vcreate a Force storm in " + room->short() + ", with " + floor + " min and " + ceiling + " max damage, lasting " + rounds + " rounds.\n");
 
-      storm_room(room, get_floor(), get_ceiling(), (rounds > 0 ? rounds : 1));
+      this_body->add_special_skill_delay("force storm", delay);
+
+      storm_room(room, (floor > 0 ? floor : 1), (ceiling > level ? ceiling : level), rounds);
    }
    else
    {
       this_body->simple_action("$N $vlose focus.\n");
-      this_body->stun(8);
    }
 }
 
@@ -174,14 +140,21 @@ void storm_room(object room, int floor, int ceiling, int rounds)
 
 void damage_everything(object room, int damage)
 {
+   if (!present("force_storm", this_body))
+   {
+      load_object("/d/obj/force_damage");
+      new("/d/obj/force_damage", "Force storm", "force_storm")->move(this_body);
+      present("force_storm", this_body)->set_death_message("$N was killed by a Force storm created by $N1 at $o1.");
+   }
+
    foreach (object thing in all_inventory(room))
    {
       if (thing->is_adversary())
       {
-         thing->my_action("$N $vget blasted with wind, hail, and lightning.\n");
-         thing->other_action("$N $vscream in agony.\n");
+         this_body->add_event(thing, present("force_storm", this_body), thing->query_random_limb(), damage);
 
-         thing->hurt_us(damage, "random");
+         this_body->start_fight(thing);
+         this_body->handle_events();
       }
    }
 }

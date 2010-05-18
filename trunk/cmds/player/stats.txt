@@ -11,23 +11,12 @@ private void main(string arg)
 {
    object body;
    string name;
-   int stat_str, stat_con, stat_agi, stat_dex, stat_per, stat_int, stat_cha, stat_luc, stat_for;
 
    if (wizardp(this_body()) && find_body(arg)) { body = find_body(arg); }
    else { body = this_body(); }
 
    name = body->query_title();
    body->refresh_stats();
-
-   stat_str = body->query_str();
-   stat_con = body->query_con();
-   stat_agi = body->query_agi();
-   stat_dex = body->query_dex();
-   stat_per = body->query_per();
-   stat_int = body->query_int();
-   stat_cha = body->query_cha();
-   stat_luc = body->query_luc();
-   stat_for = body->query_for();
 
    out(BORDER + "\n");
 
@@ -36,26 +25,19 @@ private void main(string arg)
    out(SEPARATOR + "\n");
 
    outf("%-13s: %2d / %-2d    %-13s: %2d / %-2d\n",
-      "Strength", (stat_str / 5), (body->query_race_str_max() / 5),
-      "Intelligence", (stat_int / 5), (body->query_race_int_max() / 5));
+      "Strength", (body->query_str() / 5), (body->query_race_str_max() / 5),
+      "Intelligence", (body->query_int() / 5), (body->query_race_int_max() / 5));
    outf("%-13s: %2d / %-2d    %-13s: %2d / %-2d\n",
-      "Constitution", (stat_con / 5), (body->query_race_con_max() / 5),
-      "Charisma", (stat_cha / 5), (body->query_race_cha_max() / 5));
+      "Constitution", (body->query_con() / 5), (body->query_race_con_max() / 5),
+      "Charisma", (body->query_cha() / 5), (body->query_race_cha_max() / 5));
    outf("%-13s: %2d / %-2d    %-13s: %2d / %-2d\n",
-      "Agility", (stat_agi / 5), (body->query_race_agi_max() / 5),
-      "Luck", (stat_luc / 5), (body->query_race_luc_max() / 5));
+      "Agility", (body->query_agi() / 5), (body->query_race_agi_max() / 5),
+      "Luck", (body->query_luc() / 5), (body->query_race_luc_max() / 5));
    outf("%-13s: %2d / %-2d    %-13s: %2d / %-2d\n",
-      "Dexterity", (stat_dex / 5), (body->query_race_dex_max() / 5),
-      "Force", (stat_for / 5), (body->query_race_for_max() / 5));
+      "Dexterity", (body->query_dex() / 5), (body->query_race_dex_max() / 5),
+      "Force", (body->query_for() / 5), (body->query_race_for_max() / 5));
    outf("%-13s: %2d / %-2d\n",
-      "Perception", (stat_per / 5), (body->query_race_per_max() / 5));
-
-   out(SEPARATOR + "\n");
-
-   outf("Hit points: %-9s    %27s: %i%% %s\n",
-      sprintf("%i/%i", body->query_health(), body->query_max_health()),
-      "Carry weight", (body->query_capacity() > 0 ? ((body->query_capacity() * 100) / body->query_max_capacity()) : 0),
-      (wizardp(this_body()) ? "(" + body->query_capacity() + "/" + body->query_max_capacity() + ")" : ""));
+      "Perception", (body->query_per() / 5), (body->query_race_per_max() / 5));
 
    out(BORDER + "\n");
 }

@@ -1,4 +1,4 @@
-// Last editied by deforce on 03-08-2007
+// Last editied by deforce on 12-19-2007
 #include <playerflags.h>
 
 inherit CMD;
@@ -18,33 +18,30 @@ int sort_level_name(string first, string second);
 void main()
 {
    string output = "";
-   string title;
-   string array users_all = sort_array(bodies()->query_userid(), 1);
-   string array users_admin;
+   string array users_player = sort_array(bodies()->query_userid(), 1);
    string array users_wizard;
-   string array users_player;
 
-   users_admin = filter_array(users_all, (: adminp($1) :));
-   users_wizard = filter_array(filter_array(users_all, (: !adminp($1) :)), (: wizardp($1) :));
-   users_player = filter_array(users_all, (: !wizardp($1) :));
+   users_wizard = filter_array(users_player, (: wizardp($1) :));
+   users_player = filter_array(users_player, (: !wizardp($1) :));
 
-   title = ctime(time()) + "   -   " + implode(explode(upper_case(mud_name()), ""), " ") + "   -   ";
-   title += sizeof(users_all) + " adventurers%^RESET%^\n";
-   output += "\n\n%^CYAN%^" + colour_center(title);
+   output += "\n\n%^CYAN%^" + colour_center(ctime(time()) + "   -   " + implode(explode(upper_case(mud_name()), ""), " ") + "   -   " + sizeof(bodies()) + " adventurers%^RESET%^\n");
    output += DELIM;
 
-   foreach (string user in users_admin)
+   for (int count = 0; count < sizeof(users_wizard); count++)
    {
-      object body = find_body(user);
+      object body = find_body(users_wizard[count]);
+      int wizard_level = SECURE_D->query_is_wizard(users_wizard[count]);
 
-      if (body && (body->is_visible() || wizardp(this_body())))
-      {
-         string line = "  %^BOLD%^[Admin] ";
+      users_wizard[count] = sprintf("%02d", wizard_level) + ":::" + users_wizard[count];
+   }
 
-         line += format_status(user);
+   users_wizard = sort_array(users_wizard, "sort_level_name");
 
-         output += show_location(line, body) + "\n";
-      }
+   for (int count = 0; count < sizeof(users_wizard); count++)
+   {
+      string array name = explode(users_wizard[count], ":::");
+
+      users_wizard[count] = name[1];
    }
 
    foreach (string user in users_wizard)
@@ -53,15 +50,21 @@ void main()
 
       if (body && (body->is_visible() || wizardp(this_body())))
       {
-         string line = " %^BOLD%^[Wizard] ";
+         int wizard_level = SECURE_D->query_is_wizard(user);
+         string line = "%^BOLD%^[";
 
-         line += format_status(user);
+         if (wizard_level > 3) { line += "Grand Moff"; }
+         else if (wizard_level > 2) { line += "Moff"; }
+         else if (wizard_level > 1) { line += "Officer"; }
+         else if (wizard_level > 0) { line += "Cadet"; }
+
+         line += "] " + format_status(user);
 
          output += show_location(line, body) + "\n";
       }
    }
 
-   if (sizeof(users_player) && (sizeof(users_admin) || sizeof(users_wizard)))
+   if (sizeof(users_player) && sizeof(users_wizard))
    {
       output += DELIM;
    }
@@ -97,7 +100,7 @@ void main()
             object body;
             string user = "";
 
-            if (sizeof(users_player) > (count + (lines * line_count)))
+            if (sizeof(users_player) >= (count + (lines * line_count)))
             {
                user = users_player[count + (lines * line_count)];
                body = find_body(user);
