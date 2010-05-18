@@ -1,4 +1,4 @@
-// Last edited by deforce on 06-02-2008
+// Last edited by deforce 10-10-2009
 inherit VERB_OB;
 
 void perform_healing(object body);
@@ -19,9 +19,9 @@ void do_heal_liv(object living)
       {
          write(living->short() + " is too dedicated to the Dark side of the Force to be healed.\n");
       }
-      else if ((living != this_body) && (this_body->query_skill("force_healing") < 100))
+      else if (this_body->has_buff("/d/buffs/anger"))
       {
-         write("You are not experienced enough to heal another's wounds.\n");
+         write("You are too angry to use the Force for healing.\n");
       }
       else if (!this_body->has_learned_skill("force healing"))
       {
@@ -62,6 +62,8 @@ void do_heal_liv(object living)
          call_out("meditation_time", 4, living);
 
          this_body->add_skill_delay(8);
+
+         this_body->stun(2);
       }
    }
    else
@@ -91,23 +93,18 @@ void perform_healing(object body)
    object this_body = this_body();
    float force = this_body->query_for();
    float level = this_body->query_guild_level("jedi");
-   float skill = this_body->query_skill("force_healing");
-   float modifier = (skill >= 800 ? 100 : (skill >= 200 ? 200 : 400));
-   int amount = ((force / 100.0) * (level / 50.0) * 50.0) + (force * (force / modifier));
-   string output = "You " + (this_body == body ? "heal yourself" : "are healed by " + this_body->short()) + ".\n";
+   int rank = to_int(floor(this_body->query_skill("force_healing") / 100.0));
+   int amount = floor(force / 5.0) + floor((rank * 8.0) * (force / 100.0) * (level / 50.0));
 
+   tell(body, "You " + (this_body == body ? "heal yourself" : "are healed by " + this_body->short()) + ".\n");
    body->other_action("$N $vare surrounded by a faint blue glow.\n");
    body->heal_us(amount);
-
-   output += "hp: " + body->query_health() + "/" + body->query_max_health() + "    dr: undrugged\n";
 
    foreach (string limb in body->query_limbs())
    {
       if (body->query_limb_health(limb) < body->query_max_health(limb))
       {
-         body->heal_us(amount * 0.5, limb);
-
-         output += limb + ": " + body->query_limb_health(limb) + "/" + body->query_max_health(limb) + "\n";
+         body->heal_limb(limb, amount * 0.5);
       }
    }
 
@@ -115,14 +112,12 @@ void perform_healing(object body)
    {
       body->adjust_jedi_alignment(1);
    }
-
-   tell(body, output);
 }
 
 void meditation_time(object body)
 {
    object this_body = this_body();
-   int alignment = this_body->query_jedi_alignment();
+   int alignment;
 
    if (!this_body) { return; }
    else if (this_body->get_target())
@@ -138,13 +133,20 @@ void meditation_time(object body)
       return;
    }
 
-   if (this_body->test_skill("force_healing", this_body->query_jedi_alignment() * (alignment < 0 ? 25 : 10)))
+   alignment = this_body->query_jedi_alignment();
+
+   if (this_body->test_skill("force_healing", alignment * (alignment < 0 ? 25 : 10)))
    {
       perform_healing(body);
    }
    else
    {
       this_body->simple_action("$N $vlose focus.\n");
+
+      if (this_body->query_int() < random(100))
+      {
+         this_body->stun(2);
+      }
    }
 }
 

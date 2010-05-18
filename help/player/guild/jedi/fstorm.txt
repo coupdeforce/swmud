@@ -1,11 +1,8 @@
- -= Force Storm =-  (Jedi Guild Command)
+$$ see: jedi, dark_jedi
+--=== Force Storm (Jedi Guild Command) ===--
 
  Usage: fstorm <room exit>
 
  The Jedi will attempt to create a storm which bends time and space in an adjacent room.
 
  A Jedi who uses this will be drawn closer to the Dark side of the Force.
-
- This command uses the Force Lightning skill (lightning), and is gained with its mastery.
-
- See also: jedi, dark_jedi, lightning

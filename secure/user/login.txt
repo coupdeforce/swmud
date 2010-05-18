@@ -1,4 +1,4 @@
-// Last edited by deforce on 02-05-2007
+// Last edited by deforce on 03-11-2008
 // Written by Rust Jan 12, 1994
 // Deathblade moved to new user/body system on Apr 30, 1995 to
 #include <daemons.h>
@@ -221,7 +221,8 @@ private nomask varargs void login_handle_logon(int state, mixed extra, string ar
 // allowed to change this, ask us first.  Please make sure you have extensively
 // modified/rewritten more than half of the base mudlib first
 // (intend to modify ... doesn't cut it)
-   printf("%s is running Lima 1.0b3 on %s\n\n", mud_name(), driver_version());
+//   printf("%s is based on Lima 1.0b3 and running on %s\n\n", mud_name(), driver_version());
+   printf("%s is based on Lima and running on MudOS.\n\n", mud_name());
 
    write("Hello, Player!\n");
 
@@ -297,7 +298,7 @@ private nomask varargs void login_handle_logon(int state, mixed extra, string ar
             else
             {
                write("Unfortunately, " + mud_name() + " is still in the developmental stage, and is not accepting new users.\n"
-                  + "If it is urgent, please use the guest character.\n");
+                  + "Please mail " + ADMIN_EMAIL + " with any questions.\n");
                get_lost();
                return;
             }

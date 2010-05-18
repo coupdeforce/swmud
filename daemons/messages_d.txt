@@ -21,7 +21,7 @@ mapping messages =
       "dodge" : "$N $vdodge $p1 punch to $p $o2.",
    ]),
 
-   "combat-1h-blade" :
+   "combat-blade" :
    ([
       "miss" : "$N $vmiss $p1 $o2 with a slash from $p $o.",
       "none" : "$N $vmiss $p1 $o2 with a slash from $p $o.",
@@ -40,45 +40,7 @@ mapping messages =
       "disarm " : "$N $vslash $p1 hand with $p $o, causing $t to drop $p1 $o1.",
    ]),
 
-   "combat-2h-blade" :
-   ([
-      "miss" : "$N $vmiss $p1 $o2 with a slash from $p $o.",
-      "none" : "$N $vmiss $p1 $o2 with a slash from $p $o.",
-      "dam1" : "$N $vscrape $p1 $o2 with the edge of $p $o.",
-      "dam2" : "$N $vstab $p1 $o2 with $p $o.",
-      "dam3" : "$N $vpierce $p1 $o2 with $p $o.",
-      "dam4" : "$N $vwound $p1 $o2 with $p $o.",
-      "dam5" : "$N $vwound $p1 $o2 badly with $p $o.",
-      "dam6" : "$N $vgraze $p1 $o2 with $p $o.",
-      "dam7" : "$N $vcut $p1 $o2 with $p $o.",
-      "dam8" : "$N $vslice $p1 $o2 with $p $o.",
-      "dam9" : "$N $vslice $p1 $o2 horribly with $p $o.",
-      "dam10" : "$N $vdestroy $p1 $o2 with $p $o.",
-      "parry" : "$N $vparry $p1 $o.",
-      "dodge" : "$N $vdodge $p1 slash towards $p $o2.",
-      "disarm " : "$N $vslash $p1 hand with $p $o, causing $t to drop $p1 $o1.",
-   ]),
-
-   "combat-1h-blunt" :
-   ([
-      "miss" : "$N $vmiss $p1 $o2 with a swing of $p $o.",
-      "none" : "$N $vmiss $p1 $o2 with a swing of $p $o.",
-      "dam1" : "$N $vpoke $p1 $o2 lightly with $p $o.",
-      "dam2" : "$N $vstrike $p1 $o2 with $p $o.",
-      "dam3" : "$N $vstrike $p1 $o2 badly with $p $o.",
-      "dam4" : "$N $vcatch $p1 $o2 in the arm with a quick slam.",
-      "dam5" : "$N $vbash $p1 $o2 with $p $o.",
-      "dam6" : "$N $vbash $p1 $o2 horribly with $p $o.",
-      "dam7" : "$N $vslam $p1 $o2 with $p $o.",
-      "dam8" : "$N $vmaul $p1 $o2 with $p $o.",
-      "dam9" : "$N $vmaul $p1 $o2 terribly with $p $o.",
-      "dam10" : "$N $vdestroy $p1 $o2 with $p $o.",
-      "parry" : "$N $vparry $p1 $o.",
-      "dodge" : "$N $vdodge $p1 blow to $p $o2.",
-      "disarm" : "$N $vknock $p1 $o1 out of $p1 hand with $p $o.",
-   ]),
-
-   "combat-2h-blunt" :
+   "combat-blunt" :
    ([
       "miss" : "$N $vmiss $p1 $o2 with a swing of $p $o.",
       "none" : "$N $vmiss $p1 $o2 with a swing of $p $o.",
@@ -160,25 +122,6 @@ mapping messages =
       "dam19" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
       "dam20" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
       "dam21" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam22" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam23" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam24" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam25" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam26" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam27" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam28" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam29" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam30" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam31" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam32" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam33" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam34" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam35" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam36" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam37" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam38" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam39" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
-      "dam40" : "$N $vsend bolts of lightning from $p hands to $p1 $o2!",
    ]),
 
    "living-default" :

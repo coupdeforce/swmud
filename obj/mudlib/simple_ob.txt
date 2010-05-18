@@ -66,7 +66,17 @@ mixed direct_verb_rule(string verb, string rule, mixed args)
 {
    string s = msgs[verb];
 
-   if (s) { return s[<1] == '\n' ? s : s + "\n"; }
+   if (s)
+   {
+      if (stringp(s))
+      {
+         return s[<1] == '\n' ? s : s + "\n";
+      }
+      else if (functionp(s)) // Makes functions work in add_item!
+      {
+         return evaluate(s);
+      }
+   }
 
    // can't use that verb on us...
    return 0;

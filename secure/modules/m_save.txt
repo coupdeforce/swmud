@@ -1,4 +1,4 @@
-// Last edited by deforce on 07-10-2008
+// Last edited by deforce on 07-11-2008
 // Inheritable for persistance.
 // Beek for nightmare, ported by Rust.
 // Could use helper funs that save directly to a file,
@@ -61,7 +61,14 @@ varargs string save_to_string(int recursep)
 
    if (save_recurse)
    {
-      map["#inventory#"] = all_inventory()->save_to_string(1) - ({ 0 });
+      if (wizardp(this_object()) || wizardp(environment(this_object())))
+      {
+         map["#inventory#"] = all_inventory()->save_to_string(1) - ({ 0 });
+      }
+      else
+      {
+         map["#inventory#"] = filter_array(all_inventory(), (: $1->is_autoload() :))->save_to_string(1) - ({ 0 });
+      }
    }
 
    return save_variable(map);
