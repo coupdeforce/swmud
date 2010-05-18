@@ -1,33 +1,33 @@
-// Last edited by deforce on 02-27-2008
-/* Daemon for handling channels.
-**
-** Basic architecture: this daemon records all active channels for
-** registered listener objects.  Incoming tells/emotes are then passed
-** to the objects.  In particular, player objects register at login
-** time and unregister at exit time.
-**
-** Note: (un)registration uses the previous object
-**
-** Client interface:
-**      register_channels()     register a set of channels
-**      unregister_channels()   unregister a set of channels
-**
-**      deliver_string()        deliver a raw string to listeners
-**      deliver_channel()       deliver a string to a channel
-**      deliver_tell()          deliver a (default-format) tell
-**      deliver_emote()         deliver a (default-format) emote
-**      deliver_soul()          deliver a (default-format) soul
-**      deliver_notice()        deliver a (default-format) system notice
-**
-**      cmd_channel()           standard channel processing
-**
-** Listener interface:
-**      channel_rcv_string()    receive a simple string
-**      channel_rcv_soul()      receive a soul data array
-**      channel_rcv_data()      receive data defining a channel use
-**
-** 05-Nov-94. Created. Deathblade.
-*/
+// Last edited by deforce on 01-25-2010
+// Daemon for handling channels.
+//
+// Basic architecture: this daemon records all active channels for
+// registered listener objects.  Incoming tells/emotes are then passed
+// to the objects.  In particular, player objects register at login
+// time and unregister at exit time.
+//
+// Note: (un)registration uses the previous object
+//
+// Client interface:
+//      register_channels()     register a set of channels
+//      unregister_channels()   unregister a set of channels
+//
+//      deliver_string()        deliver a raw string to listeners
+//      deliver_channel()       deliver a string to a channel
+//      deliver_tell()          deliver a (default-format) tell
+//      deliver_emote()         deliver a (default-format) emote
+//      deliver_soul()          deliver a (default-format) soul
+//      deliver_notice()        deliver a (default-format) system notice
+//
+//      cmd_channel()           standard channel processing
+//
+// Listener interface:
+//      channel_rcv_string()    receive a simple string
+//      channel_rcv_soul()      receive a soul data array
+//      channel_rcv_data()      receive data defining a channel use
+//
+// Created by Deathblade on 11-05-1994. 
+
 #pragma warnings
 
 #define CHANNEL_FORMAT(chan) "%%^CHANNEL%%^[%s]%%^RESET%%^ %s\n"
@@ -62,21 +62,6 @@ class listener_pair
 private class listener_pair *   saved_listeners;
 private class listener_pair *   saved_hooks;
 
-private nomask string extract_channel_name(string channel_name)
-{
-   int idx = strsrch(channel_name, "_", 1);
-
-   if (idx == -1) { return channel_name; }
-
-   // If the channel is an intermud channel, prepend an 'i' to the name
-   if (channel_name[0..4] == "imud_")
-   {
-      return "i" + channel_name[idx + 1..];
-   }
-
-   return channel_name[idx+1..];
-}
-
 protected nomask class channel_info query_channel_info(string channel_name)
 {
    return info[channel_name];
@@ -86,10 +71,10 @@ protected nomask void create_channel(string channel_name)
 {
    class channel_info  ci;
 
-   if (info[channel_name]) { error("channel already exists\n"); }
+   if (info[channel_name]) { error("Channel already exists.\n"); }
 
    ci = new(class channel_info);
-   ci->name = extract_channel_name(channel_name);
+   ci->name = channel_name;
    ci->listeners = ({ });
    ci->hooked = ({ });
    ci->history = ({ });
@@ -101,14 +86,17 @@ private void register_one(int add_hook, object listener, string channel_name)
 {
    class channel_info  ci = info[channel_name];
 
+   if (!channel_name)
+   {
+      return;
+   }
+
    if (!ci)
    {
-      /*
-      ** Note: the registration interface allows for auto-creation.
-      ** The user commands request that /new be used, though.  This
-      ** allows a user to create a channel and listen to it, and it
-      ** will "remain" even across sessions.
-      */
+      // Note: the registration interface allows for auto-creation.
+      // The user commands request that /new be used, though.  This
+      // allows a user to create a channel and listen to it, and it
+      // will "remain" even across sessions.
       create_channel(channel_name);
       ci = info[channel_name];
    }
@@ -222,26 +210,20 @@ protected nomask void set_flags(string channel_name, int flags)
    }
 }
 
-/*
-** user_channel_name()
-**
-** Return a channel name that a user might like.  Internal names are
-** not "human readable"
-*/
+// user_channel_name()
+// Return a channel name that a user might like.  Internal names are
+// not "human readable"
 nomask string user_channel_name(string channel_name)
 {
    class channel_info  ci = info[channel_name];
 
    if (ci) { return ci->name; }
 
-   return extract_channel_name(channel_name);
+   return channel_name;
 }
 
-/*
-** register_channels()
-**
-** Register previous_object() with a specific set of channels.
-*/
+// register_channels()
+// Register previous_object() with a specific set of channels.
 nomask void register_channels(string * names)
 {
    /* First filter out the channels that don't exist, otherwise the channel
@@ -251,12 +233,9 @@ nomask void register_channels(string * names)
    map_array(names, (: register_one, 0, previous_object() :));
 }
 
-/*
-** unregister_channels()
-**
-** Un-register previous_object() from a specific set of channels.  If
-** the list is 0, then unregister from all channels.
-*/
+// unregister_channels()
+// Un-register previous_object() from a specific set of channels.  If
+// the list is 0, then unregister from all channels.
 nomask void unregister_channels(string * names)
 {
    if (!names) { names = keys(info); }
@@ -264,11 +243,8 @@ nomask void unregister_channels(string * names)
    map_array(names, (: unregister_one :), previous_object());
 }
 
-/*
-** find_sender_name()
-**
-** Find the sender's name
-*/
+// find_sender_name()
+// Find the sender's name
 private nomask string find_sender_name(string sender_name)
 {
    if (sender_name) { return sender_name; }
@@ -289,18 +265,17 @@ private nomask string find_sender_name(string sender_name)
    return sender_name;
 }
 
-/*
-** deliver_string()
-**
-** Deliver a raw string over a channel.
-*/
+// deliver_string()
+// Deliver a raw string over a channel.
 nomask void deliver_string(string channel_name, string str)
 {
    class channel_info ci = info[channel_name];
 
+   mixed array time_data = localtime(time());
+
    if (!ci || sizeof(ci->listeners) == 0) { return; }
 
-   ci->history += ({ str });
+   ci->history += ({ sprintf("%02i:%02i %s", time_data[2], time_data[1], str) });
 
    if (sizeof(ci->history) > CHANNEL_HISTORY_SIZE)
    {
@@ -310,29 +285,25 @@ nomask void deliver_string(string channel_name, string str)
    ci->listeners->channel_rcv_string(channel_name, str);
 }
 
-/*
-** deliver_channel()
-**
-** Deliver a string to a channel, prepending the channel name
-*/
+// deliver_channel()
+// Deliver a string to a channel, prepending the channel name
 nomask void deliver_channel(string channel_name, string str)
 {
    deliver_string(channel_name, sprintf(CHANNEL_FORMAT(channel_name),
       user_channel_name(channel_name), str));
 }
 
-/*
-** deliver_raw_soul()
-**
-** Deliver raw "soul" data over a channel.
-*/
+// deliver_raw_soul()
+// Deliver raw "soul" data over a channel.
 nomask void deliver_raw_soul(string channel_name, mixed * data)
 {
    class channel_info ci = info[channel_name];
 
+   mixed array time_data = localtime(time());
+
    if (!ci || sizeof(ci->listeners) == 0) { return; }
 
-   ci->history += ({ data[1][<1] });
+   ci->history += ({ sprintf("%02i:%02i %s", time_data[2], time_data[1], data[1][<1]) });
 
    if (sizeof(ci->history) > CHANNEL_HISTORY_SIZE)
    {
@@ -342,11 +313,8 @@ nomask void deliver_raw_soul(string channel_name, mixed * data)
    ci->listeners->channel_rcv_soul(channel_name, data);
 }
 
-/*
-** deliver_data()
-**
-** Deliver unformatted channel data to the listeners
-*/
+// deliver_data()
+// Deliver unformatted channel data to the listeners
 private nomask void deliver_data(string channel_name, string sender_name, string type, mixed data)
 {
    class channel_info ci = info[channel_name];
@@ -356,12 +324,8 @@ private nomask void deliver_data(string channel_name, string sender_name, string
    ci->listeners->channel_rcv_data(channel_name, sender_name, type, data);
 }
 
-/*
-** deliver_tell()
-**
-** Deliver a standard-formatted "tell" ove
-r a channel
-*/
+// deliver_tell()
+// Deliver a standard-formatted "tell" over a channel
 nomask void deliver_tell(string channel_name, string sender_name, string message)
 {
    sender_name = find_sender_name(sender_name);
@@ -371,11 +335,8 @@ nomask void deliver_tell(string channel_name, string sender_name, string message
       user_channel_name(channel_name), sender_name + ": " + punctuate(message)));
 }
 
-/*
-** deliver_emote()
-**
-** Deliver a standard-formatted "emote" over a channel
-*/
+// deliver_emote()
+// Deliver a standard-formatted "emote" over a channel
 nomask void deliver_emote(string channel_name, string sender_name, string message)
 {
    if (!sizeof(message))
@@ -391,11 +352,8 @@ nomask void deliver_emote(string channel_name, string sender_name, string messag
       user_channel_name(channel_name), sender_name + " " + punctuate(message)));
 }
 
-/*
-** deliver_soul()
-**
-** Deliver a standard-formatted "soul" over a channel
-*/
+// deliver_soul()
+// Deliver a standard-formatted "soul" over a channel
 nomask void deliver_soul(string channel_name, mixed * soul)
 {
    string user_channel_name;
@@ -411,11 +369,8 @@ nomask void deliver_soul(string channel_name, mixed * soul)
    deliver_raw_soul(channel_name, soul);
 }
 
-/*
-** deliver_notice()
-**
-** Deliver a standard-formatted "system notice" over a channel
-*/
+// deliver_notice()
+// Deliver a standard-formatted "system notice" over a channel
 nomask void deliver_notice(string channel_name, string message)
 {
    deliver_string(channel_name, sprintf(CHANNEL_FORMAT(channel_name),
@@ -465,12 +420,8 @@ void create()
    }
 }
 
-/*
-** remove()
-**
-** Write out all listeners and hooks that are blueprints.  We'll reset
-** them at creation time.
-*/
+// remove()
+// Write out all listeners and hooks that are blueprints.  We'll reset them at creation time.
 void remove()
 {
    string channel_name;
@@ -516,21 +467,15 @@ void remove()
 }
 
 
-/*
-** query_channels()
-**
-** Return the list of active channels
-*/
+// query_channels()
+// Return the list of active channels
 nomask string * query_channels()
 {
    return keys(info);
 }
 
-/*
-** query_listeners()
-**
-** Return the listeners of a particular channel
-*/
+// query_listeners()
+// Return the listeners of a particular channel
 nomask object * query_listeners(string channel_name)
 {
    if (check_previous_privilege(1))
@@ -543,12 +488,8 @@ nomask object * query_listeners(string channel_name)
    return 0;
 }
 
-/*
-** query_flags()
-**
-** Return the flags for a particular channel.  0 is returned for unknown
-** channels.
-*/
+// query_flags()
+// Return the flags for a particular channel.  0 is returned for unknown channels.
 nomask int query_flags(string channel_name)
 {
    class channel_info ci = info[channel_name];
@@ -566,11 +507,8 @@ nomask int query_flags(string channel_name)
    return flags;
 }
 
-/*
-** make_name_list()
-**
-** Make a list of names given an array of players.
-*/
+// make_name_list()
+// Make a list of names given an array of players.
 nomask string make_name_list(mixed * list)
 {
    /*
@@ -581,15 +519,12 @@ nomask string make_name_list(mixed * list)
    return implode(list->query_userid(), ", ");
 }
 
-/*
-** is_valid_channel()**
-** Is the given string a valid channel name (as in command name) ?  A list
-** of internal names should be provided (such as the list a player is
-** registered with).  The internal channel name will be returned, or 0
-** if the name does not correspond to a channel.
-**
-** Note: permanent channels will always be valid.
-*/
+// is_valid_channel()**
+// Is the given string a valid channel name (as in command name) ?  A list
+// of internal names should be provided (such as the list a player is
+// registered with).  The internal channel name will be returned, or 0
+// if the name does not correspond to a channel.
+// Note: permanent channels will always be valid.
 nomask string is_valid_channel(string which, string * list)
 {
    if (list)

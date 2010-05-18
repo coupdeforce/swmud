@@ -1,4 +1,4 @@
-// Last edited by deforce on 12-04-2007
+// Last edited by deforce on 03-11-2008
 // NOTE:
 // Despite the length of this code, the only outside calls made
 // are from call_unguarded(). call_other()s to other object will
@@ -78,6 +78,17 @@ void create()
 }
 
 int query_allow_shadow() { return 0; }
+
+string array get_wizard_list()
+{
+   return keys(wizards);
+}
+
+void delete_from_wizard_list(mixed item)
+{
+   map_delete(wizards, item);
+   save_data();
+}
 
 // The following function HAS to be private. Otherwise somebody
 // might gain write access to the server's datastructures.
