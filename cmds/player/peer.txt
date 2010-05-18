@@ -1,4 +1,4 @@
-// Last modified by deforce on 11-14-2007
+// Last modified by deforce on 07-03-2008
 #include <mudlib.h>
 inherit CMD;
 inherit M_EXIT;
@@ -17,14 +17,18 @@ private void main(string direction)
 
       if (dir_room && (member_array(direction, environment(this_body())->query_exit_directions(wizardp(this_body()))) > -1))
       {
-         string exits = dir_room->show_exits();
-
-         out("%^ROOM_SHORT%^" + dir_room->short() + "%^RESET%^\n");
-
-         if (exits) { out("Exits: %^ROOM_EXIT%^" + exits + "%^RESET%^"); }
-         else { out("No exits."); }
-
-         out("\n\n" + dir_room->long());
+         if (dir_room->query_light() < 1)
+         {
+            out("It is too dark to see anything.\n");
+         }
+         else if (dir_room->query_light() > 9)
+         {
+            out("It is too bright to see anything.\n");
+         }
+         else
+         {
+            out(dir_room->long());
+         }
       }
       else { out("You don't see anything in that direction.\n"); }
    }

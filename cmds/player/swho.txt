@@ -1,4 +1,4 @@
-// Last editied by deforce on 12-19-2007
+// Last editied by deforce on 05-29-2008
 #include <playerflags.h>
 
 inherit CMD;
@@ -24,8 +24,8 @@ void main()
    users_wizard = filter_array(users_player, (: wizardp($1) :));
    users_player = filter_array(users_player, (: !wizardp($1) :));
 
-   output += "\n\n%^CYAN%^" + colour_center(ctime(time()) + "   -   " + implode(explode(upper_case(mud_name()), ""), " ") + "   -   " + sizeof(bodies()) + " adventurers%^RESET%^\n");
-   output += DELIM;
+   out("\n\n%^CYAN%^" + colour_center(ctime(time()) + "   -   " + implode(explode(upper_case(mud_name()), ""), " ") + "   -   " + sizeof(bodies()) + " adventurers%^RESET%^\n"));
+   out(DELIM);
 
    for (int count = 0; count < sizeof(users_wizard); count++)
    {
@@ -60,13 +60,13 @@ void main()
 
          line += "] " + format_status(user);
 
-         output += show_location(line, body) + "\n";
+         out(show_location(line, body) + "\n");
       }
    }
 
    if (sizeof(users_player) && sizeof(users_wizard))
    {
-      output += DELIM;
+      out(DELIM);
    }
 
    for (int count = 0; count < sizeof(users_player); count++)
@@ -88,46 +88,18 @@ void main()
 
    if (sizeof(users_player))
    {
-      int users_per_line = floor(WIDTH / USER_WIDTH);
-      int lines = ceil(to_float(sizeof(users_player)) / to_float(users_per_line));
+      string array lines = ({ });
 
-      string line = "";
-
-      for (int count = 0; count < lines; count++)
+      foreach (string user in users_player)
       {
-         for (int line_count = 0; line_count < users_per_line; line_count++)
-         {
-            object body;
-            string user = "";
+         string line = get_guild_color(find_body(user)->query_primary_guild());
+         line += format_status(user);
 
-            if (sizeof(users_player) >= (count + (lines * line_count)))
-            {
-               user = users_player[count + (lines * line_count)];
-               body = find_body(user);
-            }
-
-            if (body && strlen(user))
-            {
-               string primary_guild = body->query_primary_guild();
-
-               if ((line_count > 0) && (colour_strlen(line) < (line_count * USER_WIDTH)))
-               {
-                  line += repeat_string(" ", ((line_count * USER_WIDTH) - colour_strlen(line)));
-               }
-
-               line += get_guild_color(primary_guild);
-               line += format_status(user);
-            }
-         }
-
-         output += line + "\n";
-         line = "";
+         lines += ({ line });
       }
 
-      output += line + "\n";
+      outf("%#-" + WIDTH + ".0s\n\n", implode(lines, "\n"));
    }
-
-   out(output);
 }
 
 int sort_level_name(string first, string second)
@@ -196,9 +168,7 @@ string format_status(string user)
 
    output += "%^RESET%^" + (wizardp(user) && body->test_flag(F_INACTIVE) ? " (away)" : format_idle_time(body));
 
-   if (wizardp(body)) { return output; }
-
-   return output[0..USER_WIDTH + (strlen(output) - colour_strlen(output)) - 1];
+   return output;
 }
 
 string show_location(string line, object body)

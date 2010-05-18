@@ -12,10 +12,12 @@ void main()
 {
    string array channels = sort_array(CHANNEL_D->query_channels(), 1);
    string array lines = ({ });
-   float columns = floor(WIDTH / (wizardp(this_user()) ? 33 : 20));
+   float columns = 1;
    int line_count;
 
-   if (columns > 1) { columns = floor((WIDTH - ((columns - 1) * 4)) / (wizardp(this_user()) ? 33 : 20)); }
+   if (wizardp(this_user())) { columns = floor(WIDTH / 33); }
+
+   if (columns > 1) { columns = floor((WIDTH - ((columns - 1) * 4)) / 33); }
 
    if (sizeof(channels))
    {
@@ -118,24 +120,20 @@ void main()
             }
          }
 
-         lines += ({ output });
+         if (strlen(output))
+         {
+            lines += ({ output });
+            output = "";
+         }
       }
 
 //      lines = sort_array(lines, 1);
       line_count = ceil(sizeof(lines) / columns);
 
-      if ((columns > 1) && (sizeof(lines) > 1))
+      if ((columns > 1) && (sizeof(lines) > 1) && wizardp(this_user()))
       {
-         if (wizardp(this_user()))
-         {
-            out(sprintf("\n\n%-12s  %-6s  %-11s", "Name", "Status", "Options") + repeat_string("     " + sprintf("%-12s  %-6s  %-11s", "Name", "Status", "Options"), columns - 1) + "\n");
-            out(repeat_string("-", 33) + repeat_string("     " + repeat_string("-", 33), columns - 1) + "\n");
-         }
-         else
-         {
-            out(sprintf("\n\n%-12s  %-6s", "Name", "Status") + repeat_string("     " + sprintf("%-12s  %-6s", "Name", "Status"), columns - 1) + "\n");
-            out(repeat_string("-", 20) + repeat_string("     " + repeat_string("-", 20), columns - 1) + "\n");
-         }
+         out(sprintf("\n\n%-12s  %-6s  %-11s", "Name", "Status", "Options") + repeat_string("     " + sprintf("%-12s  %-6s  %-11s", "Name", "Status", "Options"), columns - 1) + "\n");
+         out(repeat_string("-", 33) + repeat_string("     " + repeat_string("-", 33), columns - 1) + "\n");
       }
       else
       {

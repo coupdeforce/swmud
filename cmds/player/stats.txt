@@ -1,43 +1,95 @@
-// Last edited by deforce on 11-26-2007
+// Last edited by deforce on 05-27-2008
 #include <mudlib.h>
 #include <config.h>
 
 inherit CMD;
 
-#define BORDER (repeat_string("=", 79))
-#define SEPARATOR (repeat_string("-", 79))
+void format_stats(object body);
+void format_stats_max(object body);
 
 private void main(string arg)
 {
    object body;
-   string name;
+   string name = arg;
+   string flags = "";
 
-   if (wizardp(this_body()) && find_body(arg)) { body = find_body(arg); }
+   if (strlen(arg))
+   {
+      if (sscanf(arg, "%s %s", name, flags) != 2)
+      {
+         if (strsrch(arg, "-") > -1)
+         {
+            flags = arg;
+         }
+         else
+         {
+            name = arg;
+         }
+      }
+   }
+
+   out("\n\n");
+
+   if (wizardp(this_body()) && strlen(name) && find_body(name))
+   {
+      body = find_body(name);
+      name = body->query_title();
+
+      out(name + (wizardp(body) ? (adminp(body) ? " (Admin Wizard)" : " (Wizard)") : "") + "\n");
+      out(repeat_string("-", 79) + "\n");
+   }
    else { body = this_body(); }
 
-   name = body->query_title();
    body->refresh_stats();
 
-   out(BORDER + "\n");
+   if (strsrch(flags, "-m") > -1)
+   {
+      format_stats_max(body);
+   }
+   else
+   {
+      format_stats(body);
+   }
 
-   out(name + (wizardp(body) ? (adminp(body) ? " (Admin Wizard)" : " (Wizard)") : "") + "\n");
+   out("\n");
+}
 
-   out(SEPARATOR + "\n");
+void format_stats(object body)
+{
+   string format = "%-13s: %2d";
 
-   outf("%-13s: %2d / %-2d    %-13s: %2d / %-2d\n",
+   outf(format + "    " + format + "\n",
+      "Strength", (body->query_str() / 5),
+      "Intelligence", (body->query_int() / 5));
+   outf(format + "    " + format + "\n",
+      "Constitution", (body->query_con() / 5),
+      "Charisma", (body->query_cha() / 5));
+   outf(format + "    " + format + "\n",
+      "Agility", (body->query_agi() / 5),
+      "Luck", (body->query_luc() / 5));
+   outf(format + "    " + format + "\n",
+      "Dexterity", (body->query_dex() / 5),
+      "Force", (body->query_for() / 5));
+   outf(format + "\n",
+      "Perception", (body->query_per() / 5));
+}
+
+void format_stats_max(object body)
+{
+   string format = "%-13s: %2d / %-2d";
+
+   outf(format + "    " + format + "\n",
       "Strength", (body->query_str() / 5), (body->query_race_str_max() / 5),
       "Intelligence", (body->query_int() / 5), (body->query_race_int_max() / 5));
-   outf("%-13s: %2d / %-2d    %-13s: %2d / %-2d\n",
+   outf(format + "    " + format + "\n",
       "Constitution", (body->query_con() / 5), (body->query_race_con_max() / 5),
       "Charisma", (body->query_cha() / 5), (body->query_race_cha_max() / 5));
-   outf("%-13s: %2d / %-2d    %-13s: %2d / %-2d\n",
+   outf(format + "    " + format + "\n",
       "Agility", (body->query_agi() / 5), (body->query_race_agi_max() / 5),
       "Luck", (body->query_luc() / 5), (body->query_race_luc_max() / 5));
-   outf("%-13s: %2d / %-2d    %-13s: %2d / %-2d\n",
+   outf(format + "    " + format + "\n",
       "Dexterity", (body->query_dex() / 5), (body->query_race_dex_max() / 5),
       "Force", (body->query_for() / 5), (body->query_race_for_max() / 5));
-   outf("%-13s: %2d / %-2d\n",
+   outf(format + "\n",
       "Perception", (body->query_per() / 5), (body->query_race_per_max() / 5));
-
-   out(BORDER + "\n");
 }
