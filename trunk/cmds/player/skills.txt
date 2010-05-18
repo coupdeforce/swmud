@@ -1,6 +1,7 @@
 // Last modified by deforce on 12-24-2007
 #include <mudlib.h>
 #include <config.h>
+#include <hooks.h>
 
 inherit CMD;
 
@@ -31,8 +32,11 @@ private void main(string arg)
    foreach (string name in keys(skills))
    {
       string capname;
+      string output;
       int array my_skill = skills[name];
       int skill_value;
+      int pure_skill_value;
+      int rank;
       mixed data = SKILL_D->query_skill(name);
 
       if (!data) { capname = name + " (invalid)"; }
@@ -46,19 +50,34 @@ private void main(string arg)
          my_skill = ({ 0, 0 });
       }
 
-      skill_value = my_skill[0];
+      pure_skill_value = my_skill[0];
+      skill_value = pure_skill_value + body->call_hooks("all_skill_bonus", HOOK_SUM) + body->call_hooks(name + "_skill_bonus", HOOK_SUM);
 
-      if (skill_value > 0)
+      if (skill_value < 0)
       {
-         int rank = to_int(floor(skill_value / 100));
-         int to_next = skill_value - (rank * 100);
-         string output = sprintf("%-27s : %2i", capname[0..26], rank);
-
-         if (rank < 10) { output += sprintf("  %2i%%", to_next); }
-         else if (rank == 10) { output += "  ***"; }
-
-         lines += ({ output });
+         skill_value = 0;
       }
+      else if (skill_value > 1000)
+      {
+         skill_value = 1000;
+      }
+
+      rank = skill_value / 100;
+      output = sprintf("%2i", rank);
+
+      if (rank < 10) { output += sprintf("  %2i%%", (skill_value - (rank * 100))); }
+      else if (rank == 10) { output += "  ***"; }
+
+      if (pure_skill_value > skill_value)
+      {
+         output = "%^BOLD%^%^RED%^" + output + "%^RESET%^";
+      }
+      else if (skill_value > pure_skill_value)
+      {
+         output = "%^BOLD%^%^GREEN%^" + output + "%^RESET%^";
+      }
+
+      lines += ({ sprintf("%-27s : ", capname[0..26]) + output });
    }
 
    lines = sort_array(lines, 1);
@@ -66,8 +85,30 @@ private void main(string arg)
 
    if ((columns > 1) && (sizeof(lines) > 1))
    {
-      out(sprintf("\n\n%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank") + repeat_string("    " + sprintf("%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank"), columns - 1) + "\n");
-      out(repeat_string("-", 37) + repeat_string("    " + repeat_string("-", 37), columns - 1) + "\n");
+      out(sprintf("\n\n%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank"));
+
+      if (sizeof(lines) > 4)
+      {
+         out(repeat_string("    " + sprintf("%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank"), columns - 1));
+      }
+      else
+      {
+         out("    " + sprintf("%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank"));
+      }
+
+      out("\n");
+      out(repeat_string("-", 37));
+
+      if (sizeof(lines) > 4)
+      {
+         out(repeat_string("    " + repeat_string("-", 37), columns - 1));
+      }
+      else
+      {
+         out("    " + repeat_string("-", 37));
+      }
+
+      out("\n");
    }
    else
    {
@@ -75,15 +116,15 @@ private void main(string arg)
       out(repeat_string("-", 37) + "\n");
    }
 
-   for (int count = 0; count < line_count; count++)
+   for (int row_count = 0; row_count < line_count; row_count++)
    {
-      for (int column_count = 0; column_count < columns; column_count++)
-      {
-         int index = count + (line_count * column_count);
+      out(lines[row_count]);
 
-         if (index < sizeof(lines))
+      for (int column_count = 1; column_count < columns; column_count++)
+      {
+         if (((column_count * line_count) + row_count) < sizeof(lines))
          {
-            out((column_count > 0 ? "    " : "") + lines[index]);
+            out("    " + lines[(column_count * line_count) + row_count]);
          }
       }
 

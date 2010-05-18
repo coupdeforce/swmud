@@ -50,13 +50,13 @@ class finger get_finger_data(string userid)
    object mbox;
 
    info = unguarded(1, (: call_other, USER_D, "query_variable", userid,
-      ({ "real_name", "email", "nickname", "url", "wiz_position", "title", "plan", "gender", "race_name", "spouse", "team_alignment", "describe", "primary_guild", "primary_level" }) :));
+      ({ "real_name", "email", "nickname", "url", "wiz_position", "title", "gender", "race_name", "spouse", "team_alignment", "describe", "primary_guild", "primary_level" }) :));
 
    if (!info) { return 0; }
 
    result = new(class finger, visname: capitalize(userid), real_name: info[0], email: info[1],
-      nickname: info[2], home_page: info[3], position: info[4], sex: info[7], race: info[8],
-      spouse: info[9], team: info[10], describe: info[11], primary_guild: info[12], primary_level: info[13]);
+      nickname: info[2], home_page: info[3], position: info[4], sex: info[6], race: info[7],
+      spouse: info[8], team: info[9], describe: info[10], primary_guild: info[11], primary_level: info[12]);
 
    if (result->real_name == "") { result->real_name = 0; }
    if (result->email == "") { result->email = 0; }
@@ -108,7 +108,6 @@ class finger get_finger_data(string userid)
    {
       result->plan = read_file(WIZ_DIR + "/" + userid + "/.plan");
    }
-   else if (info[6]) { result->plan = info[6]; }
 
    return result;
 }

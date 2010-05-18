@@ -87,7 +87,7 @@ private nomask void create_domain(int no_domain_dir, string domain)
 
    if (!no_domain_dir)
    {
-      string dirname = "/domains/" + domain;
+      string dirname = "/d/" + domain;
 
       mkdir(dirname);
       printf("Created %s\n", dirname);
@@ -99,7 +99,7 @@ private nomask void create_domain(int no_domain_dir, string domain)
 
 private nomask void delete_domain(string domain)
 {
-   SECURE_D->set_protection("/domains/" + domain, 1, -1);
+   SECURE_D->set_protection("/d/" + domain, 1, -1);
 
    // this checks for admins...
    if (write_error(SECURE_D->delete_domain(domain))) { return; }

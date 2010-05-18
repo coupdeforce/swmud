@@ -5,12 +5,6 @@ inherit CMD;
 
 private void main(mixed *arg)
 {
-   if (!arg[0])
-   {
-      out("dest/clone what?\n");
-      return;
-   }
-
    object ob, env;
    string file;
 

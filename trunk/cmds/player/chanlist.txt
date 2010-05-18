@@ -1,4 +1,4 @@
-// Last modified by deforce on 12-20-2007
+// Last modified by deforce on 11-11-2009
 #include <mudlib.h>
 #include <channel.h>
 
@@ -70,7 +70,8 @@ void main()
                   "guild" + ((flags & CHANNEL_PERMANENT) ? ", perm" : ", temp"));
             }
             else if ((this_body()->query_primary_guild() == chan)
-               || (channel_guilds[this_body()->query_primary_guild()] == chan))
+               || (channel_guilds[this_body()->query_primary_guild()] == chan)
+               || (this_body()->query_guild_rank(guild_channels[chan]) >= 2))
             {
                output = sprintf("%-12s  %-6s", chan,
                   ((member_array(chan, listening) > -1) ? "on" : "off"));
@@ -111,7 +112,8 @@ void main()
             {
                output = sprintf("%-12s  %-6s  %-11s", chan,
                   ((member_array(chan, listening) > -1) ? "on" : "off"),
-                  ((flags & CHANNEL_PERMANENT) ? "perm" : "temp"));
+                  ((flags & CHANNEL_PERMANENT) ? "perm" : "temp")
+                     + ((flags & PLAYER_SILENT) ? ", ps" : ""));
             }
             else
             {

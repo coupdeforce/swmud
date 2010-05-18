@@ -1,3 +1,4 @@
+// Last edited by deforce on 04-13-2010
 //  06-14-1996 - Alexus adds timed shutdown daemon support
 //  12-15-1996 - Deathblade: removed time stamping (let LOG_D do it)
 
@@ -13,7 +14,7 @@ int call_number;
 
 private void do_shutdown(string s)
 {
-   if (!check_privilege(1))
+   if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 3))
    {
       LOG_D->log(LOG_SHUTDOWN, "do_shutdown() failed: insufficient privilege\n");
 
@@ -22,9 +23,17 @@ private void do_shutdown(string s)
 
    LOG_D->log(LOG_SHUTDOWN, sprintf("SHUTDOWN performed (%s)\n", s));
 
-   foreach (object ob in users()) { catch(ob->quit()); }
+   while (sizeof(users()))
+   {
+      foreach (object ob in users())
+      {
+         catch(ob->quit());
+         catch(destruct(ob));
+      }
+   }
 
-   unguarded(1, (: shutdown :));
+//   unguarded(1, (: shutdown :));
+   call_out((: unguarded, 1, (: shutdown :) :), sizeof(users()));
 }
 
 private void count_down(int num, string s)
@@ -42,7 +51,7 @@ private void count_down(int num, string s)
 
    num--;
 
-   call_number=call_out((: count_down, num, s :), 60);
+   call_number = call_out((: count_down, num, s :), 60);
 }
 
 private void main(mixed *args, mapping flags)
@@ -50,9 +59,9 @@ private void main(mixed *args, mapping flags)
    int num;
    string s;
 
-   if (!check_privilege(1))
+   if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 3))
    {
-      out("An administrator is needed for shutdown.\n");
+      out("A moff is needed for shutdown.\n");
 
       return;
    }
@@ -109,7 +118,10 @@ private void main(mixed *args, mapping flags)
 // Used by the out of memory code; could be added elsewhere too
 void automatic_shutdown(string reason)
 {
-   if (!check_privilege(1)) { error("automatic_shutdown() failed: Permission denied\n"); }
+   if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 3))
+   {
+      error("automatic_shutdown() failed: Permission denied\n");
+   }
 
    tell_all(COLOR + THE_BIG_GUY " shouts: Automatic shutdown (" + reason + ") triggered.%^RESET%^\n");
    LOG_D->log(LOG_SHUTDOWN, "Shutdown started by " THE_BIG_GUY "(" + reason + ")\n");

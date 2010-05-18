@@ -86,20 +86,33 @@ private void main(string who)
    else { mailstring = info->visname + " has no unread mail."; }
 
    output += sprintf("%s\n", (info->title ? info->title : info->visname));
-   if (info->describe) { output += sprintf("%s\n", info->describe); }
-   output += sprintf("%-45s Level: %s\n", sprintf("%s %s of the %s", sex, title_capitalize(info->race), title_capitalize(!wizardp(who) ? get_guild_plural(info->primary_guild) : "wizards")), info->primary_level);
+   if (info->describe) { output += info->describe + "\n"; }
+   if (!wizardp(who)) { output += sprintf("%-45s Level: %i\n", sprintf("%s %s of the %s", sex, title_capitalize(info->race), (strlen(info->primary_guild) ? title_capitalize(get_guild_plural(info->primary_guild)) : "Players")), info->primary_level); }
+   else
+   {
+      int wizard_level = SECURE_D->query_is_wizard(who);
+      string wizard_title = "";
+
+      if (wizard_level > 3) { wizard_title = "Grand Moff"; }
+      else if (wizard_level > 2) { wizard_title = "Moff"; }
+      else if (wizard_level > 1) { wizard_title = "Officer"; }
+      else if (wizard_level > 0) { wizard_title = "Cadet"; }
+
+      output += sprintf("%-45s Level: %s\n", sprintf("%s %s of the %s", sex, title_capitalize(info->race), "Wizards"), wizard_title);
+   }
 //   output += sprintf("Nickname: %-29s\n", info->nickname);
 //   output += sprintf("Team: %s %s\n", team, info->position);
-   if (!wizardp(who)) {  output += sprintf("Team: %s\n", team); }
+   if (!wizardp(who)) { output += sprintf("Team: %s\n", team); }
    output += sprintf("In real life: %-31s %s\n", info->real_name[0..31], info->spouse);
    if (strlen(info->home_page)) { output += info->home_page[0..70]; }
-   if (strlen(info->email)) { output += sprintf("E-mail Address: %s\n", info->email[0..63]); }
+   if (strlen(info->email)) { output += sprintf("E-mail: %s\n", info->email[0..71]); }
    output += character_age;
    output += sprintf("%s %s%s%s\n", (info->idle == -1 ? "Left at" : "On since"),
       (info->last_login ? ctime(info->last_login) : "<unknown>"), idle, info->connect_from);
    output += sprintf("%s\n", mailstring);
 
-   if (info->plan) { output += "Plan:\n" + info->plan + "\n"; }
+   if (info->project) { output += "Project:\n" + info->project; }
+   if (info->plan) { output += "Plan:\n" + info->plan; }
 //   else { output += "No plan.\n"; }
 
    out(output);

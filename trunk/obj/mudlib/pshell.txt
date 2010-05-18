@@ -1,4 +1,4 @@
-// Last modifed by deforce on 03-08-2007
+// Last edited by deforce on 11-28-2007
 // Player shell object
 // Created by Deathblade on 08-17-1995
 
@@ -9,17 +9,17 @@
 inherit SHELL;
 inherit M_COMPLETE;
 
+private mapping shell_vars = ([]);
+
 string array query_path()
 {
-   return ({ CMD_DIR_PLAYER "/" });
+   return shell_vars["path"];
 }
 
 string query_shellname()
 {
    return "Player Shell";
 }
-
-private mapping shell_vars = ([]);
 
 void set_variable(string name, mixed value)
 {
@@ -30,6 +30,7 @@ void set_variable(string name, mixed value)
    switch(name)
    {
       case "ansi":
+      case "path":
       case "PROMPT":
       case "status":
       case "MORE":

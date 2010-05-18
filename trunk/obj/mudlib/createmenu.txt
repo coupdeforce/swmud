@@ -1,4 +1,4 @@
-// Last edited by deforce on 11-26-2007
+// Last edited by deforce on 03-10-2008
 // @./path/createmenu->start_menu()
 #include <mudlib.h>
 #include <playerflags.h>
@@ -11,12 +11,19 @@ inherit M_ACCESS;
 string get_stat_name(string stat);
 string get_stat_full_name(string stat);
 string format_stat(string stat);
+void ansi_input(string input);
 void stats_input(string input);
 void display_stats();
+void display_human_stats();
 void handedness_input(string input);
 void display_handedness();
 void team_input(string input);
 void display_team();
+void add_to_stat(string stat, int value);
+void set_human_bonus(string stat);
+void set_human_sacrifice(string stat);
+void set_human_modifier(int value);
+void validate_human_stats();
 void start_menu();
 void complete_character();
 
@@ -32,6 +39,35 @@ void display_stats()
    write(format_stat("agi") + "     " + format_stat("luc") + "\n");
    write(format_stat("dex") + "     " + format_stat("for") + "\n");
    write(format_stat("per") + "\n\n");
+
+   modal_simple((: stats_input :), "Type 'help' for more info > ");
+}
+
+void display_human_stats()
+{
+   object this_body = this_body();
+   int human_race_modifier = this_body->query_human_race_modifier();
+
+   validate_human_stats();
+
+   write("\n%^BOLD%^Attributes:%^RESET%^\n\n");
+
+   write("  Remaining Points: " + (this_body->query_points_remaining() / 5) + "\n");
+   write("Attribute Modifier: " + human_race_modifier + "\n");
+
+   if (human_race_modifier)
+   {
+      write(sprintf("             Bonus: %-12s     Sacrifice: %s\n",
+         capitalize(get_stat_full_name(this_body->query_human_race_bonus_attribute())),
+         capitalize(get_stat_full_name(this_body->query_human_race_sacrifice_attribute()))));
+   }
+
+   write("\n");
+   write("     " + format_stat("str") + "     " + format_stat("int") + "\n");
+   write("     " + format_stat("con") + "     " + format_stat("cha") + "\n");
+   write("     " + format_stat("agi") + "     " + format_stat("luc") + "\n");
+   write("     " + format_stat("dex") + "     " + format_stat("for") + "\n");
+   write("     " + format_stat("per") + "\n\n");
 
    modal_simple((: stats_input :), "Type 'help' for more info > ");
 }
@@ -52,10 +88,36 @@ void display_team()
 
 string format_stat(string stat)
 {
+   object this_body = this_body();
+
+   if (this_body->is_human())
+   {
+      string sacrifice = this_body->query_human_race_sacrifice_attribute();
+      string bonus = this_body->query_human_race_bonus_attribute();
+
+      if (this_body->query_human_race_modifier() && (sacrifice != bonus))
+      {
+         if (sacrifice == stat)
+         {
+            return sprintf("%%^BOLD%%^%12s%%^RESET%%^ [%%^BOLD%%^%s%%^RESET%%^]: %%^BOLD%%^%%^RED%%^%2d%%^RESET%%^ / %%^BOLD%%^%%^RED%%^%-2d%%^RESET%%^",
+               capitalize(get_stat_full_name(stat)), stat,
+               (call_other(this_body, "query_" + stat) / 5),
+               (call_other(this_body, "query_race_" + stat + "_max") / 5));
+         }
+         else if (bonus == stat)
+         {
+            return sprintf("%%^BOLD%%^%12s%%^RESET%%^ [%%^BOLD%%^%s%%^RESET%%^]: %%^BOLD%%^%%^GREEN%%^%2d%%^RESET%%^ / %%^BOLD%%^%%^GREEN%%^%-2d%%^RESET%%^",
+               capitalize(get_stat_full_name(stat)), stat,
+               (call_other(this_body, "query_" + stat) / 5),
+               (call_other(this_body, "query_race_" + stat + "_max") / 5));
+         }
+      }
+   }
+
    return sprintf("%%^BOLD%%^%12s%%^RESET%%^ [%%^BOLD%%^%s%%^RESET%%^]: %2d / %-2d",
       capitalize(get_stat_full_name(stat)), stat,
-      (call_other(this_body(), "query_" + stat) / 5),
-      (call_other(this_body(), "query_race_" + stat + "_max") / 5));
+      (call_other(this_body, "query_" + stat) / 5),
+      (call_other(this_body, "query_race_" + stat + "_max") / 5));
 }
 
 string get_stat_name(string stat)
@@ -186,6 +248,100 @@ void add_to_stat(string s, int val)
    // call_other(this_body(), query_stat, newval);
 }
 
+void set_human_bonus(string stat)
+{
+   object this_body = this_body();
+   string stat_shortname = get_stat_name(stat);
+
+   if (!stat_shortname)
+   {
+      write("\n%^YELLOW%^Invalid attribute name.%^RESET%^\n");
+      write("Choices are: str, con, agi, dex, per, int, cha, luc, for.\n\n");
+
+      return;
+   }
+
+   this_body->set_human_race_bonus_attribute(stat_shortname);
+
+   write("\n%^BOLD%^%^GREEN%^Set " + get_stat_full_name(stat) + " as your bonus attribute.%^RESET%^\n");
+}
+
+void set_human_sacrifice(string stat)
+{
+   object this_body = this_body();
+   string stat_shortname = get_stat_name(stat);
+
+   if (!stat_shortname)
+   {
+      write("\n%^YELLOW%^Invalid attribute name.%^RESET%^\n");
+      write("Choices are: str, con, agi, dex, per, int, cha, luc, for.\n\n");
+
+      return;
+   }
+
+   this_body()->set_human_race_sacrifice_attribute(stat_shortname);
+
+   write("\n%^BOLD%^%^RED%^Set " + get_stat_full_name(stat) + " as your sacrifice attribute.%^RESET%^\n");
+}
+
+void set_human_modifier(int value)
+{
+   if ((value < 0) || (value > 2))
+   {
+      write("\n%^YELLOW%^Your attribute modifier must be from 0 to 2.%^RESET%^\n");
+
+      return;
+   }
+
+   this_body()->set_human_race_modifier(value);
+
+   write("\n%^BOLD%^%^GREEN%^Set your attribute modifier to " + value + ".%^RESET%^\n");
+}
+
+void validate_human_stats()
+{
+   object this_body = this_body();
+
+   foreach (string stat in ({ "str", "con", "agi", "dex", "per", "int", "cha", "luc", "for" }) )
+   {
+      int min = call_other(this_body, "query_race_" + stat + "_min");
+      int max = call_other(this_body, "query_race_" + stat + "_max");
+      int current = call_other(this_body, "query_" + stat);
+      int points_remaining = this_body->query_points_remaining();
+
+      if (max < current)
+      {
+         int difference = current - max;
+         call_other(this_body, "set_" + stat, max);
+         this_body->set_points_remaining(points_remaining + difference);	
+      }
+      else if (min > current)
+      {
+         int difference = min - current;
+         call_other(this_body, "set_" + stat, min);
+         this_body->set_points_remaining(points_remaining - difference);
+      }
+   }
+}
+
+void ansi_input(string input)
+{
+   switch (lower_case(input))
+   {
+      case "y":
+      case "yes":
+      case "aye":
+         this_user()->query_shell_ob()->set_variable("ansi", 1);
+         this_user()->update_translations();
+         break;
+   }
+
+   write("\n%^BOLD%^Character Creation%^RESET%^\n\n");
+   write("Section 1 of 3: Attributes\n");
+
+   this_body()->is_human() ? display_human_stats() : display_stats();
+}
+
 void stats_input(string input)
 {
    string stat;
@@ -207,6 +363,18 @@ void stats_input(string input)
    {
       add_to_stat(stat, -5);
    }
+   else if (this_body()->is_human() && (sscanf(input, "bonus %s", stat) == 1))
+   {
+      set_human_bonus(stat);
+   }
+   else if (this_body()->is_human() && (sscanf(input, "sacrifice %s", stat) == 1))
+   {
+      set_human_sacrifice(stat);
+   }
+   else if (this_body()->is_human() && (sscanf(input, "mod %d", val) == 1))
+   {
+      set_human_modifier(val);
+   }
    else if (input == "help")
    {
       write("\nType 'help <attribute>' for info about a particular attribute.\n");
@@ -214,6 +382,14 @@ void stats_input(string input)
       write("Type 's <attribute> [value]' to substract one or more points from an attribute.\n\n");
       write("Examples: 'a str' will add one point to strength.\n");
       write("          's dex 5' will subtract five points from dexterity.\n\n");
+
+      if (this_body()->is_human())
+      {
+         write("Type 'bonus <attribute>' to choose your positive modifier.\n");
+         write("Type 'sacrifice <attribute>' to choose your negative modifier.\n");
+         write("Type 'mod <value>' to set the modifier from 0 to 2.\n\n");
+      }
+
       write("Type 'list' to see your current attributes.\n");
       write("Type 'done' after you've distributed all points and are satisfied.\n\n");
 
@@ -244,7 +420,7 @@ void stats_input(string input)
          int levels = (points / 5);
 
          write("\n%^YELLOW%^You still have " + levels + " point" + (levels > 1 ? "s" : "") + " to distribute to your stats.%^RESET%^\n");
-         write("You must distribute all of your levels to continue.\n");
+         write("You must distribute all of your points to continue.\n");
       }
       else
       {
@@ -260,7 +436,7 @@ void stats_input(string input)
       this_body()->do_game_command(input);
    }
 
-   display_stats();
+   this_body()->is_human() ? display_human_stats() : display_stats();
 }
 
 void handedness_input(string input)
@@ -367,7 +543,5 @@ void complete_character()
 void start_menu()
 {
    this_body()->set_flag(F_IN_EDIT);
-   write("\n%^BOLD%^Character Creation%^RESET%^\n\n");
-   write("Section 1 of 3: Attributes\n");
-   display_stats();
+   modal_push((: ansi_input :), "\nWould you like to enable color? ");
 }

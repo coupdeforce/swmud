@@ -1,4 +1,4 @@
-// Last editied by deforce on 05-29-2008
+// Last editied by deforce on 06-02-2008
 #include <playerflags.h>
 
 inherit CMD;
@@ -24,8 +24,8 @@ void main()
    users_wizard = filter_array(users_player, (: wizardp($1) :));
    users_player = filter_array(users_player, (: !wizardp($1) :));
 
-   out("\n\n%^CYAN%^" + colour_center(ctime(time()) + "   -   " + implode(explode(upper_case(mud_name()), ""), " ") + "   -   " + sizeof(bodies()) + " adventurers%^RESET%^\n"));
-   out(DELIM);
+   output += "\n\n%^CYAN%^" + colour_center(ctime(time()) + "   -   " + implode(explode(upper_case(mud_name()), ""), " ") + "   -   " + sizeof(bodies()) + " adventurers%^RESET%^\n");
+   output += DELIM;
 
    for (int count = 0; count < sizeof(users_wizard); count++)
    {
@@ -60,13 +60,13 @@ void main()
 
          line += "] " + format_status(user);
 
-         out(show_location(line, body) + "\n");
+         output += show_location(line, body) + "\n";
       }
    }
 
    if (sizeof(users_player) && sizeof(users_wizard))
    {
-      out(DELIM);
+      output += DELIM;
    }
 
    for (int count = 0; count < sizeof(users_player); count++)
@@ -88,18 +88,36 @@ void main()
 
    if (sizeof(users_player))
    {
+      int columns = floor(WIDTH / USER_WIDTH);
+      int line_count = ceil(to_float(sizeof(users_player)) / columns);
       string array lines = ({ });
 
       foreach (string user in users_player)
       {
          string line = get_guild_color(find_body(user)->query_primary_guild());
          line += format_status(user);
+         line += repeat_string(" ", (USER_WIDTH - colour_strlen(line)));
 
          lines += ({ line });
       }
 
-      outf("%#-" + WIDTH + ".0s\n\n", implode(lines, "\n"));
+      for (int row_count = 0; row_count < line_count; row_count++)
+      {
+         string line_output = lines[row_count];
+
+         for (int column_count = 1; column_count < columns; column_count++)
+         {
+            if (((column_count * line_count) + row_count) < sizeof(lines))
+            {
+               line_output += lines[(column_count * line_count) + row_count];
+            }
+         }
+
+         output += line_output + "\n";
+      }
    }
+
+   out(output);
 }
 
 int sort_level_name(string first, string second)
@@ -157,6 +175,7 @@ string format_status(string user)
    if (!wizardp(body)) { output += sprintf("[%2i] ", body->query_primary_level()); }
 
    if (body->test_flag(F_IN_EDIT)) { output += (wizardp(user) ? "** " : "*"); }
+   output += (body->get_target() ? "!" : "");
    output += (!body->is_visible() ? "(" : "");
    if (!wizardp(body) && body->test_flag(F_INACTIVE)) { output += "["; }
 
@@ -164,11 +183,14 @@ string format_status(string user)
 
    if (!wizardp(body) && body->test_flag(F_INACTIVE)) { output += "]"; }
    output += (!body->is_visible() ? ")" : "");
+   output += (body->get_target() ? "!" : "");
    if (body->test_flag(F_IN_EDIT)) { output += (wizardp(user) ? " **" : "*"); }
 
    output += "%^RESET%^" + (wizardp(user) && body->test_flag(F_INACTIVE) ? " (away)" : format_idle_time(body));
 
-   return output;
+   if (wizardp(body)) { return output; }
+
+   return output[0..USER_WIDTH + (strlen(output) - colour_strlen(output)) - 1];
 }
 
 string show_location(string line, object body)
