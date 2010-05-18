@@ -1,4 +1,4 @@
-// Last edited by deforce on 11-25-2007
+// Last edited by deforce on 03-09-2010
 // Rust 08-15-1994
 
 #include <security.h>
@@ -50,17 +50,16 @@ class finger get_finger_data(string userid)
    object mbox;
 
    info = unguarded(1, (: call_other, USER_D, "query_variable", userid,
-      ({ "real_name", "email", "nickname", "url", "wiz_position", "title", "gender", "race_name", "spouse", "team_alignment", "describe", "primary_guild", "primary_level" }) :));
+      ({ "real_name", "email", "url", "wiz_position", "title", "gender", "race_name", "spouse", "team_alignment", "describe", "primary_guild", "primary_level" }) :));
 
    if (!info) { return 0; }
 
-   result = new(class finger, visname: capitalize(userid), real_name: info[0], email: info[1],
-      nickname: info[2], home_page: info[3], position: info[4], sex: info[6], race: info[7],
-      spouse: info[8], team: info[9], describe: info[10], primary_guild: info[11], primary_level: info[12]);
+   result = new(class finger, real_name: info[0], email: info[1],
+      home_page: info[2], position: info[3], title: info[4], sex: info[5], race: info[6],
+      spouse: info[7], team: info[8], describe: info[9], primary_guild: info[10], primary_level: info[11]);
 
    if (result->real_name == "") { result->real_name = 0; }
    if (result->email == "") { result->email = 0; }
-   if (result->nickname == "") { result->nickname = 0; }
    if (result->home_page == "") { result->home_page = 0; }
 
    if (result->team > 25) { result->team = 1; }
@@ -75,8 +74,6 @@ class finger get_finger_data(string userid)
       if (result->real_name && result->real_name[0] == '#') { result->real_name = 0; }
       if (result->home_page && result->home_page[0] == '#') { result->home_page = 0; }
    }
-
-   result->title = info[5];
 
    mbox = MAILBOX_D->get_mailbox(userid);
    result->mail_count = mbox->query_message_count();
@@ -130,8 +127,8 @@ string show_big_html_finger()
    foreach (object user in u)
    {
       retval += sprintf("<TR><TD>%s</TD><TD>%s</TD><TD>%s</TD></TR>",
-         find_body( user->query_userid()) ? sprintf("<font size=+2><a href=http://%s:%d/cgi/who.c?=%s>%s</a></font>",
-         __HOST__, PORT_HTTP, user->query_userid(), capitalize( user->query_userid())) :"Login",
+         find_body( user->query_userid()) ? sprintf("<font size=+2><a href=/cgi/who.c?=%s>%s</a></font>",
+         user->query_userid(), capitalize( user->query_userid())) :"Login",
          "level", format_idle_time(user));
    }
 
