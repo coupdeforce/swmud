@@ -1,146 +1,101 @@
-// Last edited by deforce on 07-12-2008
-inherit CMD;
+// Last edited by deforce on 04-25-2010
+#include <hooks.h>
 
-void perform_enhance_attribute(string attribute);
-void meditation_time(string attribute);
-string format_time_left(int time);
-string get_stat_name(string stat);
-string get_stat_full_name(string stat);
+inherit VERB_OB;
 
-void main(string attribute)
+void perform_valor();
+void meditation_time();
+
+void do_valor()
 {
    object this_body = this_body();
 
-   if (!attribute)
-   {
-      write("Enhance which attribute?\n");
+   this_body->simple_action("$N $vconcentrate on strengthening $p body through the Force...\n");
 
-      return;
-   }
+   this_body->adjust_jedi_alignment(2);
 
-   if (!this_body->query_guild_level("jedi"))
+   this_body->add_skill_delay(8);
+
+   call_out("meditation_time", 4);
+}
+
+mixed can_valor()
+{
+   object this_body = this_body();
+
+   if (this_body->query_guild_level("jedi"))
    {
-      write("Only Jedi know how to use the Force to enhance their attributes.\n");
-   }
-   else if (!this_body->has_learned_skill("enhance attributes"))
-   {
-      write("You have not learned how to enhance your attributes with the Force.\n");
-   }
-   else if (this_body->get_target())
-   {
-      write("You are unable to concentrate on enhancing your attributes while in combat.\n");
-   }
-   else if (this_body->has_skill_delay())
-   {
-      write("You are too busy to concentrate on enhancing your attributes.\n");
-   }
-   else if (this_body->has_special_skill_delay("enhance attribute"))
-   {
-      write("You need to wait " + format_time_left(this_body->has_special_skill_delay("enhance attribute")) + " before you can enhance your attributes again.\n");
-   }
-   else if (!get_stat_name(attribute))
-   {
-      write("You have no " + attribute + " to enhance.\n");
+      if (!this_body->has_learned_skill("force valor"))
+      {
+         return "You have not learned how to strengthen your body through the Force.\n";
+      }
+      else if (this_body->query_guild_level("assassin"))
+      {
+         return "You are too dedicated to the Dark side of the Force to use it for strengthening your body.\n";
+      }
+      else if (this_body->has_buff("/d/buffs/anger"))
+      {
+         return "You are too angry to use the Force for strengthening your body.\n";
+      }
+      else if (this_body->get_target())
+      {
+         return "You are unable to concentrate on strengthening your body through the Force while in combat.\n";
+      }
+      else if (this_body->has_skill_delay())
+      {
+         return "You are too busy to concentrate on strengthening your body through the Force.\n";
+      }
+      else if (this_body->has_special_skill_delay("force valor"))
+      {
+         return "You need to wait " + convert_time(this_body->has_special_skill_delay("force valor")) + " before you can strengthen your body through the Force again.\n";
+      }
    }
    else
    {
-      this_body->simple_action("$N $vconcentrate on enhancing $p body with the Force...\n");
-
-      call_out("meditation_time", 4, attribute);
-
-      this_body->add_skill_delay(8);
-
-      this_body->stun(2);
+      return "Only Jedi know how to use the Force to strengthen their body.\n";
    }
+
+   return 1;
 }
 
-void perform_enhance_attribute(string attribute)
+void perform_valor()
 {
    object this_body = this_body();
-   string stat_name = get_stat_name(attribute);
-   float force = this_body->query_for();
-   float level = this_body->query_guild_level("jedi");
-   int rank = to_int(floor(this_body->query_skill("enhatt") / 100.0));
-   int amount = to_int(floor((level / 50.0) * (force / 100.0) * (rank * 3.0)));
-   int delay = 300 - to_int(floor(((level * 2.0) + force) / 50.0) * 30.0);
-   int duration = 10 + (rank * 5) + to_int(floor((level / 50.0) * (force / 100.0) * (10.0 + (rank * 5.0))) * 2.0);
+   int force = this_body->query_for();
+   int level = this_body->query_guild_level("jedi");
+   int rank = this_body->query_skill("force_valor") / 100;
+   int spec = this_body->query_guild_specialization_rank("jedi", "control");
+   int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
+   int amount = (level * force * (rank_spec * 3)) / 5000;
+   int delay = 420 - ((level + (rank_spec * 2)) * 4);
+   int duration = ((rank_spec * 2) + level) * 4;
 
    if (amount < 1) { amount = 1; }
 
-   load_object("/d/buffs/enhatt");
-   this_body->add_buff(new("/d/buffs/enhatt", attribute, amount, duration));
+   load_object("/d/buffs/force_valor");
+   this_body->add_buff(new("/d/buffs/force_valor", amount, duration));
 
-   this_body->add_special_skill_delay("enhance attribute", delay);
+   this_body->add_special_skill_delay("force valor", delay);
 }
 
-void meditation_time(string attribute)
+void meditation_time()
 {
    object this_body = this_body();
    int alignment = this_body->query_jedi_alignment();
 
    if (!this_body) { return; }
 
-   if (this_body->test_skill("enhatt", alignment * (alignment < 0 ? -2 : 2)))
+   if (this_body->test_skill("force_valor", (alignment * (alignment < 0 ? 25 : 5)) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
-      perform_enhance_attribute(attribute);
+      perform_valor();
    }
    else
    {
       this_body->simple_action("$N $vlose focus.\n");
-
-      if (this_body->query_int() < random(100))
-      {
-         this_body->stun(2);
-      }
    }
 }
 
-string format_time_left(int time)
+void create()
 {
-   string output = "";
-
-   if (time > 59)
-   {
-      if ((time / 60) > 0) { output += (time / 60) + " minute" + ((time / 60) != 1 ? "s" : "") + ", "; }
-   }
-
-   output += (time % 60) + " second" + ((time % 60) != 1 ? "s" : "");
-
-   return output;
-}
-
-string get_stat_name(string stat)
-{
-   switch(lower_case(stat))
-   {
-      case "strength":
-      case "str":
-         return "str";
-      case "constitution":
-      case "con":
-         return "con";
-      case "agility":
-      case "agi":
-         return "agi";
-      case "dexterity":
-      case "dex":
-         return "dex";
-      case "perception":
-      case "per":
-         return "per";
-      case "intelligence":
-      case "int":
-         return "int";
-      case "charisma":
-      case "cha":
-         return "cha";
-      case "luck":
-      case "luc":
-         return "luc";
-      case "force":
-      case "for":
-         return "for";
-   }
-
-   return 0;
+   add_rules( ({ "" }) );
 }

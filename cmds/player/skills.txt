@@ -7,14 +7,16 @@ inherit CMD;
 inherit CLASS_SKILL;
 
 #define WIDTH this_user()->query_screen_width()
-#define COLUMNS floor(WIDTH / 37)
 
 private void main(string arg)
 {
    object body;
    mapping skills;
    string array lines = ({ });
+   float columns = floor(WIDTH / 37);
    int line_count;
+
+   if (columns > 1) { columns = floor((WIDTH - ((columns - 1) * 4)) / 37); }
 
    if (wizardp(this_body()) && find_body(arg)) { body = find_body(arg); }
    else { body = this_body(); }
@@ -56,12 +58,12 @@ private void main(string arg)
    }
 
    lines = sort_array(lines, 1);
-   line_count = ceil(sizeof(lines) / COLUMNS);
+   line_count = ceil(sizeof(lines) / columns);
 
-   if (COLUMNS > 1)
+   if ((columns > 1) && (sizeof(lines) > 1))
    {
-      out(sprintf("\n\n%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank") + repeat_string("    " + sprintf("%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank"), COLUMNS - 1) + "\n");
-      out(repeat_string("-", 37) + repeat_string("    " + repeat_string("-", 37), COLUMNS - 1) + "\n");
+      out(sprintf("\n\n%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank") + repeat_string("    " + sprintf("%%^YELLOW%%^%-29s %-7s%%^RESET%%^", "Skill", "Rank"), columns - 1) + "\n");
+      out(repeat_string("-", 37) + repeat_string("    " + repeat_string("-", 37), columns - 1) + "\n");
    }
    else
    {
@@ -71,7 +73,7 @@ private void main(string arg)
 
    for (int count = 0; count < line_count; count++)
    {
-      for (int column_count = 0; column_count < COLUMNS; column_count++)
+      for (int column_count = 0; column_count < columns; column_count++)
       {
          int index = count + (line_count * column_count);
 
