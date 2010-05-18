@@ -526,6 +526,8 @@ void team_input(string input)
 
 void complete_character()
 {
+   this_body()->set_max_health(this_body()->query_max_health() + (this_body()->query_con() / 5));
+   this_body()->set_health(this_body()->query_max_health());
    this_body()->clear_flag(F_IN_EDIT);
    write("\n%^BOLD%^Your character is complete.  Welcome to " + mud_name() + "!%^RESET%^\n\n");
 
