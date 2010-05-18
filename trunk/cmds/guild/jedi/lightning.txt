@@ -1,17 +1,12 @@
-// Last edited by deforce on 06-12-2008
+// Last edited by deforce on 05-03-2010
 inherit VERB_OB;
-inherit M_DAMAGE_SOURCE;
 
-int get_floor();
-int get_ceiling();
 void zap_target(object thing);
 void concentration(object thing);
 
 void do_lightning_obj(object thing)
 {
    object this_body = this_body();
-
-   set_combat_messages("combat-lightning");
 
    if (this_body->query_guild_level("jedi"))
    {
@@ -59,8 +54,6 @@ void do_lightning()
 
    if (!this_body()->is_body())
    {
-      set_combat_messages("combat-lightning");
-
       concentration(target);
 
       return;
@@ -73,44 +66,31 @@ void do_lightning()
 void zap_target(object thing)
 {
    object this_body = this_body();
-   int floor = get_floor();
-   int ceiling = get_ceiling();
+   int force = this_body->query_for();
+   int level = this_body->query_guild_level("jedi");
+   int rank = this_body->query_skill("lightning") / 100;
+   int spec = this_body->query_guild_specialization_rank("jedi", "destruction");
+   int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
+   int floor = level * force * rank_spec / 1000;
+   int ceiling = (level + rank_spec) * rank_spec * force * force / 40000;
    int amount = (floor < ceiling ? floor + random(ceiling - floor + 1) : floor);
+
+   if (amount < (level / 2)) { amount = level / 2; }
 
 //   this_body->simple_action("$N can do lightning from " + floor + " to " + ceiling + ", and had a damage roll of " + amount + ".\n");
 //   this_body->targetted_action("$N $vsend bolts of lightning from $p hands to $t!\n", thing);
-   this_body->add_event(thing, this_object(), choice(({ "head", "torso" })), amount);
-
-   if (member_array(thing, this_body->query_targets()) > -1)
+   if (!present("force_lightning", this_body))
    {
-      this_body->handle_events();
+      load_object("/d/obj/force_damage");
+      new("/d/obj/force_damage", "Force lightning", "force_lightning")->move(this_body);
+      present("force_lightning", this_body)->set_combat_messages("combat-lightning");
+      present("force_lightning", this_body)->set_death_message("$N was killed by bolts of lightning from $P1 hands at $o1.");
    }
-   else
-   {
-      this_body->start_fight(thing);
-   }
-}
 
-int get_floor()
-{
-   object this_body = this_body();
-   float force = this_body->query_for();
-   float level = this_body->query_guild_level("jedi");
-   int rank = to_int(floor(this_body->query_skill("lightning") / 200.0));
-   int amount = ((level / (6 - rank)) * (force / 100.0));
+   this_body->add_event(thing, present("force_lightning", this_body), thing->query_random_limb(), amount, this_body);
 
-   return (amount > 0 ? amount : 1);
-}
-
-int get_ceiling()
-{
-   object this_body = this_body();
-   float force = this_body->query_for();
-   float level = this_body->query_guild_level("jedi");
-   int rank = to_int(floor((this_body->query_skill("lightning") + 100) / 200.0));
-   int amount = ((level / (50.0 - (9.8 * rank))) * (force / 100.0)) + (force * (1 + (rank * 0.1)) * (force / (600.0 - (rank * 100.0))));
-
-   return (amount > 0 ? amount : 1);
+   this_body->start_fight(thing);
+   this_body->handle_events();
 }
 
 void concentration(object thing)
@@ -118,7 +98,7 @@ void concentration(object thing)
    object this_body = this_body();
    int alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("lightning", this_body->query_jedi_alignment() * (alignment < 0 ? -10 : -30)))
+   if (this_body->test_skill("lightning", this_body->query_jedi_alignment() * (alignment < 0 ? -10 : -20)))
    {
       zap_target(thing);
    }

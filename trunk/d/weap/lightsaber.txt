@@ -1,0 +1,104 @@
+// Last edited by deforce on 02-16-2010
+inherit WEAPON;
+inherit M_LIGHT_SOURCE;
+
+string color = choice(({ "%^YELLOW%^yellow", "%^BOLD%^%^BLUE%^bright blue", "%^BOLD%^%^GREEN%^bright green" }));
+
+void setup()
+{
+   set_id("lightsaber", "saber");
+   set_long("This is a simple lightsaber, manufactured for those who have not yet constructed their own.  The case is made of polished silver metal, with buttons along the side.");
+   set_combat_messages("combat-blade");
+   set_damage_type("blade");
+   set_skill_used("saber_combat");
+   set_weapon_class(40);
+   set_mass(4000);
+   set_value(2000);
+}
+
+int is_lightsaber() { return 1; }
+
+string query_wield_message()
+{
+   light();
+
+   add_adj(color + "%^RESET%^");
+
+   return "$N $vactivate $p $o.";
+}
+
+string query_unwield_message()
+{
+   extinguish();
+
+   remove_adj(color + "%^RESET%^");
+
+   return "$N $vshut down $p $o.";
+}
+
+class event_info source_modify_event(class event_info evt)
+{
+   object this_body = query_wielded_by();
+   int weapon_class = query_weapon_class();
+   int level = this_body->query_guild_level("jedi");
+
+   if (stringp(evt->data)) { return evt; }
+
+   if (level && this_body->has_learned_skill("lightsaber combat"))
+   {
+      int rank = this_body->query_skill("saber_combat") / 100.0;
+      int min_damage = 2 + floor(level / (15.0 - rank));
+      int max_level_damage = level + (floor(level / 10.0) * 2);
+      int max_skill_damage = floor(weapon_class * ((10.0 + (rank * 9.0)) / 100.0));
+      int damage = evt->data[1];
+
+      if (damage < min_damage)
+      {
+         damage = min_damage;
+      }
+      else
+      {
+         if (damage > max_level_damage)
+         {
+            damage = max_level_damage;
+         }
+
+         if (damage > max_skill_damage)
+         {
+            damage = max_skill_damage;
+         }
+      }
+
+      if (this_body->has_learned_skill("combat sense") && this_body->test_skill("combat_sense"))
+      {
+         int force = this_body->query_for();
+         rank = this_body->query_skill("combat_sense") / 100.0;
+
+         if (floor((level / (5.0 - (rank * 0.4))) * (force / 100.0)) > random(100))
+         {
+            damage += floor(damage * ((rank / 100.0) * (level / 5.0) * (force / 100.0)));
+
+            this_body->simple_action("$N $vdeliver a critical strike with $p lightsaber!");
+         }
+      }
+
+      if (damage != evt->data[1])
+      {
+         tell(this_body, sprintf("Damage adjusted from %d to %d.\n", evt->data[1], damage));
+      }
+
+      evt->data[1] = damage;
+   }
+   else if (((500 - this_body->query_agi() - this_body->query_dex() - this_body->query_per() - this_body->query_luc() - this_body->query_for()) / 5.0) > random(100))
+   {
+      this_body->start_fight(evt->target);
+      evt->target->start_fight(this_body);
+      evt->target = this_body;
+   }
+   else
+   {
+      evt->data[1] = random(floor(weapon_class * (this_body->query_primary_level() / 50.0)) + 1);
+   }
+
+   return evt;
+}

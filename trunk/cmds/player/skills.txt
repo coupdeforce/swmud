@@ -1,10 +1,8 @@
-// Last modified by deforce on 12-08-2007
+// Last modified by deforce on 12-24-2007
 #include <mudlib.h>
 #include <config.h>
-#include <classes.h>
 
 inherit CMD;
-inherit CLASS_SKILL;
 
 #define WIDTH this_user()->query_screen_width()
 
@@ -33,6 +31,7 @@ private void main(string arg)
    foreach (string name in keys(skills))
    {
       string capname;
+      int array my_skill = skills[name];
       int skill_value;
       mixed data = SKILL_D->query_skill(name);
 
@@ -42,7 +41,12 @@ private void main(string arg)
          capname = data[0];
       }
 
-      skill_value = body->query_skill(name);
+      if (sizeof(my_skill) != 2)
+      {
+         my_skill = ({ 0, 0 });
+      }
+
+      skill_value = my_skill[0];
 
       if (skill_value > 0)
       {
