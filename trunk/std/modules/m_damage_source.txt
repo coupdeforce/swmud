@@ -24,7 +24,6 @@ private int slow_bonus = 0;
 private int tear_bonus = 0;
 private int critical_chance_bonus = 0;
 private int critical_multiplier_bonus = 0;
-private int lightsaber_deflection_bonus = 0;
 private int durability = 1;
 private int max_durability = 1;
 private int chance_to_be_damaged = 2;
@@ -38,7 +37,7 @@ private mapping combat_messages = ([]);
 
 void internal_setup()
 {
-   this_object()->add_save( ({ "damage_types", "damage_bonuses", "durability", "max_durability", "critical_chance_bonus", "critical_multiplier_bonus", "persist_flags" }) );
+1   this_object()->add_save( ({ "damage_types", "damage_bonuses", "durability", "max_durability", "critical_chance_bonus", "critical_multiplier_bonus", "persist_flags" }) );
 }
 
 int can_swing()
@@ -154,21 +153,6 @@ int query_critical_multiplier_bonus()
 void reset_critical_multiplier_bonus()
 {
    critical_multiplier_bonus = 0;
-}
-
-void add_lightsaber_deflection_bonus(int x)
-{
-   lightsaber_deflection_bonus += x;
-}
-
-int query_lightsaber_deflection_bonus()
-{
-   return lightsaber_deflection_bonus;
-}
-
-void reset_lightsaber_deflection_bonus()
-{
-   lightsaber_deflection_bonus = 0;
 }
 
 int is_weapon()

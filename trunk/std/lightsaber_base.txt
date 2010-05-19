@@ -4,7 +4,7 @@ inherit WEAPON;
 
 #include <lightsaber.h>
 
-string color = get_lightsaber_color_code(choice(({ "blue", "green", "yellow", "red" })));
+string color = choice(({ "blue", "green", "yellow", "red" }));
 int deflection_bonus = 0;
 int alignment = 0;
 
@@ -13,7 +13,7 @@ void mudlib_setup()
    add_id("lightsaber", "saber");
    set_combat_messages("combat-blade");
    set_skill_used("saber_combat");
-   add_save(({ "color", "alignment" }));
+   add_save(({ "color", "deflection_bonus", "alignment" }));
    ::mudlib_setup();
 }
 
@@ -24,28 +24,38 @@ string query_wield_message()
 //   light();
 
    clear_adj();
-   call_out("add_adj", 1, color + "%^RESET%^");
+   call_out("add_adj", 1, get_lightsaber_color_code(color) + "%^RESET%^");
 
-   return "$N $vactivate $p $o, which produces a glowing " + color + "%^RESET%^ blade.";
+   return "$N $vactivate $p $o, which produces a glowing " + get_lightsaber_color_code(color) + "%^RESET%^ blade.";
 }
 
 string query_unwield_message()
 {
 //   extinguish();
 
-   remove_adj(color + "%^RESET%^");
+   remove_adj(get_lightsaber_color_code(color) + "%^RESET%^");
 
    return "$N $vshut down $p $o.";
 }
 
 void set_lightsaber_color(string lightsaber_color)
 {
-   color = get_lightsaber_color_code(lightsaber_color);
+   color = lightsaber_color;
 }
 
-void set_lightsaber_deflection_bonus(int bonus)
+void add_deflection_bonus(int amount)
 {
-   deflection_bonus = bonus;
+   deflection_bonus += amount;
+}
+
+int query_deflection_bonus()
+{
+   return deflection_bonus;
+}
+
+void reset_deflection_bonus()
+{
+   deflection_bonus = 0;
 }
 
 void set_lightsaber_alignment(int align)

@@ -20,9 +20,57 @@ void do_class_obj(object thing)
             write(sprintf("%16s: %i\n", title_capitalize(type), amount));
          }
 
+         if (thing->query_to_hit_base())
+         {
+            write(sprintf("\n%16s: %i", "To-Hit Base", thing->query_to_hit_base()));
+         }
+
+         if (thing->query_to_hit_bonus())
+         {
+            write(sprintf("\n%16s: %i", "To-Hit Bonus", thing->query_to_hit_bonus()));
+         }
+
+         if (thing->query_parry_bonus())
+         {
+            write(sprintf("\n%16s: %i", "Parry Bonus", thing->query_parry_bonus()));
+         }
+
+         if (thing->query_stun_bonus())
+         {
+            write(sprintf("\n%16s: %i", "Stun Bonus", thing->query_stun_bonus()));
+         }
+
+         if (thing->query_slow_bonus())
+         {
+            write(sprintf("\n%16s: %i", "Slow Bonus", thing->query_slow_bonus()));
+         }
+
+         if (thing->query_tear_bonus())
+         {
+            write(sprintf("\n%16s: %i", "Tear Bonus", thing->query_tear_bonus()));
+         }
+
+         if (thing->query_critical_chance_bonus())
+         {
+            write(sprintf("\n%16s: %i", "Critical % Bonus", thing->query_critical_chance_bonus()));
+         }
+
+         if (thing->query_critical_multiplier_bonus())
+         {
+            write(sprintf("\n%16s: %i", "Critical x Bonus", thing->query_critical_multiplier_bonus()));
+         }
+
          if (!thing->is_living())
          {
-            write(sprintf("\n%16s: %i\n", "Base Speed", thing->query_weapon_speed()));
+            write(sprintf("\n%16s: %i", "Base Speed", thing->query_weapon_speed()));
+         }
+
+         if (thing->is_lightsaber())
+         {
+            if (thing->query_deflection_bonus())
+            {
+               write(sprintf("\n%16s: %i", "Deflection Bonus", thing->query_deflection_bonus()));
+            }
          }
       }
 
@@ -30,20 +78,42 @@ void do_class_obj(object thing)
       {
          if (thing->is_living())
          {
-            write(sprintf("%16s: %i\n", "Armor Class", thing->query_armor_class() + thing->query_jedi_armor_class()));
+            write(sprintf("\n%16s: %i", "Armor Class", thing->query_armor_class() + thing->query_jedi_armor_class()));
          }
          else
          {
-            write(sprintf("%16s: %i\n", "Armor Class", thing->query_armor_class()));
-            write(sprintf("%16s: %i\n", "Max Armor Class", thing->query_max_armor_class()));
+            write(sprintf("\n%16s: %i", "Armor Class", thing->query_armor_class()));
+            write(sprintf("\n%16s: %i", "Max Armor Class", thing->query_max_armor_class()));
          }
+      }
+
+      if (sizeof(thing->query_attribute_bonuses()))
+      {
+         write("\n\nAttribute Bonuses:");
+
+         foreach (string type, int bonus in thing->query_attribute_bonuses())
+         {
+            write(sprintf("\n%16s: %i", capitalize(type), bonus));
+         }
+
+         write("\n");
+      }
+
+      if (thing->query_heal_bonus())
+      {
+         write(sprintf("\n%16s: %i\n", "Heal Bonus", thing->query_heal_bonus()));
+      }
+
+      if (thing->query_armor_bonus())
+      {
+         write(sprintf("\n%16s: %i\n", "Armor Bonus", thing->query_armor_bonus()));
       }
 
       if (!thing->is_living())
       {
-         write(sprintf("%16s: %i\n", "Durability", thing->query_durability()));
-         write(sprintf("%16s: %i\n", "Max Durability", thing->query_max_durability()));
-         write(sprintf("%16s: %i\n", "Value", thing->query_value()));
+         write(sprintf("\n%16s: %i", "Durability", thing->query_durability()));
+         write(sprintf("\n%16s: %i", "Max Durability", thing->query_max_durability()));
+         write(sprintf("\n%16s: %i", "Value", thing->query_value()));
       }
 
       if (sizeof(required_learned_skills))
