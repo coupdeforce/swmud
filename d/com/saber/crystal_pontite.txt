@@ -9,5 +9,5 @@ void setup()
    set_damage_bonuses(([ "cold" : 10 ]));
    set_attribute_bonuses(([ "cha" : 10 ]));
    set_mass(50);
-   set_value(18000);
+   set_value(20000);
 }
