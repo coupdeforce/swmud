@@ -1,4 +1,5 @@
-inherit WEAPON;
+inherit BLADE_BASE;
+inherit BLADE_CUSTOM;
 
 void setup()
 {
@@ -14,3 +15,5 @@ void setup()
    set_mass(9250);
    set_value(4800);
 }
+
+int can_use_energy_cell() { return 1; }

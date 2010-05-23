@@ -17,7 +17,7 @@ void do_uninstall_obj_from_obj(object ob1, object ob2)
    }
 
    if ((ob1->is_lightsaber_component() && ob2->is_lightsaber())
-      || (ob1->is_melee_component() && ob2->is_melee_weapon())
+      || (ob1->is_blade_component() && ob2->is_blade())
       || (ob1->is_blaster_component() && ob2->is_blaster())
       || (ob1->is_armor_component() && ob2->is_modifiable_armor()))
    {

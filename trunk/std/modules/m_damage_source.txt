@@ -355,6 +355,8 @@ void decrease_class(int x)
 void set_durability(int amount)
 {
    durability = amount;
+
+   if (max_durability < durability) { max_durability = durability; }
 }
 
 //:FUNCTION set_max_durability
