@@ -28,7 +28,7 @@ object array get_objects(string verb, object thing)
       case "sell": return all_inventory(thing);
       case "unconceal": return filter_array(all_inventory(thing), (: $1->test_flag(F_CONCEALED) :));
       case "unholster": return filter_array(deep_inventory(environment(thing)), (: $1->test_flag(F_HOLSTERED) :)) + filter_array(deep_inventory(environment(thing)), (: $1->has_weapons() :));
-      case "uninstall": return filter_array(filter_array(deep_inventory(thing), (: $1->is_lightsaber_component() :)), (: environment($1)->is_lightsaber() :)) + filter_array(deep_inventory(thing), (: $1->is_lightsaber() :));
+      case "uninstall": return filter_array(filter_array(deep_inventory(thing), (: $1->is_lightsaber_component() :)), (: environment($1)->is_lightsaber() :)) + filter_array(all_inventory(thing), (: $1->is_lightsaber() :)) + filter_array(filter_array(deep_inventory(thing), (: $1->is_blade_component() :)), (: environment($1)->is_blade() :)) + filter_array(all_inventory(thing), (: $1->is_blade() :));
       case "unwield": return filter_array(all_inventory(thing), (: $1->test_flag(F_WIELDED) :));
       case "wear": return filter_array(all_inventory(thing), (: !$1->test_flag(F_WORN) :));
       case "wield": return filter_array(all_inventory(thing), (: !$1->test_flag(F_WIELDED) :));

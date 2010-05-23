@@ -1,4 +1,5 @@
-inherit WEAPON;
+inherit BLADE_BASE;
+inherit BLADE_CUSTOM;
 
 void setup()
 {
