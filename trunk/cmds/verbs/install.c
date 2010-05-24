@@ -4,7 +4,12 @@ inherit VERB_OB;
 
 void do_install_obj_in_obj(object ob1, object ob2)
 {
-   if (ob2->test_flag(F_WIELDED))
+   if (this_body()->query_target())
+   {
+      write("You are unable to install a component while in combat.\n");
+      return;
+   }
+   else if (ob2->test_flag(F_WIELDED))
    {
       write("You must unwield " + ob2->the_short() + " before installing a component.\n");
       return;
@@ -20,7 +25,14 @@ void do_install_obj_in_obj(object ob1, object ob2)
       || (ob1->is_blaster_component() && ob2->is_blaster())
       || (ob1->is_armor_component() && ob2->is_modifiable_armor()))
    {
-      ob1->move(ob2);
+      mixed test = ob1->move(ob2);
+
+      if (stringp(test))
+      {
+         write(test);
+         return;
+      }
+
       ob2->assemble();
 
       if (ob1->test_flag(F_CONCEALED))

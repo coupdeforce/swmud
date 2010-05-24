@@ -1,11 +1,15 @@
-// Last edited by deforce on 05-16-2010
 #include <flags.h>
 
 inherit VERB_OB;
 
 void do_uninstall_obj_from_obj(object ob1, object ob2)
 {
-   if (ob2->test_flag(F_WIELDED))
+   if (this_body()->query_target())
+   {
+      write("You are unable to uninstall a component while in combat.\n");
+      return;
+   }
+   else if (ob2->test_flag(F_WIELDED))
    {
       write("You must unwield " + ob2->the_short() + " before uninstalling a component.\n");
       return;
