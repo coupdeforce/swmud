@@ -163,6 +163,7 @@
 #define ADVERSARY               "/std/adversary"
 #define AGGRESSIVE_MONSTER      "/std/aggressive_monster"
 #define ARMOR                   "/std/armor"
+#define ARMOR_CUSTOM            "/std/armor_custom"
 #define BASE_OBJ                "/std/base_obj"
 #define BLADE_BASE              "/std/blade_base"
 #define BLADE_CUSTOM            "/std/blade_custom"
@@ -208,6 +209,7 @@
 
 // for mudlib objects
 #define M_ANSI                  "/std/modules/m_ansi"
+#define M_ARMOR_COMPONENT       "/std/modules/m_armor_component"
 #define M_BLADE_COMPONENT       "/std/modules/m_blade_component"
 #define M_BODY_STATS            "/std/modules/m_bodystats"
 #define M_COMPLETE              "/std/modules/m_complete"
