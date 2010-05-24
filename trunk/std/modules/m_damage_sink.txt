@@ -1,4 +1,3 @@
-// Last edited by deforce on 10-31-2009
 // 04-XX-1998: Iizuka updated to conform to the new adversary code.
 // 05-XX-1998: Iizuka added support for multiple resistances.
 // On repair, clear the damaged flag and set new class/durability if necessary
@@ -17,15 +16,14 @@ private mapping weaknesses = ([ ]);
 private mapping weakness_bonuses = ([ ]);
 private int armor_class = 1;
 private int max_armor_class = 1;
-private int armor_bonus;
+private int armor_bonus = 0;
 private int durability = 1;
 private int max_durability = 1;
 private int chance_to_be_damaged = 5;
-private nosave int armor_bonus;
 
 void internal_setup()
 {
-   this_object()->add_save( ({ "armor_class", "max_armor_class", "armor_bonus", "durability", "max_durability", "resistances", "resistance_bonuses", "weaknesses", "weakness_bonuses", "persist_flags" }) );
+   this_object()->add_save( ({ "armor_class", "max_armor_class", "armor_bonus", "durability", "max_durability", "chance_to_be_damaged", "resistances", "resistance_bonuses", "weaknesses", "weakness_bonuses", "persist_flags" }) );
 }
 
 //:FUNCTION set_armor_class
@@ -130,6 +128,11 @@ int query_max_armor_class()
 void add_armor_bonus(int amount)
 {
    armor_bonus += amount;
+}
+
+void reset_armor_bonus()
+{
+   armor_bonus = 0;
 }
 
 int query_armor_bonus()
@@ -254,6 +257,11 @@ void add_resistance_bonus(string type, int amt)
    }
 }
 
+void reset_resistance_bonuses()
+{
+   resistance_bonuses = ([ ]);
+}
+
 //:FUNCTION query_resistances
 // Returns all the resistances an armor possesses.
 mapping query_resistances()
@@ -298,6 +306,11 @@ void add_weakness_bonus(string type, int amt)
    {
       map_delete(weakness_bonuses, type);
    }
+}
+
+void reset_weakness_bonuses()
+{
+   weakness_bonuses = ([ ]);
 }
 
 //:FUNCTION query_weaknesses
