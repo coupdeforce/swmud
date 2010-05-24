@@ -37,7 +37,7 @@ private mapping combat_messages = ([]);
 
 void internal_setup()
 {
-1   this_object()->add_save( ({ "damage_types", "damage_bonuses", "durability", "max_durability", "critical_chance_bonus", "critical_multiplier_bonus", "persist_flags" }) );
+   this_object()->add_save( ({ "damage_types", "damage_bonuses", "durability", "max_durability", "critical_chance_bonus", "critical_multiplier_bonus", "persist_flags" }) );
 }
 
 int can_swing()
