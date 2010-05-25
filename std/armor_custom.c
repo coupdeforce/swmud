@@ -85,7 +85,7 @@ mixed receive_object(object target, string relation)
    {
       case "armor overlay":
       case "armor underlay":
-         if (!this_object()->cannot_use_component(target->query_component_name())) { return 1; }
+         if (!this_object()->cannot_use_component(target->query_component_type(), target->query_component_name())) { return 1; }
 
       return target->short() + " cannot be used with that type of clothing or armor.\n";
    }
