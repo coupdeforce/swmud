@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-05-2010
 // Mixed in to create a wearable item.  The client should also mix in M_GETTABLE.
 // Created by Rust/Belboz on 09-07-1994
 // Updated for "modules" approach by Deathblade on 11-12-1994
@@ -22,6 +21,7 @@ private string remove_message = "$N $vremove $p $o.";
 private string array slots;
 private int body_size = 3;
 private int resize_count = 0;
+private mapping attribute_modifiers = ([ ]);
 private mapping attribute_bonuses = ([ ]);
 private nosave mapping attribute_hooks = ([ ]);
 private int to_hit_bonus = 0;
@@ -32,7 +32,7 @@ private int body_armor_bonus = 0;
 
 void mudlib_setup()
 {
-   add_save(({ "body_size", "slots", "required_learned_skills", "required_skills", "required_guilds", "wear_message", "remove_message", "resize_count", "attribute_bonuses", "to_hit_bonus", "heal_bonus", "body_armor_bonus", "persist_flags" }));
+   add_save(({ "body_size", "slots", "required_learned_skills", "required_skills", "required_guilds", "wear_message", "remove_message", "resize_count", "attribute_modifiers", "attribute_bonuses", "to_hit_bonus", "heal_bonus", "body_armor_bonus", "persist_flags" }));
 }
 
 mixed ob_state()
@@ -184,9 +184,19 @@ string worn_attributes()
    else { return " worn over " + slots[0]; }
 }
 
+void set_attribute_modifiers(mapping modifiers)
+{
+   attribute_modifiers = modifiers;
+}
+
+mapping query_attribute_modifiers()
+{
+   return attribute_modifiers;
+}
+
 int get_attribute_bonus(string type)
 {
-   return attribute_bonuses[type];
+   return attribute_modifiers[type] + attribute_bonuses[type];
 }
 
 void set_attribute_bonuses(mapping bonuses)
@@ -283,6 +293,8 @@ int query_body_armor_bonus()
 //set_worn(1) causes an object to become worn.  set_worn(0) removes it.
 void set_worn(int g)
 {
+   string array affected_attributes = keys(attribute_modifiers) - keys(attribute_bonuses) + keys(attribute_bonuses);
+
    assign_flag(F_WORN, g);
 //   hook_state("prevent_drop", "You'll have to take it off first.\n", g);
 
@@ -301,7 +313,7 @@ void set_worn(int g)
       owner(this_object())->add_armor_bonus(body_armor_bonus * -1);
    }
 
-   foreach (string type in keys(attribute_bonuses))
+   foreach (string type in affected_attributes)
    {
       if (g)
       {

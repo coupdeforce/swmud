@@ -1,4 +1,3 @@
-// Last modified by deforce on 10-26-2009
 /* ??-Aug-94 Created.  By Beek.  Originally was /std/weapon.
 ** 12-Dec-94 Converted to modules approach.  Deathblade.
 ** 22-Oct-95 Beek separated out the combat stuff into M_DAMAGE_SOURCE, since
@@ -26,6 +25,7 @@ private mapping required_skills = ([ ]);
 private mapping required_guilds = ([ ]);
 private string wield_message = "$N $vwield a $o.";
 private string unwield_message = "$N $vunwield a $o.";
+private mapping attribute_modifiers = ([ ]);
 private mapping attribute_bonuses = ([ ]);
 private nosave mapping attribute_hooks = ([ ]);
 private int heal_bonus = 0;
@@ -36,7 +36,7 @@ private nosave function parry_hook;
 
 void mudlib_setup()
 {
-   add_save(({ "wielding_limbs", "required_learned_skills", "required_skills", "required_guilds", "wield_message", "unwield_message", "attribute_bonuses", "heal_bonus", "armor_bonus", "parry_bonus", "persist_flags" }));
+   add_save(({ "wielding_limbs", "required_learned_skills", "required_skills", "required_guilds", "wield_message", "unwield_message", "attribute_modifiers", "attribute_bonuses", "heal_bonus", "armor_bonus", "parry_bonus", "persist_flags" }));
 }
 
 int valid_wield() // Return 1 if they can wield this.
@@ -84,9 +84,19 @@ string wielded_attributes()
    return this_body()->get_wield_attributes();
 }
 
+void set_attribute_modifiers(mapping modifiers)
+{
+   attribute_modifiers = modifiers;
+}
+
+mapping query_attribute_modifiers()
+{
+   return attribute_modifiers;
+}
+
 int get_attribute_bonus(string type)
 {
-   return attribute_bonuses[type];
+   return attribute_modifiers[type] + attribute_bonuses[type];
 }
 
 void set_attribute_bonuses(mapping bonuses)
@@ -181,6 +191,8 @@ int query_armor_bonus()
 
 varargs void mark_wielded_by(object which, string array limbs...)
 {
+   string array affected_attributes = keys(attribute_modifiers) - keys(attribute_bonuses) + keys(attribute_bonuses);
+
    wielded_by = which;
    wielding_limbs = limbs;
 
@@ -204,7 +216,7 @@ varargs void mark_wielded_by(object which, string array limbs...)
    assign_flag(F_WIELDED, which && (which != this_object()));
    hook_state("move", move_hook, which && (which != this_object()));
 
-   foreach (string type in keys(attribute_bonuses))
+   foreach (string type in affected_attributes)
    {
       if (which)
       {

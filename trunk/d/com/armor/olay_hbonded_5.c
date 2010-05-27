@@ -2,7 +2,7 @@ inherit M_ARMOR_COMPONENT;
 
 void setup()
 {
-   set_id("heavy bonded plates (I)", "heavy", "bonded", "plates", "overlay");
+   set_id("heavy bonded plates (V)", "heavy", "bonded", "plates", "overlay");
    set_long("Heavy bonded plates increase defense and reduce damage from energy-based attacks, while sacrificing combat accuracy and some freedom of movement.");
    set_component_name("heavy bonded");
    set_component_type("overlay");

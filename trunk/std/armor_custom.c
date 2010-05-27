@@ -78,6 +78,7 @@ int indirect_install_obj_on_obj() { return 1; }
 int indirect_install_obj_in_obj() { return 1; }
 int indirect_uninstall_obj_from_obj() { return 1; }
 string query_relation(object ob) { return "on"; }
+int is_modifiable_armor() { return 1; }
 
 mixed receive_object(object target, string relation)
 {
