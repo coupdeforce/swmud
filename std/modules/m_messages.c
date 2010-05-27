@@ -14,8 +14,7 @@
 string punctuate(string);
 nosave private string vowels = "aeiouAEIOU";
 
-#define A_SHORT(x) (objectp(x) ? x->a_short() : (member_array(x[0], vowels) ==
--1 ? "a " : "an ") + x)
+#define A_SHORT(x) (objectp(x) ? x->a_short() : (member_array(x[0], vowels) == -1 ? "a " : "an ") + x)
 #define SHORT(x) (objectp(x) ? x->short() : x)
 #define THE_SHORT(x) (objectp(x) ? x->the_short() : "the " + x)
 mapping messages = ([]);

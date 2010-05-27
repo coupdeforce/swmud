@@ -1,7 +1,5 @@
-// Last edited by deforce on 03-30-2010
-// limbs.c - Adversary module to control limb-based health. Body styles
-//           are stored in /daemons/body_d.c.
-
+// limbs.c - Adversary module to control limb-based health.
+// Body styles are stored in /daemons/body_d.c
 #include <limbs.h>
 #include <hooks.h>
 
@@ -227,7 +225,6 @@ void kill_us()
    die();
 }
 
-// This function needs to be rewritten for the new limbs system.
 string query_random_limb()
 {
    // We need to modify this to be weighted

@@ -195,6 +195,16 @@ class event_info sink_modify_event(class event_info evt)
          effective_armor_class = 0;
       }
 
+      if (total_resistances["%" + type])
+      {
+         evt->data[type] -= (evt->data[type] * total_resistances["%" + type] / 100);
+      }
+
+      if (total_weaknesses["%" + type])
+      {
+         evt->data[type] += (evt->data[type] * total_weaknesses["%" + type] / 100);
+      }
+
       evt->data[type] -= random(effective_armor_class + 1);
    }
 
