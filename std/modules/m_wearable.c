@@ -129,6 +129,26 @@ void set_slots(string array which ...)
    slots = which;
 }
 
+//:FUNCTION add_slot
+//Adds a body slots that the wearable object takes up.
+void add_slot(string which)
+{
+   if (member_array(which, slots) == -1)
+   {
+      slots += ({ which });
+   }
+}
+
+//:FUNCTION remove_slot
+//Removes a body slot that the wearable object takes up.
+void remove_slot(string which)
+{
+   while (member_array(which, slots) > -1)
+   {
+      slots -= ({ which });
+   }
+}
+
 //FUNCTION query_slots
 //Returns the body slots that the wearable object takes up.
 string array query_slots()
@@ -196,7 +216,7 @@ mapping query_attribute_modifiers()
 
 int get_attribute_bonus(string type)
 {
-   return attribute_modifiers[type] + attribute_bonuses[type];
+   return this_object()->query_attribute_modifiers()[type] + attribute_bonuses[type];
 }
 
 void set_attribute_bonuses(mapping bonuses)
@@ -293,7 +313,7 @@ int query_body_armor_bonus()
 //set_worn(1) causes an object to become worn.  set_worn(0) removes it.
 void set_worn(int g)
 {
-   string array affected_attributes = keys(attribute_modifiers) - keys(attribute_bonuses) + keys(attribute_bonuses);
+   string array affected_attributes = keys(this_object()->query_attribute_modifiers()) - keys(attribute_bonuses) + keys(attribute_bonuses);
 
    assign_flag(F_WORN, g);
 //   hook_state("prevent_drop", "You'll have to take it off first.\n", g);
@@ -335,10 +355,7 @@ void remove()
 
    if (!slots || !env) { return 0; }
 
-   foreach (string slot in slots)
-   {
-      env->remove_item(this_object(), slot);
-   }
+   env->remove_item(this_object());
 
    set_worn(0);
 }
@@ -407,10 +424,7 @@ void do_remove()
 
    if (test_flag(F_WORN))
    {
-      foreach (string slot in slots)
-      {
-         environment()->remove_item(this_object(), slot);
-      }
+      environment()->remove_item(this_object());
 
       set_worn(0);
       environment()->simple_action(query_remove_message(), this_object());

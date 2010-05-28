@@ -22,7 +22,9 @@ object array get_objects(string verb, object thing)
       case "holster": return filter_array(all_inventory(thing) + all_inventory(environment(thing)), (: !$1->test_flag(F_HOLSTERED) :));
       case "install": return all_inventory(thing);
       case "look": return ({ environment(thing) }) + all_inventory(thing) + all_inventory(environment(thing));
+      case "lower": return all_inventory(thing) + all_inventory(environment(thing));
       case "put": return all_inventory(thing) + all_inventory(environment(thing));
+      case "raise": return all_inventory(thing) + all_inventory(environment(thing));
       case "remove": return filter_array(all_inventory(thing), (: $1->test_flag(F_WORN) :));
       case "resize": return all_inventory(thing) + all_inventory(environment(thing));
       case "sell": return all_inventory(thing);

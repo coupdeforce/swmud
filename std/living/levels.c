@@ -119,7 +119,7 @@ int query_guild_rank(string guild_name)
    }
    else if (guild_levels[guild_name])
    {
-      if (guild_levels[guild_name] > 20)
+      if ((guild_ranks[guild_name] >= 2) || (guild_levels[guild_name] > 20))
       {
          return 2;
       }
