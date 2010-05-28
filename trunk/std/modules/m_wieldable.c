@@ -96,7 +96,7 @@ mapping query_attribute_modifiers()
 
 int get_attribute_bonus(string type)
 {
-   return attribute_modifiers[type] + attribute_bonuses[type];
+   return this_object()->query_attribute_modifiers()[type] + attribute_bonuses[type];
 }
 
 void set_attribute_bonuses(mapping bonuses)
@@ -191,7 +191,7 @@ int query_armor_bonus()
 
 varargs void mark_wielded_by(object which, string array limbs...)
 {
-   string array affected_attributes = keys(attribute_modifiers) - keys(attribute_bonuses) + keys(attribute_bonuses);
+   string array affected_attributes = keys(this_object()->query_attribute_modifiers()) - keys(attribute_bonuses) + keys(attribute_bonuses);
 
    wielded_by = which;
    wielding_limbs = limbs;

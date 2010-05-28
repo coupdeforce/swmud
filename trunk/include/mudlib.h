@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-09-2010
 #ifndef __MUDLIB_H__
 #define __MUDLIB_H__
 #pragma no_warnings
@@ -183,6 +182,7 @@
 #define HIDDEN_DOOR             "/std/hidden_door"
 #define HIDDEN_EXIT             "/std/hidden_exit"
 #define HOLSTER                 "/std/holster"
+#define HOOD                    "/std/hood"
 #define KEY                     "/std/key"
 #define LIGHT_OBJECT            "/std/light_object"
 #define LIGHTSABER_BASE         "/std/lightsaber_base"
@@ -195,9 +195,10 @@
 #define WANDERING_MONSTER       "/std/wandering_monster"
 #define MOUNT                   "/std/mount"
 #define OBJ                     "/std/object"
-#define PAPER                  "/std/paper"
+#define PAPER                   "/std/paper"
 #define PARAM_OBJ               "/std/param_obj"
 #define RACE                    "/std/race"
+#define ROBE_CUSTOM             "/std/robe_custom"
 #define SIGN                    "/std/sign"
 #define SPELL                   "/std/spell"
 #define STOCK_MASTER            "/std/stock_master"

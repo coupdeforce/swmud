@@ -1,4 +1,3 @@
-// Last edited by deforce on 07-01-2008
 inherit CLASS_EVENT_INFO;
 
 int is_limb(string);
@@ -38,8 +37,9 @@ protected nomask void set_body_slots(mapping what)
 //:FUNCTION wear_item
 // nomask int wear_item(object what, string sname);
 // Wear object 'what' on slot 'sname'.
-nomask int wear_item(object what, string array slot_names)
+nomask int wear_item(object what)
 {
+   string array slot_names = what->query_slots();
    int body_size = this_object()->query_body_size();
    int size = what->get_body_size();
 
@@ -59,11 +59,19 @@ nomask int wear_item(object what, string array slot_names)
    return 1;
 }
 
-nomask int remove_item(object what, string sname)
+nomask int remove_item(object what)
 {
-   if (!body_slots[sname]) { return 0; }
+   string array slot_names = what->query_slots();
 
-   BODY_SLOT(sname)->item = 0;
+   foreach (string slot in slot_names)
+   {
+      if (!body_slots[slot]) { return 0; }
+   }
+
+   foreach (string slot in slot_names)
+   {
+      BODY_SLOT(slot)->item = 0;
+   }
 
    return 1;
 }
