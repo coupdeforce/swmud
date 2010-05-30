@@ -2,7 +2,7 @@ inherit M_ARMOR_COMPONENT;
 
 void setup()
 {
-   set_id("energy shielding (IV)", "energy", "shielding", "overlay");
+   set_id("energy shielding (IV)", "energy", "shielding", "olay", "overlay");
    set_long("Energy shielding reduces damage from energy-based attacks.");
    set_component_name("energy");
    set_component_type("overlay");

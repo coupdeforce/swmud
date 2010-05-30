@@ -7,7 +7,7 @@ void setup()
    set_component_name("jenruax");
    set_component_type("focusing");
    set_damage_bonuses(([ "energy" : 2 ]));
-   set_deflection_bonus(100);
+   set_deflection_bonus(10);
    set_mass(50);
    set_value(13000);
 }

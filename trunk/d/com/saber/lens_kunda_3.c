@@ -10,7 +10,7 @@ void setup()
    set_to_hit_bonus(20);
    set_critical_chance_bonus(12);
    set_critical_multiplier_bonus(3);
-   set_deflection_bonus(120);
+   set_deflection_bonus(6);
    set_mass(50);
    set_value(13000);
 }

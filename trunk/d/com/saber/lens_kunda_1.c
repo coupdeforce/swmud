@@ -9,7 +9,7 @@ void setup()
    set_damage_bonuses(([ "energy" : -2 ]));
    set_critical_chance_bonus(4);
    set_critical_multiplier_bonus(1);
-   set_deflection_bonus(40);
+   set_deflection_bonus(2);
    set_mass(50);
    set_value(11000);
 }

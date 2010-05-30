@@ -7,7 +7,7 @@ void setup()
    set_component_name("barab ore ingot");
    set_component_type("focusing");
    set_damage_bonuses(([ "fire" : 16, "energy": -6 ]));
-   set_deflection_bonus(-100);
+   set_deflection_bonus(-20);
    set_mass(50);
    set_value(16000);
 }

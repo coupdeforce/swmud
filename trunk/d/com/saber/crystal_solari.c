@@ -9,7 +9,7 @@ void setup()
    set_component_type("focusing");
    set_damage_bonuses(([ "energy" : 3, "vs dark side" : 12 ]));
    set_to_hit_bonus(75);
-   set_deflection_bonus(60);
+   set_deflection_bonus(6);
    set_alignment_restriction(1);
    set_mass(50);
    set_value(15000);

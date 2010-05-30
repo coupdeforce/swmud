@@ -7,7 +7,7 @@ void setup()
    set_component_name("lorrdian gemstone");
    set_component_type("focusing");
    set_armor_bonus(2);
-   set_deflection_bonus(60);
+   set_deflection_bonus(6);
    set_mass(50);
    set_value(10000);
 }

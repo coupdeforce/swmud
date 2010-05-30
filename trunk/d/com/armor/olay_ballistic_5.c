@@ -2,7 +2,7 @@ inherit M_ARMOR_COMPONENT;
 
 void setup()
 {
-   set_id("ballistic shielding (V)", "ballistic", "shielding", "overlay");
+   set_id("ballistic shielding (V)", "ballistic", "shielding", "olay", "overlay");
    set_long("Ballistic shielding reduces damage from physical attacks.");
    set_component_name("ballistic");
    set_component_type("overlay");
