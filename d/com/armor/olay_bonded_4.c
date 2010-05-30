@@ -2,7 +2,7 @@ inherit M_ARMOR_COMPONENT;
 
 void setup()
 {
-   set_id("bonded plates (IV)", "bonded", "plates", "overlay");
+   set_id("bonded plates (IV)", "bonded", "plates", "olay", "overlay");
    set_long("Bonded plates increase defense and reduce damage from physical attacks.");
    set_component_name("bonded");
    set_component_type("overlay");

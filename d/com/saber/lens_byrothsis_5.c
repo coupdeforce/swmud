@@ -8,7 +8,7 @@ void setup()
    set_component_type("lens");
    set_damage_bonuses(([ "energy" : 5 ]));
    set_to_hit_bonus(75);
-   set_deflection_bonus(-120);
+   set_deflection_bonus(-6);
    set_mass(50);
    set_value(18000);
 }

@@ -8,7 +8,7 @@ void setup()
    set_component_type("lens");
    set_damage_bonuses(([ "slashing" : 9 ]));
    set_critical_chance_bonus(-35);
-   set_deflection_bonus(-140);
+   set_deflection_bonus(-7);
    set_mass(50);
    set_value(15000);
 }
