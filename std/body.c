@@ -283,7 +283,7 @@ void remove()
    }
 #endif
 
-   if (!wizardp(link))
+   if (!wizardp(link) && !GROUP_D->member_group(link->query_userid(), "testchars"))
    {
       foreach (object thing in filter_array(all_inventory(), (: !$1->is_autoload() :)))
       {

@@ -1,4 +1,3 @@
-// Last edited by deforce on 11-19-2007
 // Switch user command, it needs to be in /cmds/player/ so wizards can switch back
 // Rust@ZorkMUD
 // Megaboz@ZorkMUD added help 05-05-1994
@@ -64,7 +63,6 @@ private void main(string arg)
    if (this_body())
    {
       this_body()->save_me();
-      this_body()->save_autoload();
    }
 
    BBUG(race);

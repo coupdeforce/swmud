@@ -26,6 +26,7 @@ object array get_objects(string verb, object thing)
       case "put": return all_inventory(thing) + all_inventory(environment(thing));
       case "raise": return all_inventory(thing) + all_inventory(environment(thing));
       case "remove": return filter_array(all_inventory(thing), (: $1->test_flag(F_WORN) :));
+      case "repair": return filter_array(all_inventory(thing) + all_inventory(environment(thing)), (: $1->test_flag(F_DAMAGED) :) );
       case "resize": return all_inventory(thing) + all_inventory(environment(thing));
       case "sell": return all_inventory(thing);
       case "unconceal": return filter_array(all_inventory(thing), (: $1->test_flag(F_CONCEALED) :));

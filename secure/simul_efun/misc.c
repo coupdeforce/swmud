@@ -1,4 +1,3 @@
-// Last edited by deforce on 10-29-2009
 #include <driver/type.h>
 
 string evaluate_path(string);
@@ -515,6 +514,28 @@ mixed max(mixed f)
    }
 
    return sort_array(f, -1)[0];
+}
+
+//:FUNCTION array_sum
+//Adds up all the integers in an array and returns
+int array_sum(mixed stuff)
+{
+   if (arrayp(stuff))
+   {
+      int total = 0;
+
+      foreach (mixed thing in stuff)
+      {
+         if (intp(thing))
+         {
+            total += thing;
+         }
+      }
+
+      return total;
+   }
+
+   return 0;
 }
 
 //:FUNCTION flatten_array
