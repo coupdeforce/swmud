@@ -91,9 +91,7 @@ void do_check_obj()
          }
       }
 
-      write("You check " + this_object()->the_short() + " and discover that it has the following components:\n\n");
-
-      write(sprintf("Underlay: %s\n", underlays[0]));
+      write("You check " + this_object()->the_short() + " and discover that it has a " + underlays[0] + " underlay.\n");
 
       return;
    }
