@@ -67,6 +67,7 @@
 #define F_ALTERED_VALUE         MakeFlag(MODULE_FLAGS, 14)
 #define F_ALTERED_CAPACITY      MakeFlag(MODULE_FLAGS, 15)
 #define F_RESIZED               MakeFlag(MODULE_FLAGS, 16)
+#define F_STOLEN                MakeFlag(MODULE_FLAGS, 17)
 
 // MAILBASE_FLAGS
 #define F_BIFF          MakeFlag(MAILBASE_FLAGS, 0)

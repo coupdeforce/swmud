@@ -57,7 +57,7 @@ private void main(string arg)
 
 void format_stats(object body)
 {
-   string format = "%-13s: %2s";
+   string format = "%-13s:%3s";
 
    outf(format + "    " + format + "\n",
       "Strength", format_stat_value(body->query_str_pure(), body->query_str()),
@@ -97,8 +97,8 @@ void format_stats_max(object body)
 
 string format_stat_value(int real, int current)
 {
-   if (current > real) { return sprintf("%%^BOLD%%^%%^GREEN%%^%d%%^RESET%%^", (current / 5)); }
-   else if (current < real) { return sprintf("%%^BOLD%%^%%^RED%%^%d%%^RESET%%^", (current / 5)); }
+   if (current > real) { return sprintf("%%^BOLD%%^%%^GREEN%%^%3s%%^RESET%%^", sprintf("%d", (current / 5))); }
+   else if (current < real) { return sprintf("%%^BOLD%%^%%^RED%%^%3s%%^RESET%%^", sprintf("%d", (current / 5))); }
 
    return sprintf("%d", (current / 5));
 }

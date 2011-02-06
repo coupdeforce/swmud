@@ -104,21 +104,72 @@ class event_info modify_event(class event_info evt)
             int rank_spec;
             int roll;
 
+//            evt->attacker->targetted_action("$N $vfire at $n1, who has a chance to deflect or reflect with $p1 lightsaber.", evt->target);
+
             if (spec <= 0) { spec = evt->target->query_guild_specialization_rank("jedi", "lightsaber"); }
 
             rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
-            roll = random((level / 2) + (force / 5) + rank_spec + 1);
+            roll = random(array_sum(evt->target->query_weapons()->query_deflection_bonus()) + (level / 2) + (force / 5) + rank_spec + 1);
 
             if (roll > random(20))
             {
-               if (roll > random(40))
+               mapping energy_damage = filter_array(evt->data, (: $1 == "energy" :) );
+               object this_ob = this_object();
+               evt->data = filter_array(evt->data, (: ($1 != "energy") && ($1 != "ion") && ($1 != "electrical") :) );
+
+//               if (sizeof(this_ob->query_targets()) && (roll > random(40)))
+               if ((1 == 1) && sizeof(this_ob->query_targets()))
                {
-                  evt->data = "blaster-reflect";
+//                  object reflect_target = choice(evt->target->query_targets());
+                  object reflect_target = evt->attacker;
+                  string limb;
+
+                  if (!reflect_target) { reflect_target = this_ob; }
+
+                  limb = reflect_target->query_random_armor_slot();
+//                  evt->attacker->targetted_action("$N $vfire at $p1 $o3 with $p $o1, and $n1 $v1reflect the energy bolt back towards $p2 " + limb + " with $p1 lightsaber!", evt->target, evt->weapon, reflect_target, limb);
+                  evt->attacker->targetted_action("$N $vfire at $p1 $o1 with $p $o.", evt->target, evt->weapon, limb);
+
+                  if (!present("lightsaber_blaster_reflect", evt->target))
+                  {
+                     load_object("/d/obj/force_damage");
+                     new("/d/obj/force_damage", "reflected blaster bolt", "lightsaber_blaster_reflect")->move(evt->target);
+                     present("lightsaber_blaster_reflect", evt->target)->set_combat_messages("combat-blaster-reflect");
+                     present("lightsaber_blaster_reflect", evt->target)->set_death_message("$N was killed by a blaster bolt reflected from $P1 lightsaber at $o1.");
+                  }
+
+                  evt->target->add_event(evt->attacker, present("lightsaber_blaster_reflect", evt->target), limb, energy_damage, evt->target);
+
+/*
+                  if (event_damage(evt))
+                  {
+                     class event_info new_evt = evt;
+
+                     evt->data = ({ "reflect", evt->data });
+                  }
+                  else
+                  {
+                     evt->data = "reflect";
+                  }
+
+                  evt->target_extra = limb;
+
+                  return evt;
+*/
+               }
+               else
+               {
+                  if (event_damage(evt))
+                  {
+                     evt->data = ({ "deflect", evt->data });
+                  }
+                  else
+                  {
+                     evt->data = "deflect";
+                  }
+
                   return evt;
                }
-
-               evt->data = "blaster-deflect";
-               return evt;
             }
          }
       }
@@ -147,7 +198,6 @@ class event_info modify_event(class event_info evt)
 
 //         tell(previous_object(), "You should be taking " + damage_total(reflected_damage) + " damage.\n");
          add_event(previous_object(), present("force_reflect", evt->target), previous_object()->query_random_armor_slot(), reflected_damage, evt->target);
-         handle_events();
       }
       else if (call_hooks("force_shield", HOOK_SUM))
       {
@@ -190,9 +240,62 @@ void handle_result(class event_info evt)
 {
    if (mapp(evt->data))
    {
-      int percent = event_damage(evt);
-      handle_message(damage_message(percent), evt->target, evt->weapon, evt->target_extra);
-      percent = evt->target->do_damage_event(evt);
+      handle_message(damage_message(event_damage(evt)), evt->target, evt->weapon, evt->target_extra);
+      evt->target->do_damage_event(evt);
+   }
+   else if (arrayp(evt->data) && stringp(evt->data[0]))
+   {
+      if (evt->data[0] == "deflect")
+      {
+         evt->data = evt->data[1];
+
+         handle_message("!deflect-" + damage_message(event_damage(evt))[1..1000], evt->target, evt->weapon, evt->target_extra);
+         evt->target->do_damage_event(evt);
+      }
+      else if (evt->data[0] == "reflect")
+      {
+         evt->data = evt->data[1];
+
+         handle_message("!reflect-" + damage_message(event_damage(evt))[1..1000], evt->target, evt->weapon, evt->target_extra);
+         evt->target->do_damage_event(evt);
+      }
+/*
+      else if (evt->data[0] == "blaster-reflect")
+      {
+         mapping energy_damage = filter_array(evt->data[1], (: $1 == "energy" :) );
+         object this_ob = this_object();
+         string limb = this_ob->query_random_armor_slot();
+         evt->data = filter_array(evt->data[1], (: ($1 != "energy") && ($1 != "ion") && ($1 != "electrical") :) );
+
+         if (event_damage(evt))
+         {
+            handle_message(damage_message(event_damage(evt)), evt->target, evt->weapon, evt->target_extra);
+            evt->target->do_damage_event(evt);
+
+            evt->target->targetted_action("$N $vreflect the energy bolt back towards $p1 " + limb + " with $p lightsaber!", this_ob);
+         }
+//         else
+//         {
+//            this_ob->targetted_action("$N $vfire at $p1 $o1 with $p $o, and $n1 $v1reflect the energy bolt back towards $p " + limb + " with $p1 lightsaber!", evt->target, evt->weapon, evt->target_extra);
+//         }
+
+         if (!present("lightsaber_blaster_reflect", evt->target))
+         {
+            load_object("/d/obj/force_damage");
+            new("/d/obj/force_damage", "lightsaber blaster reflect", "lightsaber_blaster_reflect")->move(evt->target);
+            present("lightsaber_blaster_reflect", evt->target)->set_combat_messages("combat-blaster-reflect");
+            present("lightsaber_blaster_reflect", evt->target)->set_death_message("$N was killed by a reflected blaster bolt from $P1 lightsaber at $o1.");
+         }
+
+         evt->target->add_event(this_ob, present("lightsaber_blaster_reflect", evt->target), limb, energy_damage, evt->target);
+         evt->target->handle_events();
+      }
+*/
+   }
+   else if (stringp(evt->data))
+   {
+      handle_message("!" + evt->data, evt->target, evt->weapon, evt->target_extra);
+      evt->target->do_damage_event(evt);
    }
    else
    {

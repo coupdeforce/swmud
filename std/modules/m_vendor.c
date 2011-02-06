@@ -1,4 +1,4 @@
-// Last edited by deforce on 03-17-2010
+inherit M_ACTIONS;
 
 //:MODULE
 //m_vendor is used to create vendor objects that buy and sell stuff
@@ -41,9 +41,11 @@ int check_uniqueness(object ob);
 void clear_stock();
 void organize_stock();
 int sort_short(object first, object second);
+int test_flag(int);
 
 private mixed for_sale;
 private mixed will_buy;
+private mixed will_buy_stolen = 0;
 private mixed currency_type = "gold";
 private mapping stored_items = ([ ]);
 private string unique_inv = "";
@@ -187,6 +189,21 @@ mixed query_will_buy()
    return will_buy;
 }
 
+//:FUNCTION set_will_buy_stolen
+//Set the array of object ids which this living object is willing to buy if they've been stolen.
+//set_will_buy_stolen(1) means it will buy anything that's stolen.  set_will_buy(0) means it won't
+//buy anything that's been stolen.  If a function is passed it will get the object to buy as
+//argument. If a single string is returned it will be used as error message.
+void set_will_buy_stolen(mixed x)
+{
+   will_buy_stolen = x;
+}
+
+mixed query_will_buy_stolen()
+{
+   return will_buy_stolen;
+}
+
 //:FUNCTION set_currency_type
 //Sets the type of currency the vendor will buy/sell in
 mixed set_currency_type(string type)
@@ -220,7 +237,14 @@ int test_buy_from(object ob, object seller)
 
    if (!will_buy)
    {
-      write(capitalize(short()) + " doesn't buy anything.\n");
+      do_game_command("say I don't want to buy anything.");
+
+      return 0;
+   }
+
+   if (ob->test_flag(F_STOLEN) && !will_buy_stolen)
+   {
+      do_game_command("say That looks like it was stolen!  Do I look like a fence to you?!?");
 
       return 0;
    }
@@ -247,6 +271,8 @@ int test_buy_from(object ob, object seller)
    }
 
    if (member_array(base_name(ob), will_buy) > -1) { return 1; }
+
+   if (ob->test_flag(F_STOLEN) && (member_array(base_name(ob), will_buy_stolen) > -1)) { return 1; }
 
    write(capitalize(short()) + " doesn't want to buy " + ob->the_short() + ".\n");
 
