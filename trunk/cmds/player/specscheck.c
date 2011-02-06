@@ -14,7 +14,7 @@ private void main()
    int experience = body->query_experience();
    int count;
 
-   if (!sizeof(guild_names))
+   if (!strlen(primary_guild) && !sizeof(guild_names))
    {
       out("You are not a member of any guilds.\n");
 
@@ -36,15 +36,15 @@ private void main()
          if (primary_guild_rank < 10)
          {
             int next_rank = primary_guild_rank + 1;
-            int required_experience = 2500000 - (primary_guild_level * 50000) + (primary_guild_level * next_rank * 500);
+            int required_experience = 500000 - (primary_guild_level * 50000) + (primary_guild_level * next_rank * 500);
 
             if (experience < required_experience)
             {
-               outf("  %-13s  %-17s  %-2i      %i\n", title_capitalize(primary_guild), title_capitalize(primary_guild_specialization), primary_guild_rank, (required_experience - experience));
+               outf("  %-13s  %-18s %-2i      %i\n", title_capitalize(primary_guild), title_capitalize(primary_guild_specialization), primary_guild_rank, (required_experience - experience));
             }
             else
             {
-               outf("%%^BOLD%%^  %-13s  %-17s  %-2i      0%^RESET%^\n", title_capitalize(primary_guild), title_capitalize(primary_guild_specialization), primary_guild_rank);
+               outf("%%^BOLD%%^  %-13s  %-18s %-2i      0%%^RESET%%^\n", title_capitalize(primary_guild), title_capitalize(primary_guild_specialization), primary_guild_rank);
             }
          }
          else
@@ -54,7 +54,7 @@ private void main()
       }
       else
       {
-         int required_experience = 2500000 - (primary_guild_level * 50000) + (primary_guild_level * 500);
+         int required_experience = 500000 - (primary_guild_level * 50000) + (primary_guild_level * 500);
 
          if (experience < required_experience)
          {
