@@ -16,4 +16,6 @@
 
  Example: 'prompt 3 6' would look like "90/100 100/25 > "
 
- Using 'prompt' without any options will return it to "> ".
+ Using 'prompt clear' will return your prompt to "> ".
+
+ Using 'prompt' without any options will show your current prompt options.

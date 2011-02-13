@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-18-2010
 inherit VERB_OB;
 
 void choke_target(object living);
@@ -26,7 +25,7 @@ void do_choke_liv(object living)
             {
                int alignment = this_body->query_jedi_alignment();
 
-               this_body->adjust_jedi_alignment(alignment < 0 ? -5 : -9);
+               this_body->adjust_jedi_alignment(alignment < 0 ? -5 : this_body->has_buff("/d/buffs/force_focus") ? -13 : -9);
 
                concentration(living);
             }

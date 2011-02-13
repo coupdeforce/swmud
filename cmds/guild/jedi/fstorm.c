@@ -1,4 +1,3 @@
-// Last edited by deforce on 05-03-2010
 inherit CMD; 
 inherit M_EXIT;
 

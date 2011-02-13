@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-25-2010
 inherit VERB_OB;
 
 void perform_rage();
@@ -8,7 +7,7 @@ void do_frage()
    object this_body = this_body();
    int alignment = this_body->query_jedi_alignment();
 
-   this_body->adjust_jedi_alignment(alignment < 0 ? -5 : -10);
+   this_body->adjust_jedi_alignment(alignment < 0 ? -5 : this_body->has_buff("/d/buffs/force_focus") ? -5 : -10);
 
    this_body->add_skill_delay(8);
 
@@ -34,10 +33,6 @@ mixed can_frage()
       if (!this_body->has_learned_skill("force rage"))
       {
          return "You have not learned how to fuel your rage through the Force.\n";
-      }
-      else if (this_body->has_buff("/d/buffs/force_focus"))
-      {
-         return "You are too focused on the Light side of the Force to fuel your rage through the Force.\n";
       }
       else if (this_body->has_skill_delay())
       {

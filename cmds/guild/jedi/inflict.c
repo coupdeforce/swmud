@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-25-2010
 inherit VERB_OB;
 
 int get_floor(object living);
@@ -17,10 +16,6 @@ void do_inflict_liv(object living)
       {
          write("You have not learned how to inflict pain.\n");
       }
-      else if (this_body->has_buff("/d/buffs/force_focus"))
-      {
-         write("You are too focused on the Light side of the Force to inflict pain upon someone.\n");
-      }
       else if (this_body->has_skill_delay())
       {
          write("You are too busy to concentrate on inflicting pain.\n");
@@ -33,7 +28,7 @@ void do_inflict_liv(object living)
             {
                int alignment = this_body->query_jedi_alignment();
 
-               this_body->adjust_jedi_alignment(alignment < 0 ? -2 : -5);
+               this_body->adjust_jedi_alignment(alignment < 0 ? -2 : this_body->has_buff("/d/buffs/force_focus") ? -8 : -5);
 
                concentration(living);
             }

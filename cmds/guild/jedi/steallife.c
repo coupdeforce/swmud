@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-29-2010
 inherit VERB_OB;
 
 int get_floor(object living);
@@ -16,10 +15,6 @@ void do_steallife_liv(object living)
       {
          write("You have not learned how to drain someone's life through the force.\n");
       }
-      else if (this_body->has_buff("/d/buffs/force_focus"))
-      {
-         write("You are too focused on the Light side of the Force to drain someone's life.\n");
-      }
       else if (this_body->has_skill_delay())
       {
          write("You are too busy to concentrate on draining someone's life.\n");
@@ -36,7 +31,7 @@ void do_steallife_liv(object living)
             {
                int alignment = this_body->query_jedi_alignment();
 
-               this_body->adjust_jedi_alignment(alignment < 0 ? -5 : -10);
+               this_body->adjust_jedi_alignment(alignment < 0 ? -5 : this_body->has_buff("/d/buffs/force_focus") ? -15 : -10);
 
                concentration(living);
             }

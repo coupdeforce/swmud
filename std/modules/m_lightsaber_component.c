@@ -16,12 +16,13 @@ int armor_bonus = 0;
 int critical_chance_bonus = 0;
 int critical_multiplier_bonus = 0;
 int alignment_restriction = 0;
+string name_restriction = "";
 
 void mudlib_setup()
 {
    set_id("lightsaber_component");
 
-   add_save(({ "name", "component_type", "damage_bonuses", "attribute_bonuses", "to_hit_bonus", "stun_bonus", "slow_bonus", "deflection_bonus", "parry_bonus", "heal_bonus", "armor_bonus", "critical_chance_bonus", "critical_multiplier_bonus", "alignment_restriction" }));
+   add_save(({ "name", "component_type", "damage_bonuses", "attribute_bonuses", "to_hit_bonus", "stun_bonus", "slow_bonus", "deflection_bonus", "parry_bonus", "heal_bonus", "armor_bonus", "critical_chance_bonus", "critical_multiplier_bonus", "alignment_restriction", "name_restriction" }));
 }
 
 int is_lightsaber_component() { return 1; }
@@ -158,4 +159,14 @@ void set_alignment_restriction(int value)
 int query_alignment_restriction()
 {
    return alignment_restriction;
+}
+
+void set_name_restriction(string value)
+{
+   name_restriction = value;
+}
+
+string query_name_restriction()
+{
+   return name_restriction;
 }

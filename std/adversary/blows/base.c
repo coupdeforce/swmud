@@ -83,8 +83,8 @@ class event_info armors_modify_event(class event_info evt)
    return evt;
 }
 
-// This is the method that gets called in the target object. Before
-// the event does any damage to us, make modifications.
+// This is the method that gets called in the target object.
+// Before the event does any damage to us, make modifications.
 class event_info modify_event(class event_info evt)
 {
    if (mapp(evt->data))
@@ -99,28 +99,31 @@ class event_info modify_event(class event_info evt)
          {
             int level = evt->target->query_guild_level("jedi");
             int force = evt->target->query_for();
-            int rank = evt->target->query_skill("jedi_defense") / 100;
+            int rank = (evt->target->query_skill("jedi_defense") / 100) + (evt->target->query_skill("saber_defense") / 100);
             int spec = evt->target->query_guild_specialization_rank("jedi", "defense");
             int rank_spec;
+            int attacker_advantage = 100;
             int roll;
-
-//            evt->attacker->targetted_action("$N $vfire at $n1, who has a chance to deflect or reflect with $p1 lightsaber.", evt->target);
+            int attacker_roll = random(attacker_advantage / 2);
 
             if (spec <= 0) { spec = evt->target->query_guild_specialization_rank("jedi", "lightsaber"); }
 
             rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
             roll = random(array_sum(evt->target->query_weapons()->query_deflection_bonus()) + (level / 2) + (force / 5) + rank_spec + 1);
 
-            if (roll > random(20))
+            tell(evt->target, "Your deflection roll is " + roll + " against " + attacker_roll + ".\n");
+
+            if (roll > attacker_roll)
             {
                mapping energy_damage = filter_array(evt->data, (: $1 == "energy" :) );
                object this_ob = this_object();
                evt->data = filter_array(evt->data, (: ($1 != "energy") && ($1 != "ion") && ($1 != "electrical") :) );
+               attacker_roll += random(attacker_advantage);
 
-//               if (sizeof(this_ob->query_targets()) && (roll > random(40)))
-               if ((1 == 1) && sizeof(this_ob->query_targets()))
+               tell(evt->target, "Your reflection roll is " + roll + " against " + attacker_roll + ".\n");
+
+               if (sizeof(this_ob->query_targets()) && (roll > attacker_roll))
                {
-//                  object reflect_target = choice(evt->target->query_targets());
                   object reflect_target = evt->attacker;
                   string limb;
 
@@ -128,7 +131,7 @@ class event_info modify_event(class event_info evt)
 
                   limb = reflect_target->query_random_armor_slot();
 //                  evt->attacker->targetted_action("$N $vfire at $p1 $o3 with $p $o1, and $n1 $v1reflect the energy bolt back towards $p2 " + limb + " with $p1 lightsaber!", evt->target, evt->weapon, reflect_target, limb);
-                  evt->attacker->targetted_action("$N $vfire at $p1 $o1 with $p $o.", evt->target, evt->weapon, limb);
+//                  evt->attacker->targetted_action("$N $vfire at $p1 $o1 with $p $o.", evt->target, evt->weapon, limb);
 
                   if (!present("lightsaber_blaster_reflect", evt->target))
                   {

@@ -1,4 +1,3 @@
-// Last edited by deforce on 05-10-2010
 inherit CMD;
 inherit M_EXIT;
 
@@ -109,7 +108,7 @@ void main(string arg)
                   return;
                }
 
-               this_body->adjust_jedi_alignment(1);
+               this_body->adjust_jedi_alignment(this_body->has_buff("/d/buffs/force_focus") ? 2 : 1);
                this_body->add_skill_delay(8);
 
                concentration(living, location, location_name);

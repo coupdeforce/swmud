@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-27-2010
 inherit VERB_OB;
 
 void perform_healing(object body);
@@ -36,7 +35,7 @@ void do_heal_liv(object living)
       this_body->targetted_action("$N $vconcentrate momentarily on healing $t with the Force...\n", living);
    }
 
-   this_body->adjust_jedi_alignment(1);
+   this_body->adjust_jedi_alignment(this_body->has_buff("/d/buffs/force_focus") ? 2 : 1);
 
    call_out("meditation_time", 4, living);
 

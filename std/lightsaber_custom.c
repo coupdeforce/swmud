@@ -1,10 +1,10 @@
-// Last edited by deforce on 05-13-2010
 void process_component(object thing);
 
 void assemble()
 {
    object this_ob = this_object();
    int alignment = 0;
+   string name = "";
    string color = "";
    string array crystal_names = ({ });
    string array ecell_names = ({ });
@@ -65,6 +65,19 @@ void assemble()
                thing->move(environment(this_ob));
             }
          }
+
+         if (strlen(thing->query_name_restriction()))
+         {
+            if (!strlen(name))
+            {
+               name = thing->query_name_restriction();
+            }
+            else if (thing->query_name_restriction() != name)
+            {
+               environment(this_ob)->simple_action("$N $vuninstall a $o from a $o1.", thing, this_ob);
+               thing->move(environment(this_ob));
+            }
+         }
       }
       else if (thing->query_component_type() == "lightsaber energy cell")
       {
@@ -118,6 +131,7 @@ void assemble()
 
    this_ob->set_lightsaber_color(color);
    this_ob->set_lightsaber_alignment(alignment);
+   this_ob->set_lightsaber_name_crystal(name);
 }
 
 void process_component(object thing)
@@ -156,7 +170,12 @@ mixed receive_object(object target, string relation)
       case "lightsaber color": return 1;
       case "lightsaber emitter": return 1;
       case "lightsaber energy cell": return 1;
-      case "lightsaber focusing": return 1;
+      case "lightsaber focusing":
+         if (target->is_name_crystal() && (target->query_component_name() != environment(target)->query_userid()))
+         {
+            return "For some odd reason, the " + target->short() + " seems to resist being installed into your lightsaber.\n";
+         }
+         return 1;
       case "lightsaber lens": return 1;
    }
 

@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-25-2010
 #include <hooks.h>
 
 inherit VERB_OB;
@@ -12,7 +11,7 @@ void do_valor()
 
    this_body->simple_action("$N $vconcentrate on strengthening $p body through the Force...\n");
 
-   this_body->adjust_jedi_alignment(2);
+   this_body->adjust_jedi_alignment(this_body->has_buff("/d/buffs/force_focus") ? 4 : 2);
 
    this_body->add_skill_delay(8);
 

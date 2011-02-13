@@ -1,4 +1,3 @@
-// Last edited by deforce on 05-11-2010
 inherit WEAPON;
 //inherit M_LIGHT_SOURCE;
 
@@ -7,13 +6,14 @@ inherit WEAPON;
 string color = choice(({ "blue", "green", "yellow", "red" }));
 int deflection_bonus = 0;
 int alignment = 0;
+string name_crystal = "";
 
 void mudlib_setup()
 {
    add_id("lightsaber", "saber");
    set_combat_messages("combat-blade");
    set_skill_used("saber_combat");
-   add_save(({ "color", "deflection_bonus", "alignment" }));
+   add_save(({ "color", "deflection_bonus", "alignment", "name_crystal" }));
    ::mudlib_setup();
 }
 
@@ -63,6 +63,11 @@ void set_lightsaber_alignment(int align)
    alignment = align;
 }
 
+void set_lightsaber_name_crystal(string value)
+{
+   name_crystal = value;
+}
+
 mixed direct_attach_obj_to_obj() { return 1; }
 mixed direct_detach_obj_from_obj() { return 1; }
 mixed direct_holster_obj_to_obj() { return 0; }
@@ -85,6 +90,12 @@ int valid_wield()
    else if ((alignment < 0) && (owner(this_object())->query_jedi_alignment() > 0))
    {
       tell(owner(this_object()), "You are unable to wield your " + this_object()->short() + " while it is tainted by the Dark side of the Force.\n");
+
+      return 0;
+   }
+   else if (strlen(name_crystal) && (owner(this_object())->query_userid() != name_crystal))
+   {
+      tell(owner(this_object()), "You are unable to wield your " + this_object()->short() + " while it contains a " + name_crystal + " focusing crystal.\n");
 
       return 0;
    }
