@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-27-2010
 inherit VERB_OB;
 
 void perform_purge(object body);
@@ -36,7 +35,7 @@ void do_purge_liv(object living)
       this_body->targetted_action("$N $vconcentrate momentarily on purging $p1 toxins with the Force...\n", living);
    }
 
-   this_body->adjust_jedi_alignment(2);
+   this_body->adjust_jedi_alignment(this_body->has_buff("/d/buffs/force_focus") ? 4 : 2);
 
    call_out("meditation_time", 4, living);
 

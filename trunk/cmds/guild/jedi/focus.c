@@ -1,6 +1,3 @@
-// Last edited by deforce on 03-17-2010
-#include <flags.h>
-
 inherit CMD;
 
 void concentration();
@@ -38,7 +35,7 @@ void main(string arg)
       {
          out("Your ability to use this command has been disabled.\n");
       }
-      else if (this_body->test_flag(F_FORCE_FOCUS))
+      else if (this_body->has_buff("/d/buffs/force_focus"))
       {
          out("You are already focusing on the Light side of the Force.\n");
       }

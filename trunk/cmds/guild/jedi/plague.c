@@ -1,4 +1,3 @@
-// Last edited by deforce on 10-11-2009
 inherit VERB_OB;
 
 void perform_plague(object living);
@@ -7,6 +6,7 @@ void concentrate(object living);
 void do_plague_liv(object living)
 {
    object this_body = this_body();
+   int alignment = this_body->query_jedi_alignment();
 
    if (living->has_buff("/d/buffs/force_plague"))
    {
@@ -21,7 +21,7 @@ void do_plague_liv(object living)
 
    this_body->targetted_action("$N $vconcentrate $p hatred $vtoward $t...", living);
 
-   this_body->adjust_jedi_alignment(-10);
+   this_body->adjust_jedi_alignment(alignment < 0 ? -10 : this_body->has_buff("/d/buffs/force_focus") ? -20 : -15);
 
    this_body->add_skill_delay(8);
 
@@ -57,10 +57,6 @@ mixed can_plague_liv()
       {
          return "You have not learned how to inflict plague upon others.\n";
       }
-      else if (this_body->has_buff("/d/buffs/force_focus"))
-      {
-         return "You are too focused on the Light side of the Force to inflict plague upon someone.\n";
-      }
       else if (this_body->has_skill_delay())
       {
          return "You are too busy to concentrate on inflicting plague upon someone.\n";
@@ -87,10 +83,6 @@ mixed can_plague()
       if (!this_body->has_learned_skill("force plague"))
       {
          return "You have not learned how to inflict plague upon others.\n";
-      }
-      else if (this_body->has_buff("/d/buffs/force_focus"))
-      {
-         return "You are too focused on the Light side of the Force to inflict plague upon someone.\n";
       }
       else if (this_body->has_skill_delay())
       {

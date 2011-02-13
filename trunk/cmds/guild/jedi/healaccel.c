@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-18-2010
 #include <hooks.h>
 
 inherit VERB_OB;
@@ -61,7 +60,7 @@ void do_healaccel_liv(object living)
             this_body->targetted_action("$N $vconcentrate on accelerating $p1 body's healing with the Force...\n", living);
          }
 
-         this_body->adjust_jedi_alignment(2);
+         this_body->adjust_jedi_alignment(this_body->has_buff("/d/buffs/force_focus") ? 4 : 2);
 
          call_out("meditation_time", 6, living);
 

@@ -1,4 +1,3 @@
-// Last edited by deforce on 05-02-2010
 #include <hooks.h>
 
 inherit CMD; 
@@ -40,7 +39,7 @@ void main(string arg)
       }
       else
       {
-         this_body->adjust_jedi_alignment(2);
+         this_body->adjust_jedi_alignment(this_body->has_buff("/d/buffs/force_focus") ? 4 : 2);
          this_body->add_skill_delay(12);
 
          concentration();

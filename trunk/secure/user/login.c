@@ -222,9 +222,9 @@ private nomask varargs void login_handle_logon(int state, mixed extra, string ar
 // modified/rewritten more than half of the base mudlib first
 // (intend to modify ... doesn't cut it)
 //   printf("%s is based on Lima 1.0b3 and running on %s\n\n", mud_name(), driver_version());
-   printf("%s is based on Lima and running on MudOS.\n\n", mud_name());
+   printf("%s is based on Lima and running on FluffOS.\n\n", mud_name());
 
-   write("Hello, Player!\n");
+   write("Hello, Player!  Please enter your username, or the username you would like to register.\n");
 
    modal_push((: login_handle_logon, NAME_PROMPT, 0 :), LOGIN_PROMPT);
 

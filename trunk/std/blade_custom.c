@@ -137,7 +137,12 @@ void do_check_obj()
       write("You check " + this_object()->the_short() + " and discover that it has the following components:\n\n");
 
       write(sprintf("       Edge: %s\n", edges[0]));
-      write(sprintf("Energy Cell: %s\n", ecells[0]));
+
+      if (this_object()->can_use_energy_cell())
+      {
+         write(sprintf("Energy Cell: %s\n", ecells[0]));
+      }
+
       write(sprintf("       Grip: %s\n\n", grips[0]));
 
       return;

@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-13-2010
 inherit VERB_OB;
 
 void perform_healing(object body);
@@ -52,7 +51,7 @@ void do_superheal_liv(object living)
       this_body->targetted_action("$N $vclose $p eyes and $vmeditate solemnly on healing $t with the Force...\n", living);
    }
 
-   this_body->adjust_jedi_alignment(2);
+   this_body->adjust_jedi_alignment(this_body->has_buff("/d/buffs/force_focus") ? 4 : 2);
 
    call_out("meditation_time", 8, living);
 

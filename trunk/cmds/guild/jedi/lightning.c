@@ -1,4 +1,3 @@
-// Last edited by deforce on 05-03-2010
 inherit VERB_OB;
 
 void zap_target(object thing);

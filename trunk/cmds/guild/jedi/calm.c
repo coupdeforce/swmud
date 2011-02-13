@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-04-2010
 inherit VERB_OB;
 
 void calm_target(object target);
@@ -11,7 +10,7 @@ void do_calm_liv(object target)
       int alignment = this_body->query_jedi_alignment();
 
       this_body->add_skill_delay(8);
-      this_body->adjust_jedi_alignment(1);
+      this_body->adjust_jedi_alignment(this_body->has_buff("/d/buffs/force_focus") ? 2 : 1);
 
       if (this_body->test_skill("force_calm", alignment * (alignment < 0 ? 10 : 5)))
       {

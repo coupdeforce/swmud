@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-09-2010
 inherit VERB_OB;
 
 void decay_class(object thing, int amount);
@@ -23,9 +22,12 @@ void do_decay_obj_by_str(object thing, string value)
    {
       int alignment = this_body->query_jedi_alignment();
 
-      this_body->adjust_jedi_alignment(alignment < 0 ? -4 : -8);
+      if (thing->is_armor())
+      {
+         this_body->adjust_jedi_alignment(alignment < 0 ? -4 : this_body->has_buff("/d/buffs/force_focus") ? -12 : -8);
+      }
 
-      if (this_body->test_skill("force_decay", alignment * (alignment < 0 ? -5 : -10)))
+      if (this_body->test_skill("force_decay", alignment * (thing->is_armor() ? (alignment < 0 ? -5 : -10) : (alignment < 0 ? -5 : 5))))
       {
          object env = environment(thing);
 
@@ -69,10 +71,6 @@ mixed can_decay_obj_by_str()
       {
          return "You have not learned how to cause decay through the Force.\n";
       }
-      else if (this_body->has_buff("/d/buffs/force_focus"))
-      {
-         return "You are too focused on the Light side of the Force to cause decay.\n";
-      }
       else if (this_body->has_skill_delay())
       {
          return "You are too busy to concentrate on causing decay through the Force.\n";
@@ -100,10 +98,6 @@ mixed can_decay_obj()
       {
          return "You have not learned how to cause decay through the Force.\n";
       }
-      else if (this_body->has_buff("/d/buffs/force_focus"))
-      {
-         return "You are too focused on the Light side of the Force to cause decay.\n";
-      }
       else if (this_body->has_skill_delay())
       {
          return "You are too busy to concentrate on causing decay through the Force.\n";
@@ -130,10 +124,6 @@ mixed can_decay()
       if (this_body->is_body() && !this_body->has_learned_skill("force decay"))
       {
          return "You have not learned how to cause decay through the Force.\n";
-      }
-      else if (this_body->has_buff("/d/buffs/force_focus"))
-      {
-         return "You are too focused on the Light side of the Force to cause decay.\n";
       }
       else if (this_body->has_skill_delay())
       {

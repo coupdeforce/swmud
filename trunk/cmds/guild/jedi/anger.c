@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-25-2010
 inherit CMD;
 
 void perform_healing();
@@ -27,10 +26,6 @@ void main()
       {
          write("You are already at full health.\n");
       }
-      else if (this_body->has_buff("/d/buffs/force_focus"))
-      {
-         write("You are too focused on the Light side of the Force to focus your anger.\n");
-      }
       else if (this_body->has_skill_delay())
       {
          write("You are too busy to focus your anger.\n");
@@ -39,7 +34,7 @@ void main()
       {
          int alignment = this_body->query_jedi_alignment();
 
-         this_body->adjust_jedi_alignment(alignment < 0 ? -4 : -8);
+         this_body->adjust_jedi_alignment(alignment < 0 ? -4 : this_body->has_buff("/d/buffs/force_focus") ? -12 : -8);
 
          this_body->add_skill_delay(4);
 

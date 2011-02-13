@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-13-2010
 inherit VERB_OB;
 
 void wipe_target(object living, string skill);
@@ -14,10 +13,6 @@ mixed can_mwipe_liv_str(object living, string skill)
       if (this_body->is_body() && !this_body->has_learned_skill("memory wipe"))
       {
          return "You have not learned how to wipe someone's memory with the Force.\n";
-      }
-      else if (this_body->has_buff("/d/buffs/force_focus"))
-      {
-         return "You are too focused on the Light side of the Force to wipe someone's memory.\n";
       }
       else if (this_body->has_skill_delay())
       {
@@ -61,7 +56,7 @@ void do_mwipe_liv_str(object living, string skill)
       {
          int alignment = this_body->query_jedi_alignment();
 
-         this_body->adjust_jedi_alignment(alignment < 0 ? -5 : -10);
+         this_body->adjust_jedi_alignment(alignment < 0 ? -5 : this_body->has_buff("/d/buffs/force_focus") ? -15 : -10);
 
          concentration(living, skill);
 
