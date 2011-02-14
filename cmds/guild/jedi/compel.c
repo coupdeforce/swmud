@@ -1,5 +1,8 @@
-// Last edited by deforce on 03-30-2010
+#include <hooks.h>
+
 inherit VERB_OB;
+
+mixed call_hooks(string, int);
 
 void do_compel_liv_to_wrd_str(object living, string command, string text)
 {

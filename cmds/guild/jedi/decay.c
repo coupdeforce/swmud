@@ -1,3 +1,5 @@
+#include <hooks.h>
+
 inherit VERB_OB;
 
 void decay_class(object thing, int amount);
@@ -27,7 +29,7 @@ void do_decay_obj_by_str(object thing, string value)
          this_body->adjust_jedi_alignment(alignment < 0 ? -4 : this_body->has_buff("/d/buffs/force_focus") ? -12 : -8);
       }
 
-      if (this_body->test_skill("force_decay", alignment * (thing->is_armor() ? (alignment < 0 ? -5 : -10) : (alignment < 0 ? -5 : 5))))
+      if (this_body->test_skill("force_decay", (alignment * (thing->is_armor() ? (alignment < 0 ? -5 : -10) : (alignment < 0 ? -5 : 5))) + (thing->is_weapon() ? this_body->call_hooks("force_focus", HOOK_SUM) : 0)))
       {
          object env = environment(thing);
 

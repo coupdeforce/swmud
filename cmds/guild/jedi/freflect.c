@@ -56,7 +56,7 @@ void concentration(object room)
    object this_body = this_body();
    int alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("force_reflect", (alignment * (alignment < 0 ? 20 : this_body->query_skill("force_shield") / 2))))
+   if (this_body->test_skill("force_reflect", (alignment * (alignment < 0 ? 20 : this_body->query_skill("force_shield") / 2)) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       int level = this_body->query_guild_level("jedi");
       int force = this_body->query_for();

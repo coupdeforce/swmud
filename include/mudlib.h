@@ -282,7 +282,7 @@
 #define ADMTOOL                 "/obj/admtool/admtool2"
 #define DATAEDIT                "/trans/obj/dataedit"
 
-#define CONSTRUCTOR             "/obj/construct/constructor"
+#define CONSTRUCTOR             "/obj/constructor"
 #define PRODUCT                 "/obj/construct/product"
 #define SPECIAL_PROPERTIES      "/obj/construct/special_properties"
 

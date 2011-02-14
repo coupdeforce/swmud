@@ -1,4 +1,4 @@
-// Last edited by deforce on 03-23-2010
+#include <hooks.h>
 
 inherit CMD; 
 
@@ -61,7 +61,7 @@ void concentration()
 
    this_body->add_skill_delay(8);
 
-   if (this_body->test_skill("bmed", (alignment > 0 ? alignment * 10 : alignment * -10)))
+   if (this_body->test_skill("bmed", (alignment > 0 ? alignment * 10 : alignment * -10) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       int force = this_body->query_for();
       int level = this_body->query_guild_level("jedi");

@@ -1,3 +1,5 @@
+#include <hooks.h>
+
 inherit VERB_OB;
 
 void perform_healing(object body);
@@ -163,7 +165,7 @@ void meditation_time(object body)
 
    alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("force_healing", alignment * (alignment < 0 ? 25 : 10)))
+   if (this_body->test_skill("force_healing", (alignment * (alignment < 0 ? 25 : 10)) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       perform_healing(body);
    }

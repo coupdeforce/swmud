@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-24-2010
 #include <hooks.h>
 #include <playerflags.h>
 

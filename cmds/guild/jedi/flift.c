@@ -1,4 +1,5 @@
-// Last edited by deforce on 03-20-2010
+#include <hooks.h>
+
 inherit CMD;
 inherit M_EXIT;
 
@@ -191,9 +192,9 @@ void concentration(object thing, object location, string location_name, object d
       text += location_name + " to " + destination_name;
    }
 
-   if (this_body->test_skill("force_lift", (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300))
+   if (this_body->test_skill("force_lift", (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300 + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
-      this_body->test_skill("telekinesis", this_body->query_guild_level("jedi") * 5);
+      this_body->test_skill("telekinesis", (this_body->query_guild_level("jedi") * 5) + this_body->call_hooks("force_focus", HOOK_SUM));
 
       this_body->simple_action("$N $vlift " + text + ".\n", thing);
 
