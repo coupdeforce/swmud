@@ -126,7 +126,7 @@ void meditation_time(object body)
       return;
    }
 
-   if (this_body->test_skill("heal_accel", (alignment * (alignment < 0 ? 50 : 3)) + ((this_body->query_skill("force_healing") / 2) - 500)))
+   if (this_body->test_skill("heal_accel", (alignment * (alignment < 0 ? 50 : 3)) + ((this_body->query_skill("force_healing") / 2) - 500 + this_body->call_hooks("force_focus", HOOK_SUM))))
    {
       perform_healaccel(body);
    }

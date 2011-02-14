@@ -1,4 +1,5 @@
-// Last edited by deforce on 04-13-2010
+#include <hooks.h>
+
 inherit VERB_OB;
 inherit M_EXIT;
 inherit M_MESSAGES;
@@ -196,11 +197,11 @@ void perform_push(object thing, string direction, object destination)
 {
    object this_body = this_body();
 
-   if (this_body->test_skill("force_push", (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300))
+   if (this_body->test_skill("force_push", (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300 + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       string enter_direction = "";
 
-      this_body->test_skill("telekinesis", this_body->query_guild_level("jedi") * 5);
+      this_body->test_skill("telekinesis", (this_body->query_guild_level("jedi") * 5) + this_body->call_hooks("force_focus", HOOK_SUM));
 
       this_body->targetted_action("$N $vpush $t to the " + direction + ".", thing);
 

@@ -1,5 +1,5 @@
-// Last edited by deforce on 03-22-2010
 #include <flags.h>
+#include <hooks.h>
 
 inherit CMD; 
 inherit M_EXIT;
@@ -190,7 +190,7 @@ void concentration(object thing, object location, string location_name, object d
       text += location_name + " to " + destination_name;
    }
 
-   if (this_body->test_skill("force_throw", (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300))
+   if (this_body->test_skill("force_throw", (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300 + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       int damage = weight * (0.6 + (rank * 0.7)) / 2;
 
