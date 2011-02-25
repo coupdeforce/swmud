@@ -293,15 +293,14 @@ void buy_object_from(object ob, object seller)
 
    cost = to_float(ob->query_value());
 
-   if (seller->query_guild_level("merchant") && seller->has_learned_skill("haggling")
-      && (seller->query_toggle("haggle") == "on"))
+   if ((seller->query_guild_level("merchant") || seller->query_guild_level("smuggler"))
+      && seller->has_learned_skill("haggling") && (seller->query_toggle("haggle") == "on"))
    {
-      int level = seller->query_guild_level("merchant");
-      int rank = to_int(floor(seller->query_skill("haggle") / 100.0));
+      int level = seller->query_guild_level("merchant") + seller->query_guild_level("smuggler");
+      int rank = seller->query_skill("haggle") / 100;
       float amount;
 
-      if (!seller->test_skill("haggle", level * 10)
-         && ((50 - level - (rank * 3)) > random(100)))
+      if (!seller->test_skill("haggle", level * 10) && ((50 - level - (rank * 3)) > random(100)))
       {
          amount = level + (seller->query_cha() / 5.0) + rank - 50;
 
@@ -475,15 +474,14 @@ protected int sell_object_to(object ob, object buyer)
 
    cost = to_float(ob->query_value());
 
-   if (buyer->query_guild_level("merchant") && buyer->has_learned_skill("haggling")
-      && (buyer->query_toggle("haggle") == "on"))
+   if ((buyer->query_guild_level("merchant") || buyer->query_guild_level("smuggler"))
+      && buyer->has_learned_skill("haggling") && (buyer->query_toggle("haggle") == "on"))
    {
-      int level = buyer->query_guild_level("merchant");
-      int rank = to_int(floor(buyer->query_skill("haggle") / 100.0));
+      int level = buyer->query_guild_level("merchant") + buyer->query_guild_level("smuggler");
+      int rank = buyer->query_skill("haggle") / 100;
       float amount;
 
-      if (!buyer->test_skill("haggle", level * 10)
-         && ((50 - level - (rank * 3)) > random(100)))
+      if (!buyer->test_skill("haggle", level * 10) && ((50 - level - (rank * 3)) > random(100)))
       {
          amount = level + (buyer->query_cha() / 5.0) + rank - 50;
 

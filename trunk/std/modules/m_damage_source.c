@@ -1,4 +1,3 @@
-// Last edited by deforce on 05-12-2010
 /* The concept is a bit abstract, so the name isn't entirely correct.  This
  * is an abstraction of the concept of something that one attacks with;
  * either a weapon or one's self.  It controls the combat messages, and
@@ -37,7 +36,7 @@ private mapping combat_messages = ([]);
 
 void internal_setup()
 {
-   this_object()->add_save( ({ "damage_types", "damage_bonuses", "durability", "max_durability", "critical_chance_bonus", "critical_multiplier_bonus", "persist_flags" }) );
+   this_object()->add_save( ({ "damage_types", "damage_bonuses", "durability", "max_durability", "critical_chance_bonus", "critical_multiplier_bonus", "weapon_speed", "to_hit_base", "to_hit_bonus", "stun_bonus", "slow_bonus", "tear_bonus", "chance_to_be_damaged", "persist_flags" }) );
 }
 
 int can_swing()

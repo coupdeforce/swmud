@@ -88,12 +88,14 @@ void generate_list(object player)
    string array product_list = ({ });
    mixed array guild_requirements;
    mixed array skill_requirements;
+   string array learn_requirements;
    int has_required;
 
    foreach (string name in all_products)
    {
       guild_requirements = CONSTRUCT_D->query_guild_requirements(name);
       skill_requirements = CONSTRUCT_D->query_skill_requirements(name);
+      learn_requirements = CONSTRUCT_D->query_learn_requirements(name);
       has_required = 1;
 
       foreach (mixed requirement in guild_requirements)
@@ -113,6 +115,15 @@ void generate_list(object player)
       foreach (mixed requirement in skill_requirements)
       {
          if (player->query_skill(requirement[0]) < requirement[1])
+         {
+            has_required = 0;
+            break;
+         }
+      }
+
+      foreach (string requirement in learn_requirements)
+      {
+         if (!player->has_learned_construction(requirement))
          {
             has_required = 0;
             break;
@@ -141,6 +152,7 @@ int construct_object(object player, string product_name, string verb_used)
    string file_name;
    mixed array guild_requirements;
    mixed array skill_requirements;
+   string array learn_requirements;
    mixed array item_list;
    mixed array tool_list;
    mapping items_missing;
@@ -166,6 +178,7 @@ int construct_object(object player, string product_name, string verb_used)
    file_name = CONSTRUCT_D->query_file_name(internal_name);
    guild_requirements = CONSTRUCT_D->query_guild_requirements(internal_name);
    skill_requirements = CONSTRUCT_D->query_skill_requirements(internal_name);
+   learn_requirements = CONSTRUCT_D->query_learn_requirements(internal_name);
    item_list = CONSTRUCT_D->query_item_list(internal_name);
    tool_list = CONSTRUCT_D->query_tool_list(internal_name);
    inventory = all_inventory(player);
@@ -194,6 +207,15 @@ int construct_object(object player, string product_name, string verb_used)
       if (player->query_skill(requirement[0]) < requirement[1])
       {
          write("You require greater skill in " + SKILL_D->query_skill(requirement[0])[0] + " to construct a " + product_name + ".\n");
+         return 0;
+      }
+   }
+
+   foreach (string requirement in learn_requirements)
+   {
+      if (!player->has_learned_construction(requirement))
+      {
+         write("You have not learned how to construct a " + product_name + ".\n");
          return 0;
       }
    }

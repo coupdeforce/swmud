@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-21-2010
 // Note: updates only after reboot
 //### lots of functions in here need to be autodoc'd
 
@@ -489,7 +488,15 @@ nomask object query_body()
 
 string inventory_header()
 {
-   return capitalize(query_subjective()) + " is carrying:\n";
+   foreach (object thing in all_inventory(this_object()))
+   {
+      if (thing->is_visible())
+      {
+         return capitalize(query_subjective()) + " is carrying:\n";
+      }
+   }
+
+   return "";
 }
 
 int ob_state()

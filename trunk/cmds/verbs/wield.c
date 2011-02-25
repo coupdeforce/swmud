@@ -1,4 +1,3 @@
-// Last edited by deforce on 10-21-2009
 #include <combat_modules.h>
 #include <flags.h>
 #include <verbs.h>
@@ -26,16 +25,50 @@ void do_wield_obj(object ob)
       return 0;
    }
 
+   if (ob->query("two_hands"))
+   {
+      if (this_body()->query_weapon("left hand") && this_body()->query_weapon("right hand"))
+      {
+         write("You are already wielding something in both hands.\n");
+
+         return 0;
+      }
+      else if (this_body()->query_weapon(dominant_hand + " hand"))
+      {
+         write("You are already wielding something in your " + dominant_hand + " hand, and you need both hands to wield the " + ob->short() + ".\n");
+
+         return 0;
+      }
+      else if (this_body()->query_weapon(other_hand + " hand"))
+      {
+         write("You are already wielding something in your " + other_hand + " hand, and you need both hands to wield the " + ob->short() + ".\n");
+
+         return 0;
+      }
+      else if (dominant_hand_health < 1)
+      {
+         write("Your " + dominant_hand + " hand is damaged, and you need both hands to wield the " + ob->short() + ".\n");
+
+         return 0;
+      }
+      else if (other_hand_health < 1)
+      {
+         write("Your " + other_hand + " hand is damaged, and you need both hands to wield the " + ob->short() + ".\n");
+
+         return 0;
+      }
+   }
+
    if (dominant_hand_health < 1)
    {
       if (other_hand_health < 1)
       {
-         write("Both your hands are damaged. You cannot wield that!\n");
+         write("Both your hands are damaged, so you cannot wield the " + ob->short() + ".\n");
 
          return 0;
       }
 
-      write("Your " + dominant_hand + " hand is damaged, so you wield the weapon in your " + other_hand + " hand.\n");
+      write("Your " + dominant_hand + " hand is damaged, so you wield the " + ob->short() + " in your " + other_hand + " hand.\n");
       this_body()->do_wield(ob, other_hand + " hand");
 
       return;

@@ -1,4 +1,3 @@
-// Last edited by deforce on 10-21-2009
 #include <flags.h>
 #include <hooks.h>
 
@@ -46,7 +45,7 @@ varargs void wield(object ob, string limb)
 
    if (weapons[limb])
    {
-      weapons[limb]->mark_wielded_by(0);
+
    }
 
    weapons[limb] = ob;
@@ -85,9 +84,9 @@ varargs void unwield(string limb)
    if (weapons[limb])
    {
       weapons[limb]->mark_wielded_by(0);
+      map_delete(weapons, limb);
    }
 
-   map_delete(weapons, limb);
    call_hooks("on_unwield", HOOK_IGNORE);
 }
 

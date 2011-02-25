@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-22-2010
 void remove_guild(string guild_name);
 int query_experience();
 
@@ -144,17 +143,6 @@ void set_guild_level(string guild_name, int guild_level)
       if (guild_name == primary_guild)
       {
          primary_level = guild_level;
-      }
-
-      if (this_object()->is_body())
-      {
-         string guild_path = "/cmds/guild/" + replace_string(guild_name, " ", "_");
-         object shell = this_object()->query_shell_ob();
-
-         if (member_array(guild_path, shell->query_path()) == -1)
-         {
-            shell->set_variable("path", shell->query_path() + ({ guild_path }));
-         }
       }
    }
 }
@@ -398,14 +386,6 @@ void advance_guild_level(string guild_name)
       else
       {
          guild_levels[guild_name] = 1;
-
-         if (this_object()->is_body())
-         {
-            string guild_path = "/cmds/guild/" + replace_string(guild_name, " ", "_");
-            object shell = this_object()->query_shell_ob();
-
-            shell->set_variable("path", shell->query_path() + ({ guild_path }));
-         }
       }
 
       if (primary_guild == guild_name)
@@ -441,14 +421,6 @@ void remove_guild(string guild_name)
             primary_guild = secondary_guild;
             primary_level = guild_levels[secondary_guild];
          }
-      }
-
-      if (this_object()->is_body())
-      {
-         string guild_path = "/cmds/guild/" + replace_string(guild_name, " ", "_");
-         object shell = this_object()->query_shell_ob();
-
-         shell->set_variable("path", shell->query_path() - ({ guild_path }));
       }
    }
 }

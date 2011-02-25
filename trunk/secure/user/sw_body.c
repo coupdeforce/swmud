@@ -1,4 +1,3 @@
-// Last updated by deforce on 04-01-2008
 #include <config.h>
 #include <daemons.h>
 #include <security.h>
@@ -161,7 +160,7 @@ private nomask void incarnate(int is_new, string bfn)
       this_body()->set_max_health(20);
       this_body()->set_health(20);
       this_body()->add_experience(1000);
-      this_user()->query_shell_ob()->set_variable("path", ({ "/cmds/player" }));
+      this_user()->query_shell_ob()->set_variable("path", ({ "/cmds/player", "/cmds/guild" }));
       this_user()->query_shell_ob()->set_variable("PROMPT", "%h/%m > ");
       this_body()->set_points_remaining(225);
       this_body()->set_character_birthday(LAST_LOGIN_D->query_last(query_userid())[0]);

@@ -1,5 +1,3 @@
-// Last edited by deforce on 03-03-2010
-
 inherit VERB_OB;
 
 void appraise(object thing);
@@ -8,9 +6,23 @@ void do_appraise_obj(object thing)
 {
    object this_body = this_body();
 
+   if (thing->is_living())
+   {
+      if (thing != this_body)
+      {
+         write("You judge " + thing->short() + " to be a fine, upstanding member of society.\n");
+      }
+      else
+      {
+         write("You judge yourself to be an example of everything that is good in the universe.\n");
+      }
+
+      return;
+   }
+
    this_body->add_skill_delay(2);
 
-   if (this_body->test_skill("appraise", (this_body->query_guild_level("merchant") * 10)))
+   if (this_body->test_skill("appraise", ((this_body->query_guild_level("merchant") + this_body->query_guild_level("smuggler")) * 10)))
    {
       appraise(thing);
    }
@@ -34,28 +46,35 @@ void do_appraise()
 void appraise(object thing)
 {
    object this_body = this_body();
-   float perception = this_body->query_per();
-   float level = this_body->query_guild_level("merchant");
-   int rank = to_int(floor(this_body->query_skill("appraise") / 100.0));
+   int perception = this_body->query_per();
+   int merchant_level = this_body->query_guild_level("merchant");
+   int smuggler_level = this_body->query_guild_level("smuggler");
+   int rank = this_body->query_skill("appraise") / 100;
    int value = thing->query_value();
+   int sell_value = value;
+   int variation = random(230 - merchant_level - smuggler_level - perception - (rank * 10));
 
-   if ((100 - level - (rank * 5)) > random(100))
+   if (perception < random(100))
    {
-      int variation = random(26);
-
-      value += value * (200 + variation - level - perception - (rank * 5)) / (200 - variation);
+      value += (value * 10 * variation / 100);
    }
 
-   value = value * 100 / 300;
+   if (smuggler_level)
+   {
+      write(capitalize(thing->the_short()) + " appears to be worth "  + value + " credits.\n");
+   }
 
-   write("You think you could sell " + thing->the_short() + " for "  + value + " credits.\n");
+   if (merchant_level)
+   {
+      write("You think you could sell " + thing->the_short() + " for "  + (value * 100 / 300) + " credits.\n");
+   }
 }
 
 mixed can_appraise_obj()
 {
    object this_body = this_body();
 
-   if (this_body->query_guild_level("merchant"))
+   if (this_body->query_guild_level("merchant") || this_body->query_guild_level("smuggler"))
    {
       if (!this_body->has_learned_skill("appraising"))
       {
@@ -72,7 +91,7 @@ mixed can_appraise_obj()
    }
    else
    {
-      return "Only merchants know how to appraise the value of something.\n";
+      return "Only merchants and smugglers know how to appraise the value of something.\n";
    }
 
    return 1;
@@ -82,7 +101,7 @@ mixed can_appraise()
 {
    object this_body = this_body();
 
-   if (this_body->query_guild_level("merchant"))
+   if (this_body->query_guild_level("merchant") || this_body->query_guild_level("smuggler"))
    {
       if (!this_body->has_learned_skill("appraising"))
       {
@@ -99,7 +118,7 @@ mixed can_appraise()
    }
    else
    {
-      return "Only merchants know how to appraise the value of something.\n";
+      return "Only merchants and smugglers know how to appraise the value of something.\n";
    }
 
    return 1;

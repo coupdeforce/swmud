@@ -545,7 +545,8 @@ varargs void heal_us(int x, string limb, int silent)
 
    if (!limb || undefinedp(limb) || (limb == "none"))
    {
-      if (hit_points < max_hit_points)
+//write("hit_points is " + hit_points + ", max_hit_points is " + max_hit_points + ", x is " + x + ", limb is " + limb + ", silent is " + silent + "\n");
+      if (!stringp(hit_points) && (hit_points < max_hit_points))
       {
          hit_points += x;
 
