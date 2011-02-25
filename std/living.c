@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-25-2010
 #include <flags.h>
 #include <log.h>
 
@@ -77,7 +76,15 @@ string in_room_desc()
 
 string inventory_header()
 {
-   return capitalize(query_subjective()) + " is carrying:\n";
+   foreach (object thing in all_inventory(this_object()))
+   {
+      if (thing->is_visible())
+      {
+         return capitalize(query_subjective()) + " is carrying:\n";
+      }
+   }
+
+   return "";
 }
 
 string introduce_contents()

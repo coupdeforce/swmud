@@ -187,6 +187,7 @@
 #define LIGHT_OBJECT            "/std/light_object"
 #define LIGHTSABER_BASE         "/std/lightsaber_base"
 #define LIGHTSABER_CUSTOM       "/std/lightsaber_custom"
+#define LIGHTSABER_DOUBLE_BASE  "/std/lightsaber_double_base"
 #define LIVING                  "/std/living"
 #define MENUS                   "/std/menu"
 #define MOVING_ROOM             "/std/moving_room"
