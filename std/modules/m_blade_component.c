@@ -21,6 +21,8 @@ void mudlib_setup()
    set_id("blade_component");
 
    add_save(({ "name", "component_type", "damage_bonuses", "attribute_bonuses", "to_hit_bonus", "stun_bonus", "slow_bonus", "tear_bonus", "parry_bonus", "heal_bonus", "armor_bonus", "critical_chance_bonus", "critical_multiplier_bonus" }));
+
+   ::mudlib_setup();
 }
 
 int is_blade_component() { return 1; }

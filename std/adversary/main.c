@@ -1,4 +1,3 @@
-// Last edited by deforce on 10-12-2009
 #include <hooks.h>
 #include <playerflags.h>
 
@@ -65,6 +64,11 @@ void take_a_swing(object target)
             return;
          }
 
+         if (weapon->requires_ammo() && (weapon->query_ammo() < 1) && !sizeof(weapon->query_out_of_ammo_damage_types()))
+         {
+            continue;
+         }
+
          if (!test_skill(weapon->query_skill_used()) && (random(251) > (weapon->query_to_hit_bonus(target) + call_hooks("to_hit_bonus", HOOK_SUM))))
          {
             add_event(target, weapon, query_random_limb(), "miss", this_object());
@@ -74,6 +78,11 @@ void take_a_swing(object target)
             add_event(target, weapon, query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
 
             handle_events();
+         }
+
+         if (weapon->requires_ammo())
+         {
+            weapon->adjust_ammo(-1);
          }
 
          start_fight(target);

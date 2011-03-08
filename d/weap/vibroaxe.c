@@ -16,4 +16,4 @@ void setup()
    set_value(4800);
 }
 
-int can_use_energy_cell() { return 1; }
+int can_use_blade_energy_cell() { return 1; }

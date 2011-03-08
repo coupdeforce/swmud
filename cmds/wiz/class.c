@@ -1,4 +1,3 @@
-// Last edited by deforce on 06-04-2008
 inherit VERB_OB;
 
 void do_class_obj(object thing)
@@ -18,6 +17,19 @@ void do_class_obj(object thing)
          foreach (string type, int amount in thing->query_damage_types())
          {
             write(sprintf("%16s: %i\n", title_capitalize(type), amount));
+         }
+
+         if (thing->requires_ammo())
+         {
+            write(sprintf("\n%16s: %i", "Ammo", thing->query_ammo()));
+            write(sprintf("\n%16s: %i", "Max Ammo", thing->query_max_ammo()));
+         }
+
+         if (thing->is_ranged_weapon())
+         {
+            write(sprintf("\n%16s: %i", "Range", thing->query_range()));
+            write(sprintf("\n%16s: %i", "Range Base", thing->query_range_base()));
+            write(sprintf("\n%16s: %i", "Range Bonus", thing->query_range_bonus()));
          }
 
          if (thing->query_to_hit_base())

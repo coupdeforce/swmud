@@ -1,4 +1,3 @@
-// Last edited by deforce on 11-21-2007
 #include <security.h>
 #include <classes.h>
 
@@ -19,6 +18,8 @@ string* query_skills_in_category(string category);
 void remove_category(string category);
 
 private mapping skills = ([ ]);
+private mapping skill_advance_guild_requirements = ([ ]);
+private mapping skill_advance_learn_requirements = ([ ]);
 private mapping skill_categories = ([ ]);
 
 #define PRIV_REQUIRED   "Mudlib:daemons"
@@ -55,6 +56,8 @@ int remove_skill(string skill)
 
    // delete the skill
    map_delete(skills, skill);
+   map_delete(skill_advance_guild_requirements, skill);
+   map_delete(skill_advance_learn_requirements, skill);
 
    foreach (string category in SKILL_D->query_skill_categories())
    {
@@ -69,7 +72,7 @@ int remove_skill(string skill)
    return 1;
 }
 
-int edit_skill(string skill, string capname, int advrate, int stat_str, int stat_con, int stat_agi, int stat_dex, int stat_per, int stat_int, int stat_cha, int stat_luc, int stat_for)
+int edit_skill(string skill, string capname, int advrate, int stat_str, int stat_con, int stat_agi, int stat_dex, int stat_per, int stat_int, int stat_cha, int stat_luc, int stat_for, string array learn_requirements)
 {
    if (!check_privilege(PRIV_REQUIRED))
    {
@@ -90,7 +93,7 @@ int is_skill(string skill)
 
 //:FUNCTION query_skills
 // Returns a list of all the skill names.
-string * query_skills()
+string array query_skills()
 {
    return keys(skills);
 }
@@ -100,6 +103,36 @@ string * query_skills()
 mixed query_skill(string skill_name)
 {
    return skills[skill_name];
+}
+
+void set_skill_advance_guild_requirements(string skill, string array requirements)
+{
+   skill_advance_guild_requirements[skill] = requirements;
+}
+
+void set_skill_advance_learn_requirements(string skill, string array requirements)
+{
+   skill_advance_learn_requirements[skill] = requirements;
+}
+
+string array query_skill_advance_guild_requirements(string skill_name)
+{
+   if (skill_advance_guild_requirements[skill_name])
+   {
+      return skill_advance_guild_requirements[skill_name];
+   }
+
+   return ({ });
+}
+
+string array query_skill_advance_learn_requirements(string skill_name)
+{
+   if (skill_advance_learn_requirements[skill_name])
+   {
+      return skill_advance_learn_requirements[skill_name];
+   }
+
+   return ({ });
 }
 
 void add_skill_to_category(string category, string skill_name)

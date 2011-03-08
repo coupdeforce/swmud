@@ -1,4 +1,4 @@
-// Note: updates only after reboot
+// Note: updates only when an /std/race/ object is updated.
 //### lots of functions in here need to be autodoc'd
 
 // /std/player.c  Written after login.c 1-12-94
@@ -292,6 +292,7 @@ void remove()
          thing->clear_flag(F_WIELDED);
          thing->clear_flag(F_HELD);
          thing->move(environment());
+         thing->simple_action("$N $vfall to the ground.");
       }
    }
 

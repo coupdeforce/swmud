@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-06-2010
 #include <classes.h>
 #include <hooks.h>
 
@@ -101,6 +100,9 @@ void learn_skill(string skill, int value)
    int skill_value;
    mixed skill_data;
    float chance;
+   string array guilds = this_body()->query_guild_names();
+   string array guild_requirements = SKILL_D->query_skill_advance_guild_requirements(skill);
+   string array learn_requirements = SKILL_D->query_skill_advance_learn_requirements(skill);
 
    if (this_object()->is_body()) { this_object()->check_wizard_set("use learn_skill on  " + this_object()->short(), previous_object(-1)); }
 
@@ -119,6 +121,33 @@ void learn_skill(string skill, int value)
    }
 
    skill_value = my_skill[0];
+
+   if (sizeof(guild_requirements))
+   {
+      int found_one = 0;
+
+      foreach (string requirement in guild_requirements)
+      {
+         if (member_array(requirement, guilds) > -1)
+         {
+            found_one = 1;
+         }
+      }
+
+      if (!found_one)
+      {
+         skill_value = 1000;
+      }
+   }
+
+   foreach (string requirement in learn_requirements)
+   {
+      if (member_array(requirement, learned_skills) == -1)
+      {
+         skill_value = 1000;
+         break;
+      }
+   }
 
    if (skill_value < 1000)
    {
@@ -158,6 +187,9 @@ int test_skill(string skill, int adjustment)
    int destination_value;
    int stat_bonus = get_stat_bonus(skill);
    float stat_weight = get_stat_weight(skill);
+   string array guilds = this_body()->query_guild_names();
+   string array guild_requirements = SKILL_D->query_skill_advance_guild_requirements(skill);
+   string array learn_requirements = SKILL_D->query_skill_advance_learn_requirements(skill);
 
    if (this_object()->is_body()) { this_object()->check_wizard_set("use test_skill on  " + this_object()->short(), previous_object(-1)); }
 
@@ -186,6 +218,33 @@ int test_skill(string skill, int adjustment)
 
    // semi-hack.. return 1 if roll == 0, 1 in 1000 chance of success
    if (roll == 0) { return 1; }
+
+   if (sizeof(guild_requirements))
+   {
+      int found_one = 0;
+
+      foreach (string requirement in guild_requirements)
+      {
+         if (member_array(requirement, guilds) > -1)
+         {
+            found_one = 1;
+         }
+      }
+
+      if (!found_one)
+      {
+         skill_value = 1000;
+      }
+   }
+
+   foreach (string requirement in learn_requirements)
+   {
+      if (member_array(requirement, learned_skills) == -1)
+      {
+         skill_value = 1000;
+         break;
+      }
+   }
 
    if (skill_value < 1000)
    {

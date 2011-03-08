@@ -61,7 +61,8 @@ varargs string save_to_string(int recursep)
 
    if (save_recurse)
    {
-      if (wizardp(this_object()) || wizardp(environment(this_object())))
+      if (wizardp(this_object()) || wizardp(environment(this_object()))
+         || GROUP_D->member_group(this_object()->query_userid(), "testchars"))
       {
          map["#inventory#"] = all_inventory()->save_to_string(1) - ({ 0 });
       }

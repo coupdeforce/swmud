@@ -86,28 +86,35 @@ void process_component(object thing)
    this_ob->add_to_hit_bonus(thing->query_to_hit_bonus());
    this_ob->add_stun_bonus(thing->query_stun_bonus());
    this_ob->add_slow_bonus(thing->query_slow_bonus());
-   this_ob->add_tear_bonus(thing->query_slow_bonus());
+   this_ob->add_tear_bonus(thing->query_tear_bonus());
    this_ob->add_parry_bonus(thing->query_parry_bonus());
    this_ob->add_heal_bonus(thing->query_heal_bonus());
    this_ob->add_armor_bonus(thing->query_armor_bonus());
    this_ob->add_critical_chance_bonus(thing->query_critical_chance_bonus());
+
    this_ob->add_critical_multiplier_bonus(thing->query_critical_multiplier_bonus());
 }
 
-int indirect_install_obj_on_obj() { return 1; }
 int indirect_install_obj_in_obj() { return 1; }
 int indirect_uninstall_obj_from_obj() { return 1; }
 string query_relation(object ob) { return "on"; }
+int is_modifiable_blade() { return 1; }
+int can_use_blade_edge() { return 1; }
+int can_use_blade_grip() { return 1; }
 
 mixed receive_object(object target, string relation)
 {
    switch (target->query_component_type())
    {
-      case "blade edge": return 1;
-      case "blade energy cell":
-         if (this_object()->can_use_energy_cell()) { return 1; }
+      case "blade edge":
+         if (this_object()->can_use_blade_edge()) { return 1; }
          return target->short() + " cannot be used with that type of blade.\n";
-      case "blade grip": return 1;
+      case "blade energy cell":
+         if (this_object()->can_use_blade_energy_cell()) { return 1; }
+         return target->short() + " cannot be used with that type of blade.\n";
+      case "blade grip":
+         if (this_object()->can_use_blade_grip()) { return 1; }
+         return target->short() + " cannot be used with that type of blade.\n";
    }
 
    return target->short() + " is not part of a bladed weapon.\n";
@@ -136,14 +143,20 @@ void do_check_obj()
 
       write("You check " + this_object()->the_short() + " and discover that it has the following components:\n\n");
 
-      write(sprintf("       Edge: %s\n", edges[0]));
+      if (this_object()->can_use_blade_edge())
+      {
+         write(sprintf("       Edge: %s\n", edges[0]));
+      }
 
-      if (this_object()->can_use_energy_cell())
+      if (this_object()->can_use_blade_energy_cell())
       {
          write(sprintf("Energy Cell: %s\n", ecells[0]));
       }
 
-      write(sprintf("       Grip: %s\n\n", grips[0]));
+      if (this_object()->can_use_blade_grip())
+      {
+         write(sprintf("       Grip: %s\n\n", grips[0]));
+      }
 
       return;
    }

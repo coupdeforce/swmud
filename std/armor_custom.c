@@ -79,14 +79,17 @@ int indirect_install_obj_in_obj() { return 1; }
 int indirect_uninstall_obj_from_obj() { return 1; }
 string query_relation(object ob) { return "on"; }
 int is_modifiable_armor() { return 1; }
+int can_use_armor_overlay() { return 1; }
+int can_use_armor_underlay() { return 1; }
 
 mixed receive_object(object target, string relation)
 {
    switch (target->query_component_type())
    {
       case "armor overlay":
+         if (this_object()->can_use_armor_overlay() && !this_object()->cannot_use_component(target->query_component_type(), target->query_component_name())) { return 1; }
       case "armor underlay":
-         if (!this_object()->cannot_use_component(target->query_component_type(), target->query_component_name())) { return 1; }
+         if (this_object()->can_use_armor_underlay() && !this_object()->cannot_use_component(target->query_component_type(), target->query_component_name())) { return 1; }
 
       return target->short() + " cannot be used with that type of clothing or armor.\n";
    }
@@ -114,8 +117,15 @@ void do_check_obj()
 
       write("You check " + this_object()->the_short() + " and discover that it has the following components:\n\n");
 
-      write(sprintf(" Overlay: %s\n", overlays[0]));
-      write(sprintf("Underlay: %s\n", underlays[0]));
+      if (this_object()->can_use_armor_overlay())
+      {
+         write(sprintf(" Overlay: %s\n", overlays[0]));
+      }
+
+      if (this_object()->can_use_armor_underlay())
+      {
+         write(sprintf("Underlay: %s\n", underlays[0]));
+      }
 
       return;
    }

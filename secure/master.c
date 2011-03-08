@@ -1,4 +1,3 @@
-// Last edited by deforce on 02-17-2010
 #include <config.h>
 #include <daemons.h>
 #include <mudlib.h>
@@ -438,65 +437,97 @@ string parser_gen_pos(object ob, int num, int indirect)
   }
 }
 
-string parser_error_message(int kind, object ob, mixed arg, int flag) {
-    string ret;
-    if (ob)
-        ret = ob->short() + ": ";
-    else
-        ret = "";
+string parser_error_message(int kind, object ob, mixed arg, int flag)
+{
+   string ret;
 
-    switch (kind) {
-    case ERR_IS_NOT:
-        return ret + "There is no such " + arg + " here.\n";
-        break;
-    case ERR_NOT_LIVING:
-        if (flag)
+   if (ob)
+   {
+      ret = ob->short() + ": ";
+   }
+   else
+   {
+      ret = "";
+   }
+
+   switch (kind)
+   {
+      case ERR_IS_NOT:
+         return ret + "There is no such " + arg + " here.\n";
+         break;
+      case ERR_NOT_LIVING:
+         if (flag)
+         {
             return ret + "None of the " + pluralize(arg) + " are alive.\n";
-        return ret + "The " + arg + " isn't alive.\n";
-        break;
-    case ERR_NOT_ACCESSIBLE:
-        if (flag)
+         }
+
+         return ret + "The " + arg + " isn't alive.\n";
+         break;
+      case ERR_NOT_ACCESSIBLE:
+         if (flag)
+         {
             return ret + "You can't reach them.\n";
-        else
+         }
+         else
+         {
             return ret + "You can't reach it.\n";
-        break;
-    case ERR_AMBIG:
+         }
+         break;
+      case ERR_AMBIG:
       {
-              array descs = unique_array(arg, (: parser_gen_pos($1, 1, 0) :));
-              string str;
+         array descs = unique_array(arg, (: parser_gen_pos($1, 1, 0) :));
+         string str;
 
-              if (sizeof(descs) == 1)
-                str = ret + "Which of ";
-            else
-          str = ret + "Do you mean ";
-        for (int i = 0; i < sizeof(descs); i++)
-        {
-          str += parser_gen_pos(descs[i][0], sizeof(descs[i]), 0) + " (" + (sizeof(descs) - i) + ")";
+         if (sizeof(descs) == 1)
+         {
+            str = ret + "Which of ";
+         }
+         else
+         {
+            str = ret + "Do you mean ";
+         }
 
-          if (i < sizeof(descs) - 2)
-            str += ", ";
-          else if (i == sizeof(descs) - 2)
-            str += " or ";
-        }
-        if(sizeof(descs) == 1)
-          return str + " do you mean?\n";
-        else
-          return str + "?\n";
+         for (int i = sizeof(descs) - 1; i >= 0; i--)
+         {
+            str += parser_gen_pos(descs[i][0], sizeof(descs[i]), 0) + " (" + (sizeof(descs) - i) + ")";
+
+            if (i > 1)
+            {
+               str += ", ";
+            }
+            else if (i > 0)
+            {
+               str += " or ";
+            }
+         }
+
+         if (sizeof(descs) == 1)
+         {
+            return str + " do you mean?\n";
+         }
+         else
+         {
+            return str + "?\n";
+         }
       }
-      break;
-    case ERR_ORDINAL:
-        if (arg > 1)
+         break;
+      case ERR_ORDINAL:
+         if (arg > 1)
+         {
             return ret + "There are only " + arg + " of them.\n";
-        else
+         }
+         else
+         {
             return ret + "There is only one of them.\n";
-        break;
-    case ERR_ALLOCATED:
-        return ret + arg;
-    case ERR_THERE_IS_NO:
-        return ret + "There is no " + arg + " here.\n";
-    case ERR_BAD_MULTIPLE:
-        return ret + "You can't use more than one object at a time with that verb.\n";
-    }
+         }
+         break;
+      case ERR_ALLOCATED:
+         return ret + arg;
+      case ERR_THERE_IS_NO:
+         return ret + "There is no " + arg + " here.\n";
+      case ERR_BAD_MULTIPLE:
+         return ret + "You can't use more than one object at a time with that verb.\n";
+   }
 }
 
 string get_save_file_name(string file, object who)

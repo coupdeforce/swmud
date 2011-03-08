@@ -46,17 +46,19 @@ void do_appraise()
 void appraise(object thing)
 {
    object this_body = this_body();
-   int perception = this_body->query_per();
    int merchant_level = this_body->query_guild_level("merchant");
    int smuggler_level = this_body->query_guild_level("smuggler");
    int rank = this_body->query_skill("appraise") / 100;
    int value = thing->query_value();
-   int sell_value = value;
-   int variation = random(230 - merchant_level - smuggler_level - perception - (rank * 10));
 
-   if (perception < random(100))
+   if ((rank < 10) || (this_body->query_per() < 100))
    {
-      value += (value * 10 * variation / 100);
+      int variation = 250 - (merchant_level + smuggler_level + this_body->query_per() + (rank * 10));
+
+      if (variation > 0)
+      {
+         value += (value * 2 * variation / 100);
+      }
    }
 
    if (smuggler_level)
