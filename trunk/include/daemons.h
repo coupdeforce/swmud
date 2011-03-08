@@ -12,6 +12,7 @@
 #define CHANLOG_D       "/daemons/chanlog_d"
 #define CHANNEL_D       "/daemons/channel_d"
 #define CONSTRUCT_D     "/daemons/construct_d"
+#define DAMAGE_D        "/daemons/damage_d"
 #define DID_D           "/daemons/did_d"
 #define DOC_D           "/daemons/doc_d"
 #define EXP_D           "/daemons/exp_d"

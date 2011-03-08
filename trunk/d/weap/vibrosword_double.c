@@ -16,7 +16,7 @@ void setup()
    set_value(5350);
 }
 
-int can_use_energy_cell() { return 1; }
+int can_use_blade_energy_cell() { return 1; }
 
 class event_info source_modify_event(class event_info evt)
 {

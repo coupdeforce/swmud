@@ -63,15 +63,17 @@ int indirect_install_obj_in_obj() { return 1; }
 int indirect_uninstall_obj_from_obj() { return 1; }
 string query_relation(object ob) { return "under"; }
 int is_modifiable_armor() { return 1; }
+int can_use_armor_underlay() { return 1; }
 
 mixed receive_object(object target, string relation)
 {
    switch (target->query_component_type())
    {
+      case "armor overlay":
+         return target->short() + " cannot be used over a robe.\n";
       case "armor underlay":
-         if (!this_object()->cannot_use_component(target->query_component_type(), target->query_component_name())) { return 1; }
-
-      return target->short() + " cannot be used under a robe.\n";
+         if (this_object()->can_use_armor_underlay() && !this_object()->cannot_use_component(target->query_component_type(), target->query_component_name())) { return 1; }
+         return target->short() + " cannot be used under a robe.\n";
    }
 
    return target->short() + " is not compatible with a robe.\n";

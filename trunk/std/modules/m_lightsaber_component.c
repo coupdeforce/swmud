@@ -23,6 +23,8 @@ void mudlib_setup()
    set_id("lightsaber_component");
 
    add_save(({ "name", "component_type", "damage_bonuses", "attribute_bonuses", "to_hit_bonus", "stun_bonus", "slow_bonus", "deflection_bonus", "parry_bonus", "heal_bonus", "armor_bonus", "critical_chance_bonus", "critical_multiplier_bonus", "alignment_restriction", "name_restriction" }));
+
+   ::mudlib_setup();
 }
 
 int is_lightsaber_component() { return 1; }
