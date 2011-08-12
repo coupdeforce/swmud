@@ -1,4 +1,3 @@
-// Last edited by deforce on 02-18-2010
 // possibly the grossest piece of code in the mudlib.
 // (not as bad as the code that describes Rust's mom, of course)
 // Reworked a bit 2-17-99 by Tigran.  
@@ -384,6 +383,11 @@ mixed receive_object( object target, string relation )
    if (target == this_object())
    {
       return "You can't move an object inside itself.\n";
+   }
+
+   if (this_object()->exclude_object(target))
+   {
+      return capitalize(target->the_short()) + " doesn't seem to fit " + relation + " " + this_object()->the_short() + ".\n";
    }
 
    // Have to be a bit stricter here to keep relations[] sane

@@ -1,4 +1,3 @@
-// Last editied by deforce on 06-02-2008
 #include <playerflags.h>
 
 inherit CMD;
@@ -96,7 +95,7 @@ void main()
       {
          string line = get_guild_color(find_body(user)->query_primary_guild());
          line += format_status(user);
-         line += repeat_string(" ", (USER_WIDTH - colour_strlen(line)));
+         line += repeat_string(" ", (USER_WIDTH - color_strlen(line)));
 
          lines += ({ line });
       }
@@ -190,7 +189,7 @@ string format_status(string user)
 
    if (wizardp(body)) { return output; }
 
-   return output[0..USER_WIDTH + (strlen(output) - colour_strlen(output)) - 1];
+   return output[0..USER_WIDTH + (strlen(output) - color_strlen(output)) - 1];
 }
 
 string show_location(string line, object body)
@@ -198,23 +197,23 @@ string show_location(string line, object body)
    if (wizardp(this_user()))
    {
       string room_desc = (environment(body) ? environment(body)->get_brief() : "(Nowhere)");
-      int free_space = WIDTH - colour_strlen(line) - 7;
+      int free_space = WIDTH - color_strlen(line) - 7;
 
-      if (colour_strlen(room_desc) < free_space)
+      if (color_strlen(room_desc) < free_space)
       {
-         line += repeat_string(" ", (free_space + 4 - colour_strlen(room_desc)));
+         line += repeat_string(" ", (free_space + 4 - color_strlen(room_desc)));
          line += " " + room_desc;
       }
       else
       {
          room_desc = room_desc[0..(free_space - 4)];
 
-         if (colour_strlen(room_desc) > (free_space - 3))
+         if (color_strlen(room_desc) > (free_space - 3))
          {
             room_desc = colour_truncate(room_desc, (free_space - 3));
          }
 
-         line += repeat_string(" ", (free_space + 1 - colour_strlen(room_desc)));
+         line += repeat_string(" ", (free_space + 1 - color_strlen(room_desc)));
          line += " " + room_desc + "...";
       }
    }

@@ -15,6 +15,7 @@ void assemble()
    this_ob->reset_slow_bonus();
    this_ob->reset_tear_bonus();
    this_ob->reset_parry_bonus();
+   this_ob->reset_skill_bonuses();
    this_ob->reset_heal_bonus();
    this_ob->reset_armor_bonus();
    this_ob->reset_critical_chance_bonus();
@@ -83,6 +84,11 @@ void process_component(object thing)
    foreach (string type, int bonus in thing->query_attribute_bonuses())
    {
       this_ob->add_attribute_bonus(type, bonus);
+   }
+
+   foreach (string skill, int bonus in thing->query_skill_bonuses())
+   {
+      this_ob->add_skill_bonus(skill, bonus);
    }
 
    this_ob->add_to_hit_bonus(thing->query_to_hit_bonus());
@@ -162,8 +168,6 @@ void do_check_obj()
       {
          write(sprintf("     Scope: %s\n\n", scopes[0]));
       }
-
-      return;
    }
    else
    {
@@ -172,6 +176,17 @@ void do_check_obj()
 
    if (this_object()->requires_ammo())
    {
-      write("It was last recharged " + convert_time(time() - this_object()->query_last_recharge_time()) + " ago and has " + this_object()->query_ammo() + " " + this_object()->query_ammo_desc() + " remaining.\nThe remaining time on its energy cell is " + convert_time(this_object()->query_max_ammo_recharge_time() - (time() - this_object()->query_last_recharge_time())) + ".\n");
+      int last_recharged = time() - this_object()->query_last_recharge_time();
+
+      write("It was last recharged " + convert_time(last_recharged) + " ago and has " + this_object()->query_ammo() + " " + this_object()->query_ammo_desc() + " remaining.\n");
+
+      if ((this_object()->query_max_ammo_recharge_time() - last_recharged) > 0)
+      {
+         write("The remaining time on its energy cell is " + convert_time(this_object()->query_max_ammo_recharge_time() - last_recharged) + ".\n");
+      }
+      else
+      {
+         write("Its energy cell has no charge left.\n");
+      }
    }
 }

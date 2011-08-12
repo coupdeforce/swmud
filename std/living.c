@@ -161,6 +161,12 @@ mixed direct_whisper_liv_str() { return 1; }
 mixed direct_whisper_str_to_liv() { return 1; }
 mixed direct_whisper_to_liv_str() { return 1; }
 
+// m_conversation will override
+void begin_conversation()
+{
+   tell(this_user(), "%^TELL%^" + capitalize(query_name()) + " tells you:%^RESET%^ I don't have anything to say to you.\n");
+}
+
 string look_in(string relation)
 {
    // only trap "in", since you may want something to be behind/on/under a living

@@ -17,6 +17,16 @@ string ansi(string str)
    }
 }
 
+int color_strlen(string str)
+{
+   foreach (string code in keys(ANSI_D->query_translations()[0]))
+   {
+      str = replace_string(str, "%^" + code + "%^", "");
+   }
+
+   return strlen(str);
+}
+
 //:FUNCTION colour_strlen
 //colour_strlen(s) gives the length of the visible portion of s.  Colour
 //codes (e.g. %^GREEN%^) are ignored.

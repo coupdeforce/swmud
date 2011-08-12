@@ -24,6 +24,8 @@ private int resize_count = 0;
 private mapping attribute_modifiers = ([ ]);
 private mapping attribute_bonuses = ([ ]);
 private nosave mapping attribute_hooks = ([ ]);
+private mapping skill_bonuses = ([ ]);
+private nosave mapping skill_hooks = ([ ]);
 private int to_hit_bonus = 0;
 private nosave function to_hit_hook;
 private int heal_bonus = 0;
@@ -32,7 +34,7 @@ private int body_armor_bonus = 0;
 
 void mudlib_setup()
 {
-   add_save(({ "body_size", "slots", "required_learned_skills", "required_skills", "required_guilds", "wear_message", "remove_message", "resize_count", "attribute_modifiers", "attribute_bonuses", "to_hit_bonus", "heal_bonus", "body_armor_bonus", "persist_flags" }));
+   add_save(({ "body_size", "slots", "required_learned_skills", "required_skills", "required_guilds", "wear_message", "remove_message", "resize_count", "attribute_modifiers", "attribute_bonuses", "skill_bonuses", "to_hit_bonus", "heal_bonus", "body_armor_bonus", "persist_flags" }));
 }
 
 mixed ob_state()
@@ -244,6 +246,36 @@ mapping query_attribute_bonuses()
    return attribute_bonuses;
 }
 
+int get_skill_bonus(string skill)
+{
+   return skill_bonuses[skill];
+}
+
+void set_skill_bonuses(mapping skills)
+{
+   skill_bonuses = skills;
+}
+
+void set_skill_bonus(string skill, int amount)
+{
+   skill_bonuses[skill] = amount;
+}
+
+void add_skill_bonus(string skill, int amount)
+{
+   skill_bonuses[skill] = skill_bonuses[skill] + amount;
+}
+
+void reset_skill_bonuses()
+{
+   skill_bonuses = ([ ]);
+}
+
+mapping query_skill_bonuses()
+{
+   return skill_bonuses;
+}
+
 void set_to_hit_bonus(int x)
 {
    to_hit_bonus = x;
@@ -346,6 +378,19 @@ void set_worn(int g)
       }
    }
 
+   foreach (string skill in keys(skill_bonuses))
+   {
+      if (g)
+      {
+         skill_hooks[skill] = (: get_skill_bonus, skill :);
+         owner(this_object())->add_hook(skill + "_bonus", skill_hooks[skill]);
+      }
+      else
+      {
+         owner(this_object())->remove_hook(skill + "_bonus", skill_hooks[skill]);
+      }
+   }
+
    owner(this_object())->refresh_stats();
 }
 
@@ -353,7 +398,7 @@ void remove()
 {
    object env = environment();
 
-   if (!slots || !env) { return 0; }
+   if (!slots || !env || !env->is_living()) { return 0; }
 
    env->remove_item(this_object());
 

@@ -1,4 +1,3 @@
-// Last edited by deforce on 02-10-2010
 #include <daemons.h>
 
 int query_max_health();
@@ -14,6 +13,7 @@ int query_guild_level(string guild_name);
 void set_guild_level(string guild_name, int guild_level);
 void remove_guild(string guild_name);
 string query_name();
+string query_race();
 void receive_private_msg(string message);
 void refresh_stats();
 
@@ -34,7 +34,7 @@ protected void add_a_death()
 protected void death_penalty()
 {
    int experience = query_experience();
-   int new_exp;
+   int new_exp = experience;
    int level = query_primary_level();
    object killer = previous_object();
    string killed_message = "";
@@ -42,8 +42,8 @@ protected void death_penalty()
    if (killer && killer->is_body() && (killer != this_object()) && (environment(killer) != this_object()))
    {
       int killer_level = killer->query_primary_level();
-      string killer_message = "You have killed " + capitalize(query_name()) + ", who is ";
-      killed_message += "You were killed by " + killer->in_room_desc() + ", who is ";
+      string killer_message = "You have killed " + query_name() + ", who is ";
+      killed_message += "You were killed by " + killer->query_name() + ", who is ";
 
       if (killer_level > level)
       {
@@ -53,37 +53,45 @@ protected void death_penalty()
          killed_message += (killer_level - level) + " levels higher than you.\n";
          killer_message += (killer_level - level) + " levels lower than you.\n";
 
-         if (percent_lost < 1) { percent_lost = 1; }
-
-         new_exp = floor(experience * ((100.0 - percent_lost) / 100.0));
-
-         if (query_primary_guild() == "jedi")
+         if (query_race() != "ithorian")
          {
-            if (level < 20)
+            if (percent_lost < 1) { percent_lost = 1; }
+
+            new_exp = floor(experience * ((100.0 - percent_lost) / 100.0));
+
+            if (query_primary_guild() == "jedi")
             {
-               required_experience = EXP_D->get_required_exp("ronin jedi", level + 1);
+               if (level < 20)
+               {
+                  required_experience = EXP_D->get_required_exp("ronin jedi", level + 1);
+               }
+               else
+               {
+                  required_experience = EXP_D->get_required_exp("secondary", level + 1);
+               }
             }
             else
             {
-               required_experience = EXP_D->get_required_exp("secondary", level + 1);
+               required_experience = EXP_D->get_required_exp("primary", level + 1);
             }
-         }
-         else
-         {
-            required_experience = EXP_D->get_required_exp("primary", level + 1);
-         }
 
-         if ((experience >= floor(required_experience * 0.5))
-            && (new_exp < floor(required_experience * 0.5)))
-         {
-            new_exp = floor(required_experience * 0.5);
-         }
-         else if (experience < floor(required_experience * 0.5))
-         {
-            new_exp = experience;
-         }
+            if ((experience >= floor(required_experience * 0.5))
+               && (new_exp < floor(required_experience * 0.5)))
+            {
+               new_exp = floor(required_experience * 0.5);
+            }
+            else if (experience < floor(required_experience * 0.5))
+            {
+               new_exp = experience;
+            }
 
-         killer->add_experience(experience - new_exp);
+            killer->add_experience(experience - new_exp);
+         }
+         else if (this_object()->is_unjustified_ithorian_target(killer))
+         {
+            new_exp = 0;
+            killer->add_experience(experience - new_exp);
+         }
       }
       else if (killer_level < level)
       {
@@ -92,82 +100,98 @@ protected void death_penalty()
          killed_message += (level - killer_level) + " levels lower than you.\n";
          killer_message += (level - killer_level) + " levels higher than you.\n";
 
-         if (percent_lost > 50) { percent_lost = 50; }
-
-         new_exp = floor(experience * ((100.0 - percent_lost) / 100.0));
-
-         if (level < 50)
+         if (query_race() != "ithorian")
          {
-            int required_experience;
+            if (percent_lost > 50) { percent_lost = 50; }
 
-            if (query_primary_guild() == "jedi")
+            new_exp = floor(experience * ((100.0 - percent_lost) / 100.0));
+
+            if (level < 50)
             {
-               if (level < 20)
+               int required_experience;
+
+               if (query_primary_guild() == "jedi")
                {
-                  required_experience = EXP_D->get_required_exp("ronin jedi", level + 1);
+                  if (level < 20)
+                  {
+                     required_experience = EXP_D->get_required_exp("ronin jedi", level + 1);
+                  }
+                  else
+                  {
+                     required_experience = EXP_D->get_required_exp("secondary", level + 1);
+                  }
                }
                else
                {
-                  required_experience = EXP_D->get_required_exp("secondary", level + 1);
+                  required_experience = EXP_D->get_required_exp("primary", level + 1);
+               }
+
+               if ((experience >= floor(required_experience * 0.5))
+                  && (new_exp < floor(required_experience * 0.5)))
+               {
+                  new_exp = floor(required_experience * 0.5);
+               }
+               else if (experience < floor(required_experience * 0.5))
+               {
+                  new_exp = experience;
                }
             }
-            else
-            {
-               required_experience = EXP_D->get_required_exp("primary", level + 1);
-            }
 
-            if ((experience >= floor(required_experience * 0.5))
-               && (new_exp < floor(required_experience * 0.5)))
-            {
-               new_exp = floor(required_experience * 0.5);
-            }
-            else if (experience < floor(required_experience * 0.5))
-            {
-               new_exp = experience;
-            }
+            killer->add_experience(experience - new_exp);
          }
-
-         killer->add_experience(experience - new_exp);
+         else if (this_object()->is_unjustified_ithorian_target(killer))
+         {
+            new_exp = 0;
+            killer->add_experience(experience - new_exp);
+         }
       }
       else
       {
          killed_message += "equal in level.\n";
          killer_message += "equal in level.\n";
 
-         new_exp = experience / 2;
-
-         if (level < 50)
+         if (query_race() != "ithorian")
          {
-            int required_experience;
+            new_exp = experience / 2;
 
-            if (query_primary_guild() == "jedi")
+            if (level < 50)
             {
-               if (level < 20)
+               int required_experience;
+
+               if (query_primary_guild() == "jedi")
                {
-                  required_experience = EXP_D->get_required_exp("ronin jedi", level + 1);
+                  if (level < 20)
+                  {
+                     required_experience = EXP_D->get_required_exp("ronin jedi", level + 1);
+                  }
+                  else
+                  {
+                     required_experience = EXP_D->get_required_exp("secondary", level + 1);
+                  }
                }
                else
                {
-                  required_experience = EXP_D->get_required_exp("secondary", level + 1);
+                  required_experience = EXP_D->get_required_exp("primary", level + 1);
+               }
+
+               if ((experience >= floor(required_experience * 0.5))
+                  && (new_exp < floor(required_experience * 0.5)))
+               {
+                  new_exp = floor(required_experience * 0.5);
+               }
+               else if (experience < floor(required_experience * 0.5))
+               {
+                  new_exp = experience;
                }
             }
-            else
-            {
-               required_experience = EXP_D->get_required_exp("primary", level + 1);
-            }
 
-            if ((experience >= floor(required_experience * 0.5))
-               && (new_exp < floor(required_experience * 0.5)))
-            {
-               new_exp = floor(required_experience * 0.5);
-            }
-            else if (experience < floor(required_experience * 0.5))
-            {
-               new_exp = experience;
-            }
+            killer->add_experience(experience - new_exp);
          }
-
-         killer->add_experience(experience - new_exp);
+         else if (this_object()->is_unjustified_ithorian_target(killer))
+         {
+            new_exp = 0;
+            killer->add_experience(experience - new_exp);
+         }
       }
 
       killer_message += "You have gained " + (experience - new_exp) + " experience points.\n\n";

@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-22-2010
 int query_guild_level(string guild);
 
 int team_alignment = 0;
@@ -133,7 +132,6 @@ void adjust_jedi_alignment(int value)
 
    if (this_object()->is_body()) { this_object()->check_wizard_set("adjust " + this_object()->short() + "'s jedi alignment from " + jedi_alignment + " to " + value, previous_object(-1)); }
 
-   if ((team_alignment < -25) && ((team_alignment + value) > -26))
    if (!jedi_level) { return; }
 
    max_alignment = 25 + floor(jedi_level / 2);

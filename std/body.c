@@ -282,6 +282,11 @@ void remove()
    }
 #endif
 
+   foreach (object thing in filter_array(all_inventory(), (: $1->id("spec_damage") :)))
+   {
+      destruct(thing);
+   }
+
    if (!wizardp(link) && !GROUP_D->member_group(link->query_userid(), "testchars"))
    {
       foreach (object thing in filter_array(all_inventory(), (: !$1->is_autoload() :)))
@@ -346,6 +351,9 @@ void reconnect(object new_link)
    //### add security here?
 
    link = new_link;
+
+   receive_private_msg("\n\n", 0, 0);
+
    if (is_visible()) { simple_action("$N $vhave reconnected."); }
 
    CHANNEL_D->deliver_emote("announce", query_name(), sprintf("has reconnected.", mud_name()));
@@ -405,6 +413,7 @@ protected void die()
    add_a_death();
    drop_corpse(killer->short(), weapon_name);
    move(MORGUE_D->query_morgue(file_name(environment(killer))));
+   this_object()->reset_unjustified_ithorian_targets();
    death_penalty();
 //   reset_armors();
 
@@ -487,19 +496,6 @@ nomask object query_body()
 //   return 1;
 //}
 
-string inventory_header()
-{
-   foreach (object thing in all_inventory(this_object()))
-   {
-      if (thing->is_visible())
-      {
-         return capitalize(query_subjective()) + " is carrying:\n";
-      }
-   }
-
-   return "";
-}
-
 int ob_state()
 {
    return -1;
@@ -578,6 +574,12 @@ string a_short() { return query_name(); }
 string the_short() { return query_name(); }
 string in_room_desc() { return base_in_room_desc() + query_idle_string(); }
 // end of naming overrides
+
+// m_conversation will override
+void begin_conversation()
+{
+   tell(this_user(), "You have a very interesting conversation with " + capitalize(query_name()) + ".\n");
+}
 
 varargs int check_wizard_set(string action, object array prev_objects, int min_wiz_level)
 {

@@ -272,7 +272,7 @@ int test_skill(string skill, int adjustment)
 
       skills[skill] = my_skill;
 
-      learn_skill(skill, (stat_bonus / stat_weight * adjustment));
+      learn_skill(skill, stat_weight > 0 ? (stat_bonus / stat_weight * adjustment) : adjustment);
    }
 
    return (destination_value > roll);

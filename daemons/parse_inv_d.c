@@ -16,6 +16,7 @@ object array get_objects(string verb, object thing)
       case "decay": return filter_array(deep_inventory(environment(thing)), (: !environment($1)->is_carry_container() :));
       case "detach": return filter_array(deep_inventory(environment(thing)), (: $1->test_flag(F_HOLSTERED) :)) + filter_array(deep_inventory(environment(thing)), (: $1->has_weapons() :));
       case "drop": return all_inventory(thing);
+      case "fire": return filter_array(all_inventory(environment(thing)), (: $1->is_living(F_LIGHTED) :));
 //      case "get": return deep_inventory(thing) + all_inventory(environment(thing));
       case "hide": return filter_array(filter_array(filter_array(filter_array(filter_array(all_inventory(thing), (: !$1->test_flag(F_WORN) :)), (: !$1->test_flag(F_WIELDED) :)), (: !$1->test_flag(F_CONCEALED) :)), (: !$1->is_attached() :)), (: !$1->test_flag(F_LIGHTED) :));
       case "holster": return filter_array(all_inventory(thing) + all_inventory(environment(thing)), (: !$1->test_flag(F_HOLSTERED) :));

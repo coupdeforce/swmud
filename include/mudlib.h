@@ -152,6 +152,7 @@
 #define NON_ROOM                "/std/non_room"
 #define WATER_ROOM              "/std/water_room"
 #define GRID_SERVER             "/std/grid_server"
+#define GARDEN                  "/std/room/garden"
 
 //### temporary
 #define ROOM                    INDOOR_ROOM

@@ -25,12 +25,13 @@ string damage_message(int percent)
       case 48..51: return "!dam13";
       case 52..55: return "!dam14";
       case 56..59: return "!dam15";
-      case 60..79: return "!dam16";
-      case 80..99: return "!dam17";
-      case 100..119: return "!dam18";
-      case 120..139: return "!dam19";
-      case 140..159: return "!dam20";
-      case 160..99999: return "!dam21";
+      case 60..75: return "!dam16";
+      case 76..91: return "!dam17";
+      case 92..107: return "!dam18";
+      case 108..123: return "!dam19";
+      case 124..139: return "!dam20";
+      case 140..155: return "!dam21";
+      case 156..99999: return "!dam21";
       default: return "!dam22";
    }
 }

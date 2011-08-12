@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-24-2010
 #include <mudlib.h>
 
 inherit VERB_OB;
@@ -13,13 +12,13 @@ void do_kill_liv(object thing)
       return;
    }
 
-   if (thing == this_body)
+   if (thing != this_body)
    {
-      write("You should try the 'suicide' command instead.\n");
+      this_body->initiate_combat(thing);
    }
    else
    {
-      this_body->initiate_combat(thing);
+      write("You should try the 'recreate' command instead.\n");
    }
 }
 

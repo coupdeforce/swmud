@@ -84,14 +84,13 @@ void choke_target(object living)
 //   this_body->targetted_action("$N $vchoke $t!\n", living);
    if (!present("force_choke", this_body))
    {
-      load_object("/d/obj/force_damage");
-      new("/d/obj/force_damage", "Force choke", "force_choke")->move(this_body);
+      load_object("/d/obj/spec_damage");
+      new("/d/obj/spec_damage", "Force choke", "force_choke")->move(this_body);
       present("force_choke", this_body)->set_combat_messages("combat-choke");
+      present("force_choke", this_body)->set_death_message("$N was choked to death through the Force by $N1 at $o1.");
    }
 
-   present("force_choke", this_body)->set_death_message("$N was choked to death through the Force by $N1 at $o1.");
-
-   this_body->add_event(living, present("force_choke", this_body), choice(({ "head", "torso" })), damage, this_body);
+   this_body->add_event(living, present("force_choke", this_body), choice(({ "head", "torso" })), ([ "unstoppable" : damage ]), this_body);
 
    if (stun > 0) { living->stun(stun); }
 

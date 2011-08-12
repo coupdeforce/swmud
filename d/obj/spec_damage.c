@@ -1,4 +1,3 @@
-// Last edited by deforce on 05-06-2010
 inherit OBJ;
 inherit M_DAMAGE_SOURCE;
 
@@ -6,11 +5,11 @@ void setup(string name, string id)
 {
    if (strlen(name) && strlen(id))
    {
-      set_id(name, id, "force_damage");
+      set_id(name, id, "spec_damage");
    }
    else
    {
-      set_id("force_damage");
+      set_id("spec_damage");
    }
 
    set_combat_messages("none");

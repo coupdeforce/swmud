@@ -71,7 +71,7 @@ void hurt_target(object living)
    int ceiling = get_ceiling(living);
    int amount = floor + random(ceiling - floor + 1);
 
-   this_body->simple_action("$N can inflict pain from " + floor + " to " + ceiling + ", and had a damage roll of " + amount + ".\n");
+//   this_body->simple_action("$N can inflict pain from " + floor + " to " + ceiling + ", and had a damage roll of " + amount + ".\n");
    this_body->targetted_action("$N $vinflict pain upon $t!\n", living);
 
    living->weaken_us(amount);

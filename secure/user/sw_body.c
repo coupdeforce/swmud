@@ -171,6 +171,13 @@ private nomask void incarnate(int is_new, string bfn)
 
       body->save_me();
    }
+   else
+   {
+      foreach (object thing in filter_array(all_inventory(), (: $1->id("spec_damage") :)))
+      {
+         destruct(thing);
+      }
+   }
 }
 
 void sw_body_handle_existing_logon(int);

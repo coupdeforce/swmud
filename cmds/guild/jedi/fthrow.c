@@ -200,8 +200,8 @@ void concentration(object thing, object location, string location_name, object d
 
       if (!present("force_throw", this_body))
       {
-         load_object("/d/obj/force_damage");
-         new("/d/obj/force_damage", thing->short(), "force_throw")->move(this_body);
+         load_object("/d/obj/spec_damage");
+         new("/d/obj/spec_damage", thing->short(), "force_throw")->move(this_body);
          present("force_throw", this_body)->set_combat_messages("combat-force-throw");
       }
       else
@@ -213,7 +213,7 @@ void concentration(object thing, object location, string location_name, object d
 
       if (destination->is_adversary())
       {
-         this_body->add_event(destination, present("force_throw", this_body), destination->query_random_limb(), damage);
+         this_body->add_event(destination, present("force_throw", this_body), destination->query_random_limb(), ([ "striking" : damage ]), this_body);
          this_body->start_fight(destination);
       }
       else
@@ -224,7 +224,7 @@ void concentration(object thing, object location, string location_name, object d
          {
             if (room_object->is_adversary())
             {
-               this_body->add_event(room_object, present("force_throw", this_body), destination->query_random_limb(), damage);
+               this_body->add_event(room_object, present("force_throw", this_body), destination->query_random_limb(), ([ "striking" : damage ]), this_body);
                this_body->start_fight(room_object);
             }
          }
@@ -252,17 +252,9 @@ void concentration(object thing, object location, string location_name, object d
       }
       else
       {
-         if (destination->is_adversary())
-         {
-            thing->move(environment(this_body));
-            tell_environment(thing, capitalize(thing->the_short()) + " is damaged beyond recognition.\n");
-         }
-         else
-         {
-            thing->move(destination);
-            tell_environment(thing, capitalize(thing->the_short()) + " is damaged beyond recognition.\n");
-         }
+         thing->move(destination->is_adversary() ? environment(destination) : destination);
 
+         tell_environment(thing, capitalize(thing->the_short()) + " is damaged beyond recognition.\n");
          destruct(thing);
       }
    }

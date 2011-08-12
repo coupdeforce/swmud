@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-04-2010
 // Handle the ability of 'monsters' to 'target' other objects.
 // One can rewrite this to, say, pick a random target instead of concentrating on one person,
 // but be careful that query_target() must continually return the same object between get_target()'s
@@ -10,6 +9,9 @@ int start_fight(object who);
 private nosave object target;
 private nosave object array other_targets = ({ });
 private nosave object array unfinished_business = ({ });
+private nosave mapping ranged_targets = ([ ]);
+private nosave mapping ranged_unfinished_business = ([ ]);
+private nosave object array backstabbers = ({ });
 
 object query_target()
 {
@@ -24,6 +26,34 @@ object array query_targets()
 object array query_unfinished_business()
 {
    return filter_array(unfinished_business, (: $1 :));
+}
+
+mapping query_ranged_targets()
+{
+   return ranged_targets;
+}
+
+mapping query_ranged_unfinished_business()
+{
+   return ranged_unfinished_business;
+}
+
+void backstabbed_by(object assassin)
+{
+   if (member_array(assassin, backstabbers) == -1)
+   {
+      backstabbers += ({ assassin });
+   }
+}
+
+int has_been_backstabbed_by(object assassin)
+{
+   if (member_array(assassin, backstabbers) > -1)
+   {
+      return 1;
+   }
+
+   return 0;
 }
 
 // Find someone to attack.  Return zero if we're dead or asleep or have no one to attack.
@@ -87,12 +117,13 @@ void initiate_combat(object who)
    {
       start_fight(who);
 
-      if (this_object()->query_jedi_alignment() > 0)
+      if (!who->is_justified_target())
       {
          this_object()->adjust_jedi_alignment(-1);
+         this_object()->add_unjustified_ithorian_target(who);
       }
    }
-   else
+   else if (!this_object()->is_body())
    {
       start_fight(who);
    }
