@@ -14,6 +14,7 @@ void assemble()
    this_ob->reset_slow_bonus();
    this_ob->reset_tear_bonus();
    this_ob->reset_parry_bonus();
+   this_ob->reset_skill_bonuses();
    this_ob->reset_heal_bonus();
    this_ob->reset_armor_bonus();
    this_ob->reset_critical_chance_bonus();
@@ -81,6 +82,11 @@ void process_component(object thing)
    foreach (string type, int bonus in thing->query_attribute_bonuses())
    {
       this_ob->add_attribute_bonus(type, bonus);
+   }
+
+   foreach (string skill, int bonus in thing->query_skill_bonuses())
+   {
+      this_ob->add_skill_bonus(skill, bonus);
    }
 
    this_ob->add_to_hit_bonus(thing->query_to_hit_bonus());

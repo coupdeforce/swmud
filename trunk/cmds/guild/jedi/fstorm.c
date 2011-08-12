@@ -141,8 +141,8 @@ void damage_everything(object room, int damage)
 {
    if (!present("force_storm", this_body))
    {
-      load_object("/d/obj/force_damage");
-      new("/d/obj/force_damage", "Force storm", "force_storm")->move(this_body);
+      load_object("/d/obj/spec_damage");
+      new("/d/obj/spec_damage", "Force storm", "force_storm")->move(this_body);
       present("force_storm", this_body)->set_death_message("$N was killed by a Force storm created by $N1 at $o1.");
    }
 
@@ -150,7 +150,7 @@ void damage_everything(object room, int damage)
    {
       if (thing->is_adversary())
       {
-         this_body->add_event(thing, present("force_storm", this_body), thing->query_random_limb(), damage);
+         this_body->add_event(thing, present("force_storm", this_body), "none", ([ "unstoppable" : damage ]), this_body);
 
          this_body->start_fight(thing);
          this_body->handle_events();

@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-03-2010
 inherit VERB_OB;
 
 #include <syringe_bottle.h>
@@ -37,7 +36,7 @@ void do_inject_liv_with_obj(object living, object syringe)
 
             tell(this_body, "Skill is: " + skill + ".\n");
 
-            if (random(11) > skill)
+            if ((random(100 - this_body->query_int_pure()) >= skill) && (random(50) < 10))
             {
                this_body->targetted_action("$N $vtry to inject $t with the contents of $p syringe and $vfail terribly, breaking $p syringe in the process!\n", living);
 
@@ -134,7 +133,7 @@ void do_inject()
 void inject(object body, object syringe)
 {
    object this_body = this_body();
-   int rank = to_int(floor(this_body->query_skill("inject") / 100.0));
+   int rank = this_body->query_skill("inject") / 100;
    int levels = this_body->query_guild_level("physician") + this_body->query_guild_level("assassin");
    string effect = get_liquid_effect_file(syringe->get_a_dose());
 

@@ -2,6 +2,7 @@ inherit RACE;
 
 string race_name = "ithorian";
 int body_size = 4;
+private nosave object array unjustified_ithorian_targets = ({ });
 
 // This is the name of the race, used in the initial selection screen, finger info, etc.
 string query_race()
@@ -19,6 +20,53 @@ int query_body_size()
 string short_description()
 {
    return "Blah blah Ithorians blah blah.\n";
+}
+
+void add_unjustified_ithorian_target(object target)
+{
+   if (member_array(target, unjustified_ithorian_targets) == -1)
+   {
+      unjustified_ithorian_targets += ({ target });
+   }
+}
+
+void remove_unjustified_ithorian_target(object target)
+{
+   if (member_array(target, unjustified_ithorian_targets) == -1)
+   {
+      unjustified_ithorian_targets -= ({ target });
+   }
+}
+
+void reset_unjustified_ithorian_targets()
+{
+   unjustified_ithorian_targets = ({ });
+}
+
+object array query_unjustified_ithorian_targets()
+{
+   return unjustified_ithorian_targets;
+}
+
+int is_unjustified_ithorian_target(object target)
+{
+   if (member_array(target, unjustified_ithorian_targets) > -1)
+   {
+      return 1;
+   }
+
+   return 0;
+}
+
+void check_unjustified_ithorian_targets()
+{
+   foreach (object target in unjustified_ithorian_targets)
+   {
+      if (!target)
+      {
+         unjustified_ithorian_targets -= ({ target });
+      }
+   }
 }
 
 int query_race_str_min() { return 35; }

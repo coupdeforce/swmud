@@ -39,9 +39,9 @@ void do_heal_liv(object living)
 
    this_body->adjust_jedi_alignment(this_body->has_buff("/d/buffs/force_focus") ? 2 : 1);
 
-   call_out("meditation_time", 4, living);
+   call_out("meditation_time", 2, living);
 
-   this_body->add_skill_delay(8);
+   this_body->add_skill_delay(4);
 }
 
 void do_heal()

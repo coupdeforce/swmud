@@ -1,4 +1,3 @@
-// Last edited by deforce on 11-10-2009
 inherit CONTAINER;
 inherit M_DECAY;
 inherit M_MESSAGES;
@@ -7,7 +6,8 @@ string the_name;
 string killed_by;
 string killed_with;
 object link;
-int inspected = 0;
+int failed_inspection = 0;
+mapping inspection_log = ([ ]);
 int death_time = 0;
 
 int is_living()
@@ -93,7 +93,8 @@ mixed indirect_get_obj_from_obj(object ob1, object ob2) { return 1; }
 mixed indirect_put_obj_wrd_obj(object ob1, object ob2) { return 1; }
 
 int is_corpse() { return 1; }
-int has_been_inspected() { return inspected; }
+int has_inspection_failure() { return failed_inspection; }
+int has_been_inspected_by(string name) { return inspection_log[name]; }
 int query_death_time() { return death_time; }
 
 int query_hide_contents()
@@ -101,9 +102,14 @@ int query_hide_contents()
    return 1;
 }
 
-void set_inspected()
+void set_inspection_failure()
 {
-   inspected = 1;
+   failed_inspection = 1;
+}
+
+void set_inspected_by(string name, int value)
+{
+   inspection_log[name] = value;
 }
 
 void remove()

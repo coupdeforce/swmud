@@ -27,6 +27,7 @@ private int durability = 1;
 private int max_durability = 1;
 private int chance_to_be_damaged = 2;
 private string skill_used = "";
+private string repair_skill = "melee_repair";
 private mapping damage_types = ([ ]);
 private mapping damage_bonuses = ([ ]);
 private nosave string backstab_message = "";
@@ -415,6 +416,16 @@ void set_skill_used(string new_skill_used)
    skill_used = new_skill_used;
 }
 
+string query_repair_skill()
+{
+   return repair_skill;
+}
+
+void set_repair_skill(string new_repair_skill)
+{
+   repair_skill = new_repair_skill;
+}
+
 void do_adjust(int amount)
 {
    if (test_flag(F_ADJUSTED))
@@ -453,24 +464,22 @@ void do_repair()
          {
             body->add_skill_delay(4);
 
-            if (body->test_skill("melee_repair", 1))
+            if (body->test_skill(repair_skill, 1))
             {
-               int max_repair = (body->query_skill("melee_repair") / 100) + 1;
+               int max_repair = (body->query_skill(repair_skill) / 100) + 1;
 
                if ((max_repair < 11) && ((max_durability - durability) > max_repair))
                {
-                  int permanent_damage = max_durability - (durability + max_repair);
-
                   this_object()->set_value(this_object()->query_value_pure() * (durability + max_repair) / max_durability);
-
-                  max_durability = durability + max_repair;
 
                   foreach (string type in keys(damage_types))
                   {
-                     damage_types[type] -= permanent_damage;
+                     damage_types[type] -= (max_durability - (durability + max_repair));
 
                      if (damage_types[type] < 1) { map_delete(damage_types, type); }
                   }
+
+                  max_durability = durability + max_repair;
                }
 
                durability = max_durability;

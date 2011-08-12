@@ -1,4 +1,3 @@
-// Last modified by deforce on 07-05-2008
 #include <verbs.h>
 
 inherit VERB_OB;
@@ -28,5 +27,5 @@ void create()
 {
    clear_flag(NEED_TO_SEE);
 
-   add_rules( ({ "", "WRD", }), ({ "" }));
+   add_rules( ({ "", "OBJ", "WRD", }), ({ "" }));
 }

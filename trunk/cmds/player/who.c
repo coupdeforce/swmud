@@ -1,4 +1,3 @@
-// Last editied by deforce on 06-02-2008
 #include <playerflags.h>
 
 inherit CMD;
@@ -178,23 +177,23 @@ string show_location(string line, object body)
    if (wizardp(this_user()))
    {
       string room_desc = (environment(body) ? environment(body)->get_brief() : "(Nowhere)");
-      int free_space = WIDTH - colour_strlen(line) - 7;
+      int free_space = WIDTH - color_strlen(line) - 7;
 
-      if (colour_strlen(room_desc) < free_space)
+      if (color_strlen(room_desc) < free_space)
       {
-         line += repeat_string(" ", (free_space + 4 - colour_strlen(room_desc)));
+         line += repeat_string(" ", (free_space + 4 - color_strlen(room_desc)));
          line += " " + room_desc;
       }
       else
       {
          room_desc = room_desc[0..(free_space - 4)];
 
-         if (colour_strlen(room_desc) > (free_space - 3))
+         if (color_strlen(room_desc) > (free_space - 3))
          {
             room_desc = colour_truncate(room_desc, (free_space - 3));
          }
 
-         line += repeat_string(" ", (free_space + 1 - colour_strlen(room_desc)));
+         line += repeat_string(" ", (free_space + 1 - color_strlen(room_desc)));
          line += " " + room_desc + "...";
       }
    }

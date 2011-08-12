@@ -22,7 +22,7 @@ void do_look_at_obj(object ob, string name)
    if (sizeof(str) && (str[<1] != '\n')) { str += "\n"; }
 
    if (ob->is_corpse() && this_body()->query_guild_level("bounty hunter")
-      && this_body()->has_learned_skill("inspect corpse") && !ob->has_been_inspected())
+      && this_body()->has_learned_skill("inspect corpse") && !ob->has_inspection_failure())
    {
       str += inspect_corpse(ob);
    }
@@ -193,12 +193,31 @@ string inspect_corpse(object ob)
    object this_body = this_body();
    string text = "";
 
-   if (this_body->test_skill("inspect_corpse", this_body->query_guild_level("bounty hunter") * 12))
+   if (ob->query_killer() == this_body->query_name())
    {
+      text += "You killed them with ";
+
+      if (ob->query_killer_weapon() == "bare hands")
+      {
+         text += "your bare hands";
+      }
+      else
+      {
+         text += add_article(ob->query_killer_weapon());
+      }
+
+      text += " " + convert_time(time() - ob->query_death_time()) + " ago.\n";
+   }
+   else if (ob->has_been_inspected_by(this_body->query_name()) || this_body->test_skill("inspect_corpse", this_body->query_guild_level("bounty hunter") * 12))
+   {
+      ob->set_inspected_by(this_body->query_name(), 1);
+
       text += "It looks like they were killed " + convert_time(time() - ob->query_death_time()) + " ago.\n";
 
-      if (this_body->test_skill("inspect_corpse", this_body->query_guild_level("bounty hunter") * 8))
+      if ((ob->has_been_inspected_by(this_body->query_name()) > 1) || this_body->test_skill("inspect_corpse", this_body->query_guild_level("bounty hunter") * 8))
       {
+         ob->set_inspected_by(this_body->query_name(), 2);
+
          if (ob->query_killer_weapon() == "bare hands")
          {
             text += "It looks like the killer used their bare hands.\n";
@@ -208,8 +227,10 @@ string inspect_corpse(object ob)
             text += "It looks like they were killed with " + add_article(ob->query_killer_weapon()) + ".\n";
          }
 
-         if (this_body->test_skill("inspect_corpse", this_body->query_guild_level("bounty hunter") * 4))
+         if ((ob->has_been_inspected_by(this_body->query_name()) > 2) || this_body->test_skill("inspect_corpse", this_body->query_guild_level("bounty hunter") * 4))
          {
+            ob->set_inspected_by(this_body->query_name(), 3);
+
             text += "This murder looks like the work of " +  ob->query_killer() + ".\n";
          }
          else
@@ -220,7 +241,7 @@ string inspect_corpse(object ob)
    }
    else if (random(this_body->query_skill("inspect_corpse")) < (110 - this_body->query_per()))
    {
-      ob->set_inspected();
+      ob->set_inspected_by(this_body->query_name());
 
       text += "You gain nothing from inspection, and the evidence is ruined.\n";
    }

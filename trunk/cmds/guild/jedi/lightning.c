@@ -80,13 +80,13 @@ void zap_target(object thing)
 //   this_body->targetted_action("$N $vsend bolts of lightning from $p hands to $t!\n", thing);
    if (!present("force_lightning", this_body))
    {
-      load_object("/d/obj/force_damage");
-      new("/d/obj/force_damage", "Force lightning", "force_lightning")->move(this_body);
+      load_object("/d/obj/spec_damage");
+      new("/d/obj/spec_damage", "Force lightning", "force_lightning")->move(this_body);
       present("force_lightning", this_body)->set_combat_messages("combat-lightning");
       present("force_lightning", this_body)->set_death_message("$N was killed by bolts of lightning from $P1 hands at $o1.");
    }
 
-   this_body->add_event(thing, present("force_lightning", this_body), thing->query_random_limb(), amount, this_body);
+   this_body->add_event(thing, present("force_lightning", this_body), thing->query_random_limb(), ([ "electrical" : amount ]), this_body);
 
    this_body->start_fight(thing);
    this_body->handle_events();

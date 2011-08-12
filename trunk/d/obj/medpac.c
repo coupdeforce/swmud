@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-03-2010
 inherit OBJ;
 inherit M_GETTABLE;
 inherit M_VALUABLE;

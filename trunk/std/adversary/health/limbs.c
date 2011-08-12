@@ -326,9 +326,9 @@ varargs void set_limb_health(string limb, int x)
 }
 
 //:FUNCTION hurt_us
-// varargs int hurt_us(int x, string limb);
+// varargs int hurt_us(int x, string limb, int limb_damage);
 // Hurt us a specified amount.
-varargs int hurt_us(int amount, string limb)
+varargs int hurt_us(int amount, string limb, int limb_damage)
 {
    if (this_object()->is_body()) { this_object()->check_wizard_set("hurt " + this_object()->short() + " for " + amount, previous_object(-1)); }
 
@@ -342,9 +342,19 @@ varargs int hurt_us(int amount, string limb)
       // Hurt our overall HP
       hit_points -= amount;
 
-      // Do half damage to the limb that was hit
-      if (limb)
+      // Do damage to the limb that was hit or the specified damage
+      if (limb && (limb != "none"))
       {
+         if (!limb_damage)
+         {
+            limb_damage = random((amount / 2) + 1);
+         }
+
+         if (limb_damage < 1)
+         {
+            limb_damage = 1;
+         }
+
          if (limb == "random") { limb = query_random_limb(); }
          else if (limb == "all")
          {
@@ -354,7 +364,7 @@ varargs int hurt_us(int amount, string limb)
 
                if ((health[limb] && (health[limb]->health < 1)) || dead) { continue; }
 
-               health[limb]->health -= (amount / 2);
+               health[limb]->health -= limb_damage;
 
                if (health[limb]->health <= 0)
                {
@@ -370,7 +380,7 @@ varargs int hurt_us(int amount, string limb)
 
          if ((health[limb] && (health[limb]->health < 1)) || dead) { return 0; }
 
-         health[limb]->health -= (amount / 2);
+         health[limb]->health -= limb_damage;
 
          if (health[limb]->health <= 0)
          {
@@ -378,9 +388,13 @@ varargs int hurt_us(int amount, string limb)
             disable_limb(limb);
          }
       }
+      else
+      {
+         limb = "";
+      }
 
       output = "hp: " + hit_points + " (-" + amount + ")";
-      output += (limb && (amount / 2) ? ("  %^CYAN%^" + limb + "%^RESET%^: " + health[limb]->health + " (-" + (amount / 2) + ")") : "");
+      output += (strlen(limb) && limb_damage) ? ("  %^CYAN%^" + limb + "%^RESET%^: " + health[limb]->health + " (-" + limb_damage + ")") : "";
 
       output += "\n\n";
 

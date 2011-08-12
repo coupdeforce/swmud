@@ -1,4 +1,3 @@
-// Last edited by deforce on 05-07-2010
 // Adversary's natural armor
 #include <hooks.h>
 

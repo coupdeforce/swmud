@@ -28,6 +28,8 @@ private string unwield_message = "$N $vunwield a $o.";
 private mapping attribute_modifiers = ([ ]);
 private mapping attribute_bonuses = ([ ]);
 private nosave mapping attribute_hooks = ([ ]);
+private mapping skill_bonuses = ([ ]);
+private nosave mapping skill_hooks = ([ ]);
 private int heal_bonus = 0;
 private nosave function heal_hook;
 private int armor_bonus = 0;
@@ -36,7 +38,7 @@ private nosave function parry_hook;
 
 void mudlib_setup()
 {
-   add_save(({ "wielding_limbs", "required_learned_skills", "required_skills", "required_guilds", "wield_message", "unwield_message", "attribute_modifiers", "attribute_bonuses", "heal_bonus", "armor_bonus", "parry_bonus", "persist_flags" }));
+   add_save(({ "wielding_limbs", "required_learned_skills", "required_skills", "required_guilds", "wield_message", "unwield_message", "attribute_modifiers", "attribute_bonuses", "skill_bonuses", "heal_bonus", "armor_bonus", "parry_bonus", "persist_flags" }));
 }
 
 int valid_wield() // Return 1 if they can wield this.
@@ -122,6 +124,36 @@ void reset_attribute_bonuses()
 mapping query_attribute_bonuses()
 {
    return attribute_bonuses;
+}
+
+int get_skill_bonus(string skill)
+{
+   return skill_bonuses[skill];
+}
+
+void set_skill_bonuses(mapping skills)
+{
+   skill_bonuses = skills;
+}
+
+void set_skill_bonus(string skill, int amount)
+{
+   skill_bonuses[skill] = amount;
+}
+
+void add_skill_bonus(string skill, int amount)
+{
+   skill_bonuses[skill] = skill_bonuses[skill] + amount;
+}
+
+void reset_skill_bonuses()
+{
+   skill_bonuses = ([ ]);
+}
+
+mapping query_skill_bonuses()
+{
+   return skill_bonuses;
 }
 
 void set_heal_bonus(int amount)
@@ -226,6 +258,19 @@ varargs void mark_wielded_by(object which, string array limbs...)
       else
       {
          owner(this_object())->remove_hook(type + "_bonus", attribute_hooks[type]);
+      }
+   }
+
+   foreach (string skill in keys(skill_bonuses))
+   {
+      if (which)
+      {
+         skill_hooks[skill] = (: get_skill_bonus, skill :);
+         owner(this_object())->add_hook(skill + "_bonus", skill_hooks[skill]);
+      }
+      else
+      {
+         owner(this_object())->remove_hook(skill + "_bonus", skill_hooks[skill]);
       }
    }
 

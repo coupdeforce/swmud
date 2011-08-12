@@ -1,4 +1,3 @@
-// Last edited by deforce on 10-29-2009
 // Twi'lek racial skill
 inherit VERB_OB;
 
@@ -69,28 +68,34 @@ mixed can_trip_liv()
 void trip(object body)
 {
    object this_body = this_body();
-   int rank = to_int(floor(this_body->query_skill("trip") / 100.0));
+   int rank = this_body->query_skill("trip") / 100;
    int primary_level = this_body->query_primary_level();
-   int damage = 0;
 
    // Chance to do damage
-   if ((rank * 5) > random(100))
+   if ((rank * 10) > random(100))
    {
-      damage = rank + random(((rank * 4) - rank) + 1);
+      int damage = rank + random(((rank * 4) - rank) + 1);
 
-      this_body->add_event(body, this_body, body->query_random_armor_slot(), damage);
-   }
+      if (!present("twilek_trip", this_body))
+      {
+         load_object("/d/obj/spec_damage");
+         new("/d/obj/spec_damage", "maneuver", "twilek_trip")->move(this_body);
+         present("twilek_trip", this_body)->set_combat_messages("combat-trip");
+         present("twilek_trip", this_body)->set_death_message("$N was tripped by $N1 at $o1 and dies from the impact of the fall.");
+      }
 
-   // Stun for 1 round, and chance to stun for 2 rounds
-   body->stun(2 + ((rank * 5) > random(100) ? 2 : 0));
-
-   this_body->targetted_action("$N $vtrip $t with a clever maneuver" + (damage > 0 ? ", sending $t reeling" : "") + ".", body);
-
-   if (member_array(body, this_body->query_targets()) > -1)
-   {
+      this_body->add_event(body, present("twilek_trip", this_body), "none", ([ "striking" : damage ]), this_body);
       this_body->handle_events();
    }
    else
+   {
+      this_body->targetted_action("$N $vtrip $t with a clever maneuver.", body);
+   }
+
+   // Stun for 1 round, and chance to stun for 2 rounds
+   body->stun(2 + ((rank * 10) > random(100) ? 2 : 0));
+
+   if (member_array(body, this_body->query_targets()) == -1)
    {
       this_body->start_fight(body);
       this_body->adjust_jedi_alignment(-1);

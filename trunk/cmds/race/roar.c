@@ -1,4 +1,3 @@
-// Last edited by deforce on 11-13-2009
 // Ithorian racial skill
 inherit VERB_OB;
 
@@ -91,7 +90,7 @@ mixed can_roar()
 void roar(object living)
 {
    object this_body = this_body();
-   int rank = to_int(floor(this_body->query_skill("roar") / 100.0));
+   int rank = this_body->query_skill("roar") / 100;
    int primary_level = this_body->query_primary_level();
    int damage = 0;
 
@@ -99,15 +98,21 @@ void roar(object living)
    if ((rank * 10) >= random(100))
    {
       damage = 1 + random(rank * living->query_body_size());
-
-      this_body->add_event(living, this_body, "none", damage);
    }
 
-   // Stun for 1 round, and chance to stun for 2 rounds
-   living->stun(2 + ((rank * 5) > random(100) ? 2 : 0));
+   if (!present("ithorian_roar", this_body))
+   {
+      load_object("/d/obj/spec_damage");
+      new("/d/obj/spec_damage", "roar", "ithorian_roar")->move(this_body);
+      present("ithorian_roar", this_body)->set_combat_messages("combat-roar");
+      present("ithorian_roar", this_body)->set_death_message("$N dies from shock as $N1 roars at $o1.");
+   }
 
-   this_body->targetted_action("$N $vutter a loud gutteral roar at $t" + (damage > 0 ? ", knocking $t off $p feet" : "") + ".", living);
+   this_body->add_event(living, present("ithorian_roar", this_body), "none", ([ "sonic" : damage ]), this_body);
    this_body->handle_events();
+
+   // Stun for 1 round, and chance to stun for 2 rounds
+   living->stun(2 + ((rank * 10) > random(100) ? 2 : 0));
 }
 
 void create()

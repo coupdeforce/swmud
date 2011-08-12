@@ -41,6 +41,7 @@ int check_uniqueness(object ob);
 void clear_stock();
 void organize_stock();
 int sort_short(object first, object second);
+varargs string evaluate_deal(int deal_value, int real_value, int is_buying);
 int test_flag(int);
 
 private mixed for_sale;
@@ -77,19 +78,31 @@ float set_sell_divisor(float value)
 // This is how much they sell for at the shop
 float selling_cost(float cost)
 {
+   cost -= random(26);
+
    if (cost < MIN_VALUE) { return MIN_VALUE * cost_multiplier; }
 
    return cost * cost_multiplier;
 }
 
-//:FUNCTION buying_cost
-// Override if you want a different way to determine cost
+//:FUNCTION buying_value
+// Override if you want a different way to determine value
 // This is how much a player gets for selling something
-float buying_cost(float cost)
+float buying_value(float value)
 {
-   if (cost < MIN_VALUE) { return MIN_VALUE / sell_divisor; }
+   value += random(26);
 
-   return cost / sell_divisor;
+   if (value < MIN_VALUE)
+   {
+      if ((MIN_VALUE / sell_divisor) < 1)
+      {
+         return 1.0;
+      }
+
+      return MIN_VALUE / sell_divisor;
+   }
+
+   return value / sell_divisor;
 }
 
 private class item init_item(object ob)
@@ -284,41 +297,44 @@ int test_buy_from(object ob, object seller)
 //stored_items depending on check_uniqueness()
 void buy_object_from(object ob, object seller)
 {
-   float cost;
+   float value;
+   float value_adjustment = 0.0;
    mixed item;
    string file;
    mapping money;
 
    if (!test_buy_from(ob, seller)) { return; }
 
-   cost = to_float(ob->query_value());
+   value = to_float(ob->query_value());
 
    if ((seller->query_guild_level("merchant") || seller->query_guild_level("smuggler"))
       && seller->has_learned_skill("haggling") && (seller->query_toggle("haggle") == "on"))
    {
       int level = seller->query_guild_level("merchant") + seller->query_guild_level("smuggler");
       int rank = seller->query_skill("haggle") / 100;
-      float amount;
 
-      if (!seller->test_skill("haggle", level * 10) && ((50 - level - (rank * 3)) > random(100)))
+      if (!seller->test_skill("haggle", (level * 10) - ((this_object()->query_cha() - seller->query_cha()) * 10)))
       {
-         amount = level + (seller->query_cha() / 5.0) + rank - 50;
-
-         if (amount > 0) { amount = 0; }
+         value_adjustment += (level + (rank * 5.0));
       }
       else
       {
-         amount = (level / 2.0) + (rank * 2.5);
+         value_adjustment -= random(80 - level + 1);
 
-         if (amount < 1) { amount = 1; }
+         if (this_object()->query_cha() > seller->query_cha())
+         {
+            value_adjustment -= random(this_object()->query_cha() - seller->query_cha() + 1);
+         }
       }
-
-      cost += (cost * amount) / 100.0;
    }
 
-   cost = buying_cost(cost);
+   value_adjustment += (seller->query_cha() / 2.0);
 
-   if (cost < 0.01)
+   value += (value * value_adjustment) / 100.0;
+
+   value = buying_value(value);
+
+   if (value < 1.0)
    {
       write("You wouldn't get any " + currency_type + " for " + ob->the_short() + ".\n");
 
@@ -332,14 +348,16 @@ void buy_object_from(object ob, object seller)
       return;
    }
 
-   money = MONEY_D->calculate_denominations(cost, currency_type);
+   money = MONEY_D->calculate_denominations(value, currency_type);
 
    foreach (string type, int amount in money)
    {
       seller->add_money(type, amount);
    }
 
-   this_body()->my_action("$N $vsell a $o for " + MONEY_D->currency_to_string(money, currency_type) + ".\n", ob);
+   this_body()->my_action("$N $vsell a $o for " + MONEY_D->currency_to_string(money, currency_type)
+      + evaluate_deal(value, buying_value(ob->query_value()))
+      + ".\n", ob);
 
    this_body()->other_action("$N $vsell a $o.\n", ob);
 
@@ -468,6 +486,7 @@ int test_sell(object ob)
 protected int sell_object_to(object ob, object buyer)
 {
    float cost;
+   float cost_adjustment = 0.0;
    mapping array money;
 
    if (!test_sell(ob)) { return 0; }
@@ -479,23 +498,25 @@ protected int sell_object_to(object ob, object buyer)
    {
       int level = buyer->query_guild_level("merchant") + buyer->query_guild_level("smuggler");
       int rank = buyer->query_skill("haggle") / 100;
-      float amount;
 
-      if (!buyer->test_skill("haggle", level * 10) && ((50 - level - (rank * 3)) > random(100)))
+      if (!buyer->test_skill("haggle", (level * 10) - ((this_object()->query_cha() - buyer->query_cha()) * 10)))
       {
-         amount = level + (buyer->query_cha() / 5.0) + rank - 50;
-
-         if (amount > 0) { amount = 0; }
+         cost_adjustment += (level + (rank * 5.0));
       }
       else
       {
-         amount = (level / 2.0) + (rank * 2.5);
+         cost_adjustment -= random(80 - level + 1);
 
-         if (amount < 1) { amount = 1; }
+         if (this_object()->query_cha() > buyer->query_cha())
+         {
+            cost_adjustment -= random(this_object()->query_cha() - buyer->query_cha() + 1);
+         }
       }
-
-      cost -= (cost * amount) / 100.0;
    }
+
+   cost_adjustment += (buyer->query_cha() / 2.0);
+
+   cost -= (cost * cost_adjustment) / 100.0;
 
    cost = ceil(selling_cost(cost));
 
@@ -520,6 +541,7 @@ protected int sell_object_to(object ob, object buyer)
       + MONEY_D->currency_to_string(cost, currency_type)
       + (sizeof(money[1]) ? " and get "
       + MONEY_D->currency_to_string(money[1], currency_type) + " as change" : "")
+      + evaluate_deal(cost, ob->query_value(), 1)
       + ".", ob, this_object());
 
    buyer->other_action("$N $vpurchase $o.\n", ob);
@@ -704,6 +726,28 @@ int sort_short(object first, object second)
 void clear_stock()
 {
    stored_items = ([ ]);
+}
+
+varargs string evaluate_deal(int deal_value, int real_value, int is_buying)
+{
+   if (deal_value > (real_value * 1.25))
+   {
+      return ", and feel like you got " + (is_buying ? "ripped off" : "a great deal");
+   }
+   else if (deal_value > (real_value * 1.1))
+   {
+      return ", and feel like you got a " + (is_buying ? "bad deal" : "good deal");
+   }
+   else if (deal_value < (real_value * 0.75))
+   {
+      return ", and feel like you got " + (is_buying ? "a great deal" : "ripped off");
+   }
+   else if (deal_value < (real_value * 0.9))
+   {
+      return ", and feel like you got a " + (is_buying ? "good deal" : "bad deal");
+   }
+
+   return "";
 }
 
 void organize_stock()
