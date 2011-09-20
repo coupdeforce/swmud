@@ -2,7 +2,7 @@ inherit BLADE_BASE;
 
 void setup()
 {
-   set_id("Echani ritual brand", "brand");
+   set_id("Echani ritual brand", "ritual brand", "brand");
    set_long("Echani Firedancers use the double-bladed Ritual Brand in a dodging and slicing pattern which is so graceful that it looks more like a dance than combat.");
    set_combat_messages("combat-blade");
    set_damage_type("slashing", 20);

@@ -317,10 +317,12 @@ void got_entry(function when_done, string line)
    else if (line == "help stats")
    {
       write("\n" + read_file("/help/creation/race_stats") + "\n");
+      return;
    }
    else if (line == "help races")
    {
       write("\n" + read_file("/help/creation/races_general") + "\n");
+      return;
    }
 
    if (races[line])
@@ -333,7 +335,6 @@ void got_entry(function when_done, string line)
    if (sscanf(line, "help %s", line) && races[line])
    {
       write(races[line]->short_description());
-      return;
    }
    else
    {

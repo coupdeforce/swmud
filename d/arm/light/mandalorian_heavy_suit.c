@@ -3,8 +3,8 @@ inherit ARMOR_CUSTOM;
 
 void setup()
 {
+   set_id("Mandalorian heavy suit", "heavy suit", "suit", "armor");
    set_long("This heavier Mandalorian combat suit is most commonly used by elite scouts. Besides its strong defense and ability to absorb physical damage, the armor can also be outfitted with upgrades normally restricted to medium armor.");
-   set_id("Mandalorian heavy suit", "mandalorian", "suit", "armor");
 
    set_slots("torso", "right arm", "left arm", "right leg", "left leg");
 

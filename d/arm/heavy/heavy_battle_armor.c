@@ -3,7 +3,7 @@ inherit ARMOR_CUSTOM;
 
 void setup()
 {
-   set_id("heavy battle armor", "heavy", "battle", "armor");
+   set_id("heavy battle armor", "battle armor", "armor");
    set_long("More sturdy, yet more restrictive than conventional battle armor, heavy battle armor is excellent in situations where mobility is of secondary concern.");
 
    set_slots("torso", "right arm", "left arm", "right leg", "left leg");

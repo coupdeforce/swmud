@@ -4,7 +4,7 @@ inherit HOOD;
 
 void setup()
 {
-   set_id("Jedi robe", "jedi", "robe");
+   set_id("Jedi robe", "robe");
    set_long("A plain, light-brown robe made of machine-spun wool.  It has a hood, which can be worn up or down by raising or lowering it.");
 
    set_slots("torso", "left arm", "right arm", "left leg", "right leg");

@@ -3,7 +3,7 @@ inherit ARMOR_CUSTOM;
 
 void setup()
 {
-   set_id("Mandalorian assault armor", "mandalorian", "assault", "armor");
+   set_id("Mandalorian assault armor", "assault armor", "armor");
    set_long("This was the armor of the Mandalorian elite frontline troops, a sight that Republic soldiers were all too familiar with during the war.");
 
    set_slots("torso", "right arm", "left arm", "right leg", "left leg");

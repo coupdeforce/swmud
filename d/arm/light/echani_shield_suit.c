@@ -3,7 +3,7 @@ inherit ARMOR_CUSTOM;
 
 void setup()
 {
-   set_id("Echani shield suit", "echani", "shield", "suit", "armor");
+   set_id("Echani shield suit", "shield suit", "suit", "armor");
    set_long("The Echani combined their talents for energy shield design with their armorcrafting skills to develop this innovative combat suit.  It provides capable defense that is augmented with a low strength energy shield.");
 
    set_slots("torso", "right arm", "left arm", "right leg", "left leg");
