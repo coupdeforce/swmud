@@ -3,8 +3,8 @@ inherit ARMOR_CUSTOM;
 
 void setup()
 {
+   set_id("Mandalorian combat suit", "combat suit", "suit", "armor");
    set_long("Even the basic combat attire of the Mandalorians provides a formidable defense. The mesh of this armor absorbs some of the impact of physical blows despite its light weight.");
-   set_id("Mandalorian combat suit", "mandalorian", "suit", "armor");
 
    set_slots("torso", "right arm", "left arm", "right leg", "left leg");
 

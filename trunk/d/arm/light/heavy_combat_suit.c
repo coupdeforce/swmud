@@ -3,7 +3,7 @@ inherit ARMOR_CUSTOM;
 
 void setup()
 {
-   set_id("heavy combat suit", "suit", "armor");
+   set_id("heavy combat suit", "combat suit", "suit", "armor");
    set_long("This version of the combat suit offers more protection than the basic model. It is heavier overall and not quite as flexible, but many consider the tradeoffs worthwhile.");
 
    set_slots("torso", "right arm", "left arm", "right leg", "left leg");

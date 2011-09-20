@@ -3,7 +3,7 @@ inherit ARMOR_CUSTOM;
 
 void setup()
 {
-   set_id("Corellian powersuit", "corellian", "powersuit", "suit", "armor");
+   set_id("Corellian powersuit", "powersuit", "suit", "armor");
    set_long("Essentially an improved version of powered battle armor, the powersuit employs a system of servomotors to enhance the wearer's strength.");
 
    set_slots("torso", "right arm", "left arm", "right leg", "left leg");

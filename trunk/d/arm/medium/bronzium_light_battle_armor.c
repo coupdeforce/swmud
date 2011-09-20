@@ -3,7 +3,7 @@ inherit ARMOR_CUSTOM;
 
 void setup()
 {
-   set_id("bronzium light battle armor", "bronzium", "light", "battle", "armor");
+   set_id("bronzium light battle armor", "light battle armor", "battle armor", "armor");
    set_long("This molded armor is made of better materials than standard military issue, but is still relatively cheap and easy to mass-produce, making it ideal for light militias and the like.");
 
    set_slots("torso", "right arm", "left arm", "right leg", "left leg");

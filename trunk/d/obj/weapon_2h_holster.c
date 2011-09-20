@@ -1,9 +1,8 @@
-// Last edited by deforce on 03-03-2010
 inherit HOLSTER;
 
 void setup()
 {
-   set_id("large weapon holster", "large holster", "holster");
+   set_id("large weapon holster", "large holster", "weapon holster", "holster");
    set_long("A brown leather holster for a two-handed weapon, which you can wear on your back.");
    add_relation("holstered in");
    set_default_relation("holstered in");
