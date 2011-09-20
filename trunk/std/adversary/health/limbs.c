@@ -334,7 +334,6 @@ varargs int hurt_us(int amount, string limb, int limb_damage)
 
    if (amount > 0)
    {
-      object body = this_object();
       string output;
 
       update_health();
@@ -393,12 +392,12 @@ varargs int hurt_us(int amount, string limb, int limb_damage)
          limb = "";
       }
 
-      output = "hp: " + hit_points + " (-" + amount + ")";
+      output = "hp: " + hit_points + "/" + max_hit_points + " (-" + amount + ")";
       output += (strlen(limb) && limb_damage) ? ("  %^CYAN%^" + limb + "%^RESET%^: " + health[limb]->health + " (-" + limb_damage + ")") : "";
 
       output += "\n\n";
 
-      tell(body, output);
+      tell(this_object(), output);
 
       if (hit_points <= 0) { kill_us(); }
    }
@@ -499,7 +498,7 @@ int hurt_limb(string limb, int amount)
 //:FUNCTION heal_limb
 // protected void heal_limb(string limb, int x);
 // Heal us a specified amount, truncating at max_health.
-protected varargs void heal_limb(string limb, int x, int silent)
+protected varargs int heal_limb(string limb, int x, int silent)
 {
    class limb tmp = health[limb];
 
@@ -511,15 +510,22 @@ protected varargs void heal_limb(string limb, int x, int silent)
 
    if (tmp->health < tmp->max_health)
    {
+      int total_healed = tmp->health * -1;
       tmp->health += x;
 
       if (tmp->health > tmp->max_health) { tmp->health = tmp->max_health; }
+
+      total_healed += tmp->health;
 
       if (!silent)
       {
          write(limb + ": " + tmp->health + "/" + tmp->max_health + "\n");
       }
+
+      return total_healed;
    }
+
+   return 0;
 }
 
 //:FUNCTION is_limb
@@ -551,9 +557,9 @@ varargs int query_max_health(string limb)
 }
 
 //:FUNCTION heal_us
-// varargs void heal_us(int x, string limb, int enforce max);
+// varargs int heal_us(int x, string limb, int silent);
 // Heals all limbs by 'x' amount.
-varargs void heal_us(int x, string limb, int silent)
+varargs int heal_us(int x, string limb, int silent)
 {
    if (this_object()->is_body()) { this_object()->check_wizard_set("heal " + this_object()->short() + " by " + x, previous_object(-1)); }
 
@@ -562,20 +568,27 @@ varargs void heal_us(int x, string limb, int silent)
 //write("hit_points is " + hit_points + ", max_hit_points is " + max_hit_points + ", x is " + x + ", limb is " + limb + ", silent is " + silent + "\n");
       if (!stringp(hit_points) && (hit_points < max_hit_points))
       {
+         int total_healed = hit_points * -1;
          hit_points += x;
 
          if (hit_points > max_hit_points) { hit_points = max_hit_points; }
 
+         total_healed += hit_points;
+
          if (!silent)
          {
-            write("hp: " + hit_points + "/" + max_hit_points + "    dr: undrugged\n");
+            tell(this_object(), "hp: " + hit_points + "/" + max_hit_points + " (" + total_healed + ")\n");
          }
+
+         return total_healed;
       }
    }
    else
    {
       heal_limb(limb, x);
    }
+
+   return 0;
 }
 
 //:FUNCTION heal_all

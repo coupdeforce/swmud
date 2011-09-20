@@ -7,6 +7,7 @@ string component_type = "";
 mapping attribute_bonuses = ([ ]);
 mapping resistance_bonuses = ([ ]);
 mapping weakness_bonuses = ([ ]);
+mapping skill_bonuses = ([ ]);
 int to_hit_bonus = 0;
 int heal_bonus = 0;
 int armor_bonus = 0;
@@ -16,7 +17,7 @@ void mudlib_setup()
 {
    set_id("armor_component");
 
-   add_save(({ "name", "component_type", "attribute_bonuses", "resistance_bonuses", "weakness_bonuses", "to_hit_bonus", "heal_bonus", "armor_bonus", "body_armor_bonus" }));
+   add_save(({ "name", "component_type", "attribute_bonuses", "resistance_bonuses", "weakness_bonuses", "skill_bonuses", "to_hit_bonus", "heal_bonus", "armor_bonus", "body_armor_bonus" }));
 
    ::mudlib_setup();
 }
@@ -65,6 +66,16 @@ void set_weakness_bonuses(mapping values)
 mapping query_weakness_bonuses()
 {
    return weakness_bonuses;
+}
+
+void set_skill_bonuses(mapping values)
+{
+   skill_bonuses = values;
+}
+
+mapping query_skill_bonuses()
+{
+   return skill_bonuses;
 }
 
 void set_to_hit_bonus(int value)

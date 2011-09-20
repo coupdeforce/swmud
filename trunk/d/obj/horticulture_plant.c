@@ -19,7 +19,7 @@ varargs void setup(string set_type, int set_potency)
 
    planted_time = time();
 
-   set_id("seed in the ground", "seed", "horticulture_plant");
+   set_id("seed in the ground", "horticulture_plant");
    set_long("A seed that has been planted in the ground.  If you're looking at it then you must have x-ray vision.");
 
    set_attached(1);
@@ -34,14 +34,16 @@ void heart_beat()
    {
       set_heart_beat(0);
 
-      set_id("grown " + type + " plant", "plant", "horticulture_plant");
+      clear_id();
+      set_id("grown " + type + " plant", type + " plant", "plant", "horticulture_plant");
       set_long("A plant that is ready to be harvested by an Ithorian for its " + type + " properties.");
 
       growth_state++;
    }
    else if (((time() - planted_time) >= 60) && (growth_state == 1))
    {
-      set_id("small " + type + " plant", "plant", "horticulture_plant");
+      clear_id();
+      set_id("small " + type + " plant", type + " plant", "plant", "horticulture_plant");
       set_long("A small " + type + " plant that is still growing.");
 
       growth_state++;
@@ -50,7 +52,8 @@ void heart_beat()
    {
       tell_from_outside(environment(), "A small sprout emerges from the soil.\n");
 
-      set_id("small " + type + " plant sprout", "sprout", "horticulture_plant");
+      clear_id();
+      set_id("small " + type + " plant sprout", type + " plant sprout", type + " sprout", "sprout", "horticulture_plant");
       set_long("A small sprout that will grow into a " + type + " plant.");
 
       set_attached(0);
@@ -70,4 +73,16 @@ int ready_for_harvest()
    }
 
    return 0;
+}
+
+void do_check_obj()
+{
+   if (this_body()->query_race() == "ithorian")
+   {
+      write("You check " + this_object()->the_short() + " and discover that it has " + potency + "% of its maximum potency.\n");
+
+      return;
+   }
+
+   write("It looks like a normal " + type + " plant.\n");
 }

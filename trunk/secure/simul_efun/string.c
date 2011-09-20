@@ -338,7 +338,7 @@ string title_capitalize(string instring)
 
 string add_article(string str)
 {
-   switch (str[0])
+   switch (terminal_colour(str, ANSI_D->query_translations()[1], strlen(str))[0])
    {
       case 'A':
       case 'a':

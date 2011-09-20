@@ -1,5 +1,9 @@
-// Last edited by deforce on 05-17-2010
 int object_value = 0;
+
+void internal_setup()
+{
+   this_object()->add_save(({ "object_value" }));
+}
 
 void set_value(int value)
 {

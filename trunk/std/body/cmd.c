@@ -62,11 +62,32 @@ varargs nomask int do_game_command(string str, int debug)
    {
       if (debug) { return result; }
 
-      if (result[<1] != '\n') { result += "\n"; }
+      if (result[0..11] == "assume first")
+      {
+         string first_filename = result[12..];
+         result = "";
 
-      write(result);
+         foreach (object thing in objs)
+         {
+            if (file_name(thing) == first_filename)
+            {
+               result = parse_sentence(str, debug, ({ thing }));
+            }
+         }
 
-      return 1;
+         if (!strlen(result))
+         {
+            return 1;
+         }
+      }
+      else
+      {
+         if (result[<1] != '\n') { result += "\n"; }
+
+         write(result);
+
+         return 1;
+      }
    }
 
    // If the result is 0, the parser didn't know the verb so we keep looking.

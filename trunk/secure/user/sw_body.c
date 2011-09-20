@@ -335,8 +335,10 @@ void got_entry(function when_done, string line)
       write(races[line]->short_description());
       return;
    }
-
-   write("There is no race by that name.\n");
+   else
+   {
+      write("There is no race by that name.\n");
+   }
 }
 #endif /* USE_RACES */
 

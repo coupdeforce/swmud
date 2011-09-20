@@ -104,3 +104,5 @@ void add_seeds(string type, int amount)
       seeds = seeds[(sizeof(seeds) - max_seeds)..];
    }
 }
+
+int is_garden_here() { return 1; }
