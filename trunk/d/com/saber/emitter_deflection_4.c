@@ -2,7 +2,7 @@ inherit M_LIGHTSABER_COMPONENT;
 
 void setup()
 {
-   set_id("deflection emitter (IV)", "deflection", "emitter");
+   set_id("deflection emitter (IV)", "deflection emitter", "deflection", "emitter");
    set_long("Deflection emitters are optimized for use against blaster fire.");
    set_component_name("deflection");
    set_component_type("emitter");

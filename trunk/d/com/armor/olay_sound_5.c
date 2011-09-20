@@ -2,7 +2,7 @@ inherit M_ARMOR_COMPONENT;
 
 void setup()
 {
-   set_id("sound dampening (V)", "sound", "dampening", "olay", "overlay");
+   set_id("sound dampening (V)", "sound dampening", "sound dampening overlay", "olay", "overlay");
    set_long("Sound dampening overlays provide excellent protection against a sonic assault, as well as reducing damage from sonic attacks.");
    set_component_name("sound dampening");
    set_component_type("overlay");

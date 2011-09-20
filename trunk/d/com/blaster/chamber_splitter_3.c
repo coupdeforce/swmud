@@ -2,7 +2,7 @@ inherit M_BLASTER_COMPONENT;
 
 void setup()
 {
-   set_id("beam splitter (III)", "splitter", "chamber");
+   set_id("beam splitter (III)", "beam splitter", "splitter", "chamber");
    set_long("Beam splitters create two or more divergent beams from the same blaster, which increases the chance of hitting a target as well as the maximum damage potential while also increasing the base damage.");
    set_component_name("beam splitter");
    set_component_type("chamber");

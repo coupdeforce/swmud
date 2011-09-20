@@ -2,7 +2,7 @@ inherit M_BLASTER_COMPONENT;
 
 void setup()
 {
-   set_id("targeting scope (V)", "scope");
+   set_id("targeting scope (V)", "targeting scope", "scope");
    set_long("A targeting scope will increase the range and chance to hit.");
    set_component_name("targeting");
    set_component_type("scope");

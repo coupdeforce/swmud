@@ -2,7 +2,7 @@ inherit M_BLADE_COMPONENT;
 
 void setup()
 {
-   set_id("vibration energy cell (III)", "vibration", "ecell", "cell");
+   set_id("vibration energy cell (III)", "vibration energy cell", "energy cell", "vibration", "ecell", "cell");
    set_long("Vibration energy cells increase the amount of damage a weapon can inflict, but make them much harder to wield.");
    set_component_name("vibration");
    set_component_type("energy cell");

@@ -2,7 +2,7 @@ inherit M_BLASTER_COMPONENT;
 
 void setup()
 {
-   set_id("precision chamber (IV)", "chamber");
+   set_id("precision chamber (IV)", "precision chamber", "chamber");
    set_long("Precision chambers create a beam with much greater accuracy and range, while sacrificing the maximum damage potential.");
    set_component_name("precision chamber");
    set_component_type("chamber");

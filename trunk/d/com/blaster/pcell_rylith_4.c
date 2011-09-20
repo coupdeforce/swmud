@@ -2,7 +2,7 @@ inherit M_BLASTER_COMPONENT;
 
 void setup()
 {
-   set_id("rylith power cell (IV)", "pcell", "cell");
+   set_id("rylith power cell (IV)", "rylith power cell", "power cell", "pcell", "cell");
    set_long("Rylith power cells greatly increase the base damage of a blaster.");
    set_component_name("rylith");
    set_component_type("power cell");

@@ -2,7 +2,7 @@ inherit M_BLADE_COMPONENT;
 
 void setup()
 {
-   set_id("Zabrak grip (I)", "zabrak", "grip");
+   set_id("Zabrak grip (I)", "zabrak grip", "zabrak", "grip");
    set_long("This specialized grip has a reduced crossguard, increasing both accuracy and damage, but making it less useful for parrying.");
    set_component_name("zabrak");
    set_component_type("grip");

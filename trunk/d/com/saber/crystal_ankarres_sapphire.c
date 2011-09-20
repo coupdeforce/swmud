@@ -2,7 +2,7 @@ inherit M_LIGHTSABER_COMPONENT;
 
 void setup()
 {
-   set_id("Ankarres Sapphire", "ankarres", "sapphire", "crystal");
+   set_id("Ankarres Sapphire", "ankarres sapphire crystal", "ankarres crystal", "ankarres", "sapphire", "crystal");
    set_long("This crystal possesses legendary healing powers and numerous other effects.  It is one of the most potent crystals that can be used in lightsaber creation.");
    set_component_name("ankarres sapphire");
    set_component_type("focusing");
