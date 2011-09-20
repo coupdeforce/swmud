@@ -2,7 +2,7 @@ inherit M_ARMOR_COMPONENT;
 
 void setup()
 {
-   set_id("durasteel underlay (V)", "durasteel", "ulay", "underlay");
+   set_id("durasteel underlay (V)", "durasteel", "durasteel underlay", "ulay", "underlay");
    set_long("Durasteel underlays provide protection against physical attacks, while sacrificing some freedom of movement.");
    set_component_name("durasteel");
    set_component_type("underlay");

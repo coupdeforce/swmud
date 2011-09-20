@@ -2,7 +2,7 @@ inherit M_BLADE_COMPONENT;
 
 void setup()
 {
-   set_id("sonic discharge cell (V)", "sonic", "discharge", "ecell", "cell");
+   set_id("sonic discharge cell (V)", "sonic discharge cell", "discharge cell", "sonic", "discharge", "ecell", "cell");
    set_long("Sonic discharge energy cells release sound waves upon impact.  Although the sonic discharge makes the weapon unwieldy, few types of armor protect against this type of attack.");
    set_component_name("sonic discharge");
    set_component_type("energy cell");

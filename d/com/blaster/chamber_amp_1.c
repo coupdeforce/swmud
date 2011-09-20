@@ -2,7 +2,7 @@ inherit M_BLASTER_COMPONENT;
 
 void setup()
 {
-   set_id("amplifying chamber (I)", "amplifier", "chamber", "amp");
+   set_id("amplifying chamber (I)", "amplifying chamber", "amplifier", "chamber", "amp");
    set_long("Amplifying chambers increase the raw energy output of a blaster beam.");
    set_component_name("amplifying");
    set_component_type("chamber");

@@ -2,7 +2,7 @@ inherit M_LIGHTSABER_COMPONENT;
 
 void setup()
 {
-   set_id("disrupting emitter (II)", "disrupting", "emitter");
+   set_id("disrupting emitter (II)", "disrupting emitter", "disrupting", "emitter");
    set_long("Disrupting emitters create an unsteady beam which can wreak havoc on a victim's nervous system.");
    set_component_name("disrupting");
    set_component_type("emitter");

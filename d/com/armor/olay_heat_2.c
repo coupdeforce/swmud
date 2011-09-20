@@ -2,7 +2,7 @@ inherit M_ARMOR_COMPONENT;
 
 void setup()
 {
-   set_id("heat shielding (II)", "heat", "shielding", "olay", "overlay");
+   set_id("heat shielding (II)", "heat shielding", "heat shielding overlay", "olay", "overlay");
    set_long("Heat shielding reduces damage from fire and extreme heat.");
    set_component_name("heat");
    set_component_type("overlay");

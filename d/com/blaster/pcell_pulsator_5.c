@@ -2,7 +2,7 @@ inherit M_BLASTER_COMPONENT;
 
 void setup()
 {
-   set_id("power pulsator cell (V)", "pulsator", "pcell", "cell");
+   set_id("power pulsator cell (V)", "power pulsator cell", "pulsator", "pcell", "cell");
    set_long("Power pulsators increase the base damage of a blaster slightly, while maximizing its damage potential.");
    set_component_name("power pulsator");
    set_component_type("power cell");

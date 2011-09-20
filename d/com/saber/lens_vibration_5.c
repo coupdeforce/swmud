@@ -2,7 +2,7 @@ inherit M_LIGHTSABER_COMPONENT;
 
 void setup()
 {
-   set_id("vibration lens (V)", "vibration", "lens");
+   set_id("vibration lens (V)", "vibration lens", "vibration", "lens");
    set_long("This lens vibrates very rapidly, resulting in a less stable but more deadly beam.");
    set_component_name("vibration");
    set_component_type("lens");

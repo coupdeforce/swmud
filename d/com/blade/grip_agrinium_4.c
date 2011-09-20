@@ -2,7 +2,7 @@ inherit M_BLADE_COMPONENT;
 
 void setup()
 {
-   set_id("agrinium grip (IV)", "agrinium", "grip");
+   set_id("agrinium grip (IV)", "agrinium grip", "agrinium", "grip");
    set_long("This grip, made from the lighter mineral agrinium, balances a weapon towards the point, resulting in heftier swings.");
    set_component_name("agrinium");
    set_component_type("grip");

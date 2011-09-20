@@ -2,7 +2,7 @@ inherit M_BLASTER_COMPONENT;
 
 void setup()
 {
-   set_id("broadened chamber (I)", "chamber");
+   set_id("broadened chamber (I)", "broadened chamber", "chamber");
    set_long("Broadened chambers broaden the beam of blasters, increasing the chance to hit as well as the maximum damage potential.");
    set_component_name("broadened");
    set_component_type("chamber");
