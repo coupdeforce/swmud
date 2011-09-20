@@ -21,10 +21,17 @@ void do_look_at_obj(object ob, string name)
 
    if (sizeof(str) && (str[<1] != '\n')) { str += "\n"; }
 
-   if (ob->is_corpse() && this_body()->query_guild_level("bounty hunter")
-      && this_body()->has_learned_skill("inspect corpse") && !ob->has_inspection_failure())
+   if (ob->is_corpse())
    {
-      str += inspect_corpse(ob);
+      if (this_body()->query_guild_level("bounty hunter")
+         && this_body()->has_learned_skill("inspect corpse") && !ob->has_inspection_failure())
+      {
+         str += inspect_corpse(ob);
+      }
+      else
+      {
+         ob->set_inspection_failure();
+      }
    }
 
    write(str);

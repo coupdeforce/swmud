@@ -475,39 +475,47 @@ string parser_error_message(int kind, object ob, mixed arg, int flag)
          break;
       case ERR_AMBIG:
       {
-         array descs = unique_array(arg, (: parser_gen_pos($1, 1, 0) :));
-         string str;
-
-         if (sizeof(descs) == 1)
+         if (this_body()->query_shell_ob()->get_variable("assume first"))
          {
-            str = ret + "Which of ";
+            return "assume first" + file_name(arg[sizeof(arg) - 1]);
          }
          else
          {
-            str = ret + "Do you mean ";
-         }
+            array descs = unique_array(arg, (: parser_gen_pos($1, 1, 0) :));
+            string str;
 
-         for (int i = sizeof(descs) - 1; i >= 0; i--)
-         {
-            str += parser_gen_pos(descs[i][0], sizeof(descs[i]), 0) + " (" + (sizeof(descs) - i) + ")";
-
-            if (i > 1)
+            if (sizeof(descs) == 1)
             {
-               str += ", ";
+               str = ret + "Which of ";
             }
-            else if (i > 0)
+            else
             {
-               str += " or ";
+               str = ret + "Do you mean ";
             }
-         }
 
-         if (sizeof(descs) == 1)
-         {
-            return str + " do you mean?\n";
-         }
-         else
-         {
-            return str + "?\n";
+            for (int i = sizeof(descs) - 1; i >= 0; i--)
+            {
+//               str += parser_gen_pos(descs[i][0], sizeof(descs[i]), 0) + " (" + (sizeof(descs) - i) + ")";
+               str += parser_gen_pos(descs[i][0], sizeof(descs[i]), 0);
+
+               if (i > 1)
+               {
+                  str += ", ";
+               }
+               else if (i > 0)
+               {
+                  str += " or ";
+               }
+            }
+
+            if (sizeof(descs) == 1)
+            {
+               return str + " do you mean?\n";
+            }
+            else
+            {
+               return str + "?\n";
+            }
          }
       }
          break;

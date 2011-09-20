@@ -1,4 +1,3 @@
-// Last edited by deforce on 11-27-2007
 #include <hooks.h>
 inherit M_PARSING;
 
@@ -93,6 +92,9 @@ int do_verb_rule(string verb,string rule,mixed args...)
       this_object()->complex_exit_do_verb_rule(verb,rule,args...);
    }
 }
+
+mixed direct_compare_obj_to_obj(object ob1, object ob2) { return 1; }
+mixed indirect_compare_obj_to_obj(object ob1, object ob2) { return 1; }
 
 //:FUNCTION direct_get_obj
 //Do some checks for the parser when we are the OBJ of the "get OBJ" rule
@@ -196,7 +198,7 @@ mixed direct_eat_obj(object ob)
 {
    if (!default_object_checks()) { return 0; }
 
-   return "I don't think " + this_object()->the_short() + " would agree with you.\n";
+   return capitalize(this_object()->the_short()) + " doesn't seem to be edible.\n";
 }
 
 //### shouldn't these to only be in coins?

@@ -6,6 +6,7 @@ string name = "";
 string component_type = "";
 mapping damage_bonuses = ([ ]);
 mapping attribute_bonuses = ([ ]);
+mapping skill_bonuses = ([ ]);
 int to_hit_bonus = 0;
 int range_bonus = 0;
 int stun_bonus = 0;
@@ -22,7 +23,7 @@ void mudlib_setup()
 {
    set_id("blaster_component");
 
-   add_save(({ "name", "component_type", "damage_bonuses", "attribute_bonuses", "to_hit_bonus", "range_bonus", "stun_bonus", "slow_bonus", "tear_bonus", "parry_bonus", "heal_bonus", "armor_bonus", "critical_chance_bonus", "critical_multiplier_bonus", "max_ammo_recharge_time_bonus" }));
+   add_save(({ "name", "component_type", "damage_bonuses", "attribute_bonuses", "skill_bonuses", "to_hit_bonus", "range_bonus", "stun_bonus", "slow_bonus", "tear_bonus", "parry_bonus", "heal_bonus", "armor_bonus", "critical_chance_bonus", "critical_multiplier_bonus", "max_ammo_recharge_time_bonus" }));
 
    ::mudlib_setup();
 }
@@ -61,6 +62,16 @@ void set_attribute_bonuses(mapping values)
 mapping query_attribute_bonuses()
 {
    return attribute_bonuses;
+}
+
+void set_skill_bonuses(mapping values)
+{
+   skill_bonuses = values;
+}
+
+mapping query_skill_bonuses()
+{
+   return skill_bonuses;
 }
 
 void set_to_hit_bonus(int value)

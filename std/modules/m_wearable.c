@@ -383,11 +383,11 @@ void set_worn(int g)
       if (g)
       {
          skill_hooks[skill] = (: get_skill_bonus, skill :);
-         owner(this_object())->add_hook(skill + "_bonus", skill_hooks[skill]);
+         owner(this_object())->add_hook(skill + "_skill_bonus", skill_hooks[skill]);
       }
       else
       {
-         owner(this_object())->remove_hook(skill + "_bonus", skill_hooks[skill]);
+         owner(this_object())->remove_hook(skill + "_skill_bonus", skill_hooks[skill]);
       }
    }
 

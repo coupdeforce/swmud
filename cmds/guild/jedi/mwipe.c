@@ -86,7 +86,14 @@ mixed can_mwipe_liv()
 
 void do_mwipe_liv(object living)
 {
-   write("Wipe " + living->short() + "'s memory of what?\n");
+   if (living != this_body())
+   {
+      write("Wipe " + living->short() + "'s memory of what?\n");
+   }
+   else
+   {
+      write("You wipe your own memory, and forget all about that time you wiped your own memory.\n");
+   }
 }
 
 mixed can_mwipe()
