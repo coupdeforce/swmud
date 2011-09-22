@@ -190,12 +190,12 @@ int construct_object(object player, string product_name, string verb_used)
    {
       if (player->query_guild_level(requirement[0]) < requirement[1])
       {
-         write("You need more experience as a " + title_capitalize(requirement[0]) + " to construct a " + product_name + ".\n");
+         write("You need more experience as a " + title_capitalize(requirement[0]) + " to construct " + add_article(product_name) + ".\n");
          return 0;
       }
       else if (player->query_guild_rank(requirement[0]) < requirement[2])
       {
-         write("You require greater status as a " + title_capitalize(requirement[0]) + " to construct a " + product_name + ".\n");
+         write("You require greater status as a " + title_capitalize(requirement[0]) + " to construct " + add_article(product_name) + ".\n");
          return 0;
       }
    }
@@ -206,7 +206,7 @@ int construct_object(object player, string product_name, string verb_used)
    {
       if (player->query_skill(requirement[0]) < requirement[1])
       {
-         write("You require greater skill in " + SKILL_D->query_skill(requirement[0])[0] + " to construct a " + product_name + ".\n");
+         write("You require greater skill in " + SKILL_D->query_skill(requirement[0])[0] + " to construct " + add_article(product_name) + ".\n");
          return 0;
       }
    }
@@ -215,7 +215,7 @@ int construct_object(object player, string product_name, string verb_used)
    {
       if (!player->has_learned_construction(requirement))
       {
-         write("You have not learned how to construct a " + product_name + ".\n");
+         write("You have not learned how to construct " + add_article(product_name) + ".\n");
          return 0;
       }
    }
@@ -243,15 +243,15 @@ int construct_object(object player, string product_name, string verb_used)
          {
             if (location == 0)
             {
-               write("  a " + name + " in a room or in your inventory\n");
+               write("  " + add_article(name) + " in a room or in your inventory\n");
             }
             else if (location == 1)
             {
-               write("  a " + name + " in your inventory\n");
+               write("  " + add_article(name) + " in your inventory\n");
             }
             else if (location == 2)
             {
-               write("  a " + name + " in a room\n");
+               write("  " + add_article(name) + " in a room\n");
             }
          }
       }
@@ -261,10 +261,30 @@ int construct_object(object player, string product_name, string verb_used)
       return 0;
    }
 
-   destroy_ingredients(item_list);
+   if (CONSTRUCT_D->query_unique_constructor(internal_name))
+   {
+      if (load_object(file_name))
+      {
+         find_object(file_name)->construct_object(this_body());
 
-   product = clone_object(file_name);
-   product->move(player);
+         destroy_ingredients(item_list);
+      }
+      else
+      {
+         write("Unable to construct " + product_name + ", please tell a wizard.\n");
 
-   player->simple_action("$N carefully $vconstruct a $o.", product);
+         return 0;
+      }
+   }
+   else
+   {
+      product = clone_object(file_name);
+      product->move(player);
+
+      destroy_ingredients(item_list);
+
+      player->simple_action("$N carefully $vconstruct a $o.", product);
+   }
+
+   return 1;
 }

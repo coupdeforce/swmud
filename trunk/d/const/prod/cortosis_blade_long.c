@@ -4,7 +4,7 @@ inherit M_VALUABLE;
 
 void setup()
 {
-   set_id("long steel cortosis-weave blade", "steel blade", "long blade", "blade", "blade_long");
+   set_id("long steel cortosis-weave blade", "steel blade", "long blade", "cortosis-weave blade", "blade", "blade_long");
    set_long("A long steel blade with cortosis woven into it.");
 
    set_mass(1600);

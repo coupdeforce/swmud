@@ -6,13 +6,14 @@ inherit M_DAEMON_DATA;
 
 private mapping products = ([ ]); // Internal name : product name
 private mapping file_names = ([ ]); // Internal name : file name
+private mapping has_unique_constructor = ([ ]); // Internal name : 1 or 0 for unique constructor
 private mapping guild_requirements = ([ ]); // Internal name : ({ ({ guild_name, guild_level, rank }) })
 private mapping skill_requirements = ([ ]); // Internal name : ({ ({ skill_name, skill_level }) })
 private mapping learn_requirements = ([ ]); // Internal name : ({ learn_name })
 private mapping item_list = ([ ]); // Internal name : ({ ({ internal_name, item_name, number_required, number_destroyed }) })
 private mapping tool_list = ([ ]); // Internal name : ({ ({ internal_name, tool_name, location }) location is either 0 (anywhere), 1 (only inventory), 2 (only environment)
 
-int add_product(string internal_name, string product_name, string product_filename, mixed array product_guild_requirements, mixed array product_skill_requirements, string array product_learn_requirements, mixed array product_item_list, mixed array product_tool_list)
+int add_product(string internal_name, string product_name, string product_filename, int is_unique_constructor, mixed array product_guild_requirements, mixed array product_skill_requirements, string array product_learn_requirements, mixed array product_item_list, mixed array product_tool_list)
 {
    if ((products[internal_name] != product_name) && (member_array(product_name, values(products)) > -1))
    {
@@ -21,6 +22,7 @@ int add_product(string internal_name, string product_name, string product_filena
 
    products[internal_name] = product_name;
    file_names[internal_name] = product_filename;
+   has_unique_constructor[internal_name] = is_unique_constructor;
    guild_requirements[internal_name] = product_guild_requirements;
    skill_requirements[internal_name] = product_skill_requirements;
    learn_requirements[internal_name] = product_learn_requirements;
@@ -41,6 +43,7 @@ int remove_product(string name)
 
    map_delete(products, name);
    map_delete(file_names, name);
+   map_delete(has_unique_constructor, name);
    map_delete(guild_requirements, name);
    map_delete(skill_requirements, name);
    map_delete(learn_requirements, name);
@@ -73,6 +76,11 @@ string query_product_name(string name)
 string query_file_name(string name)
 {
    return file_names[name];
+}
+
+int query_unique_constructor(string name)
+{
+   return has_unique_constructor[name];
 }
 
 mixed array query_guild_requirements(string name)

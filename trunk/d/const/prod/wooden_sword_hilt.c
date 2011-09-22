@@ -4,7 +4,7 @@ inherit M_VALUABLE;
 
 void setup()
 {
-   set_id("wooden sword hilt", "wooden hilt", "hilt", "hilt_sword");
+   set_id("wooden sword hilt", "wooden hilt", "sword hilt", "hilt", "hilt_sword");
    set_long("A wooden sword hilt.");
 
    set_mass(150);

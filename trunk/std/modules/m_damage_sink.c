@@ -48,19 +48,25 @@ void decrease_class(int x)
 
       assign_flag(F_DAMAGED, 1);
 
-      if (test_flag(F_WORN) && (armor_class <= 0) || (durability <= 0))
+      if ((armor_class <= 0) || (durability <= 0))
       {
          armor_class = 0;
          durability = 0;
 
          assign_flag(F_BROKEN, 1);
-
-         tell(environment(), "%^ITEM_DAMAGE%^Your %^RESET%^" + this_object()->short() + "%^ITEM_DAMAGE%^ breaks from damage.%^RESET%^\n");
-         this_object()->do_remove();
       }
-      else if (test_flag(F_WORN))
+
+      if (test_flag(F_WORN))
       {
-         tell(environment(), "%^ITEM_DAMAGE%^You notice your %^RESET%^" + this_object()->short() + "%^ITEM_DAMAGE%^ becomes damaged.%^RESET%^\n");
+         if (durability <= 0)
+         {
+            tell(environment(), "%^ITEM_DAMAGE%^Your %^RESET%^" + this_object()->short() + "%^ITEM_DAMAGE%^ breaks from damage.%^RESET%^\n");
+            this_object()->do_remove();
+         }
+         else
+         {
+            tell(environment(), "%^ITEM_DAMAGE%^You notice your %^RESET%^" + this_object()->short() + "%^ITEM_DAMAGE%^ becomes damaged.%^RESET%^\n");
+         }
       }
    }
 }
