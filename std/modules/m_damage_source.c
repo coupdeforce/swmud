@@ -336,18 +336,24 @@ void decrease_class(int x)
 
    assign_flag(F_DAMAGED, 1);
 
-   if (owner && (durability <= 0))
+   if (durability <= 0)
    {
       durability = 0;
 
       assign_flag(F_BROKEN, 1);
-
-      tell(owner, "%^ITEM_DAMAGE%^You notice your %^RESET%^" + this_object()->short() + "%^ITEM_DAMAGE%^ breaks from damage.%^RESET%^\n");
-      this_object()->unwield();
    }
-   else if (owner)
+
+   if (owner)
    {
-      tell(owner, "%^ITEM_DAMAGE%^You notice your %^RESET%^" + this_object()->short() + "%^ITEM_DAMAGE%^ becomes damaged.%^RESET%^\n");
+      if (durability <= 0)
+      {
+         tell(owner, "%^ITEM_DAMAGE%^You notice your %^RESET%^" + this_object()->short() + "%^ITEM_DAMAGE%^ breaks from damage.%^RESET%^\n");
+         this_object()->unwield();
+      }
+      else
+      {
+         tell(owner, "%^ITEM_DAMAGE%^You notice your %^RESET%^" + this_object()->short() + "%^ITEM_DAMAGE%^ becomes damaged.%^RESET%^\n");
+      }
    }
 }
 

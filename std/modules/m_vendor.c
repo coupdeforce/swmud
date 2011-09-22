@@ -75,11 +75,21 @@ float set_sell_divisor(float value)
 
 //:FUNCTION selling_cost
 // multiply the objects value with cost_mult to get the cost for selling
-// This is how much they sell for at the shop
+// This is how much they actually sell for
 float selling_cost(float cost)
 {
    cost -= random(26);
 
+   if (cost < MIN_VALUE) { return MIN_VALUE * cost_multiplier; }
+
+   return cost * cost_multiplier;
+}
+
+//:FUNCTION list_selling_cost
+// multiply the objects value with cost_mult to get the cost for selling
+// This is how much something is listed to sell for
+float list_selling_cost(float cost)
+{
    if (cost < MIN_VALUE) { return MIN_VALUE * cost_multiplier; }
 
    return cost * cost_multiplier;
@@ -441,7 +451,7 @@ int query_items(string item, int flag)
 
    foreach (key in keys)
    {
-      cost = MONEY_D->currency_to_string( selling_cost(stored_items[key]->value), currency_type);
+      cost = MONEY_D->currency_to_string(list_selling_cost(stored_items[key]->value), currency_type);
 
       num = stored_items[key]->amount;
 

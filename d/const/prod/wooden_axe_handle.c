@@ -4,7 +4,7 @@ inherit M_VALUABLE;
 
 void setup()
 {
-   set_id("wooden axe handle", "wooden handle", "handle", "handle_axe");
+   set_id("wooden axe handle", "wooden handle", "axe handle", "handle", "handle_axe");
    set_long("A wooden axe handle.");
 
    set_mass(400);
