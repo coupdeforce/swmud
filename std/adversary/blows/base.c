@@ -36,6 +36,13 @@ int do_damage_event(class event_info evt)
          this_object()->cancel_buff("/d/buffs/force_stun");
       }
 
+      if (evt->data["poison"])
+      {
+         load_object("/std/effect/poison_damage");
+         new("/std/effect/poison_damage", evt->data["poison"])->move(evt->target);
+         map_delete(evt->data, "poison");
+      }
+
       foreach (string type in keys(evt->data))
       {
          damage += evt->data[type];

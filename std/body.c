@@ -148,6 +148,7 @@ void check_health()
 private nomask void init_stuff()
 {
    this_object()->reset_body_slots();
+   this_object()->set_combat_messages("combat-unarmed");
 
    foreach (object inv in all_inventory())
    {

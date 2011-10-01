@@ -139,7 +139,7 @@ void inject(object body, object syringe)
 
 //   this_body->targetted_action("$N $vinject $t with $p $o.", body, syringe);
 
-   load_object(effect);
+   load_object("/std/effect/" + effect);
    new("/std/effect/" + effect, body, this_body, syringe, rank, levels)->move(body);
 }
 
