@@ -1,4 +1,3 @@
-// Last edited by deforce on 10-11-2009
 inherit "/std/effect";
 
 int array damage_percent = ({ 1, 2, 3, 5, 8, 13, 22, 36, 60, 100 });
@@ -27,7 +26,7 @@ void do_effect(object ob)
       if (damage < (skill_rank * 2)) { damage = (skill_rank * 2); }
       else if (damage < 1) { damage = 1; }
 
-      ob->simple_action("$N $vfeel pain from the plague.");
+      ob->simple_action("$N $vreel in pain from being plagued.");
       ob->weaken_us(damage);
    }
    else

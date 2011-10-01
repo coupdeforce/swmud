@@ -1,4 +1,3 @@
-// Last modified by deforce on 04-21-2010
 // By Beek.  Merged in some functionality written by Valentino.
 
 inherit M_ACTIONS;
@@ -44,7 +43,10 @@ void set_options(mapping m)
 
 void add_options(mapping m)
 {
-   options += m;
+   foreach (string key in keys(m))
+   {
+      options[key] = m[key];
+   }
 }
 
 void set_responses(mapping m)
@@ -54,7 +56,10 @@ void set_responses(mapping m)
 
 void add_responses(mapping m)
 {
-   responses += m;
+   foreach (string key in keys(m))
+   {
+      responses[key] = m[key];
+   }
 }
 
 void add_option_block(string option, string player)
@@ -106,7 +111,13 @@ varargs void set_start(array a, object target)
 
 void add_start(array a)
 {
-   default_start += a;
+   foreach (string option_name in a)
+   {
+      if (member_array(option_name, default_start) == -1)
+      {
+         default_start += ({ option_name });
+      }
+   }
 }
 
 string get_current_player_name()

@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-22-2010
 inherit M_CONVERSATION;
 inherit M_MESSAGES;
 
@@ -23,6 +22,7 @@ mapping specialization_guilds = ([ ]);
 string not_guild_member = "You're not a member of the guild.";
 string got_stuff_to_teach = "Here's what I can teach you with your current ability";
 string nothing_to_teach = "There is nothing more I can teach you.";
+string need_more_skill = "Let me know when you're better at %s.";
 
 array get_trainable_guilds()
 {
@@ -49,6 +49,7 @@ void generate_training_options()
    object player = get_current_player();
    string array guild_options = ({ });
    string array ability_options = ({ });
+   string array begin_specialization_options = ({ });
 
    if (!player) { return; }
 
@@ -162,8 +163,7 @@ void generate_training_options()
       string player_specialization = player->query_guild_specialization(guild);
       int rank = player->query_guild_specialization_rank(guild, specialization);
 
-      if (!strlen(player_specialization)
-         || ((player_specialization == specialization) && (rank < 10)))
+      if (!strlen(player_specialization) || ((player_specialization == specialization) && (rank < 10)))
       {
          if (player_specialization == specialization)
          {
@@ -175,15 +175,27 @@ void generate_training_options()
             {
                add_options(([ "$specialize$" + specialization : "I would like to complete my " + title_capitalize(specialization) + " specialization in the " + title_capitalize(guild) + " guild." ]));
             }
+
+            add_start(({ "$specialize$" + specialization }));
          }
          else
          {
+            begin_specialization_options += ({ specialization });
+
             add_options(([ "$specialize$" + specialization : "I would like to begin the " + title_capitalize(specialization) + " specialization in the " + title_capitalize(guild) + " guild." ]));
          }
 
          add_responses(([ "$specialize$" + specialization : "$specialize$" + specialization + "@@@@" + "$clear$" ]));
-         add_start(({ "$specialize$" + specialization }));
       }
+   }
+
+   if (sizeof(begin_specialization_options))
+   {
+      add_options(([ "can specialize" : "Can you help me to begin a specialization?" ]));
+
+      add_responses(([ "can specialize" : "I am able to teach the following specializations: " + title_capitalize(implode(begin_specialization_options, ", ")) + "@@$specialize$" + implode(begin_specialization_options, ",$specialize$") + "@@$clear$" ]));
+
+      add_start(({ "can specialize" }));
    }
 }
 
@@ -191,11 +203,20 @@ void specialize(string specialization)
 {
    object player = get_current_player();
    string guild = specialization_guilds[specialization];
+   int rank = player->query_guild_specialization_rank(guild, specialization);
+
+   foreach (string skill in keys(trainable_specializations[specialization]))
+   {
+      if (player->query_skill(skill) < (trainable_specializations[specialization][skill] * (rank + 1)))
+      {
+         do_game_command("say " + sprintf(need_more_skill, SKILL_D->query_skill(skill)[0]));
+
+         return;
+      }
+   }
 
    if (player->query_guild_specialization(guild) == specialization)
    {
-      int rank = player->query_guild_specialization_rank(guild, specialization);
-
       if (rank < 10)
       {
          player->add_guild_specialization(guild, specialization);
@@ -378,4 +399,12 @@ void set_got_stuff_to_teach(string text)
 void set_nothing_to_teach(string text)
 {
    nothing_to_teach = text;
+}
+
+void set_need_more_skill(string text)
+{
+   if (strsrch(text, "%s") > -1)
+   {
+      need_more_skill = text;
+   }
 }

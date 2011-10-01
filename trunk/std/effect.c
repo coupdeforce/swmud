@@ -91,7 +91,7 @@ int check_for_existing()
       {
          ob->transfer_to_existing_effect(this_object());
 
-         tell(environment(), "Transferring new effect from " + file_name() + " to " + file_name(ob) + "\n");
+//         tell(environment(), "Transferring new effect from " + file_name() + " to " + file_name(ob) + "\n");
 
          return 1;
       }

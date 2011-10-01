@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-26-2010
 inherit "/std/effect";
 
 int poison_strength = 1;
@@ -44,11 +43,18 @@ void do_effect(object ob)
 
       constitution = ob->query_con();
 
-//      ob->simple_action("$N $vtake damage from poison.");
+      ob->simple_action("$N $vreel in pain from being poisoned.");
 
       ob->weaken_us((poison_strength / 2) + random((poison_strength / 2)) + 1);
 
-      poison_strength -= ((constitution / 10) + random((constitution / 10)) + 1);
+      if (poison_strength > (constitution / 10.0))
+      {
+         poison_strength -= ceil(constitution * 5.0 * poison_strength / 1000.0);
+      }
+      else
+      {
+         poison_strength = 0;
+      }
    }
 
    if (poison_strength <= 0)

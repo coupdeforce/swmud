@@ -2,7 +2,6 @@
 #include <playerflags.h>
 
 mixed call_hooks(string, int);
-string query_random_limb();
 object query_weapons();
 object query_target();
 object get_target();
@@ -71,22 +70,22 @@ void take_a_swing(object target)
 
          if (!test_skill(weapon->query_skill_used()) && (random(200) > (weapon->query_to_hit_bonus(target) + call_hooks("to_hit_bonus", HOOK_SUM))))
          {
-            add_event(target, weapon, query_random_limb(), "miss", this_object());
+            add_event(target, weapon, target->query_random_limb(), "miss", this_object());
          }
          else if (this_object()->is_unjustified_ithorian_target(target))
          {
             if (random(this_object()->query_skill(weapon->query_skill_used()) + weapon->query_to_hit_bonus(target) + call_hooks("to_hit_bonus", HOOK_SUM)) > random(2000 - weapon->query_to_hit_bonus(target) - call_hooks("to_hit_bonus", HOOK_SUM)))
             {
-               add_event(target, weapon, query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
+               add_event(target, weapon, target->query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
             }
             else
             {
-               add_event(target, weapon, query_random_limb(), "miss", this_object());
+               add_event(target, weapon, target->query_random_limb(), "miss", this_object());
             }
          }
          else
          {
-            add_event(target, weapon, query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
+            add_event(target, weapon, target->query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
          }
 
          handle_events();
@@ -141,22 +140,22 @@ void take_a_ranged_swing(object target)
 
          if (!test_skill(weapon->query_skill_used()) && (random(200) > (weapon->query_to_hit_bonus(target) + call_hooks("to_hit_bonus", HOOK_SUM))))
          {
-            add_event(target, weapon, query_random_limb(), "miss", this_object());
+            add_event(target, weapon, target->query_random_limb(), "miss", this_object());
          }
          else if (this_object()->is_unjustified_ithorian_target(target))
          {
             if (random(this_object()->query_skill(weapon->query_skill_used()) + weapon->query_to_hit_bonus(target) + call_hooks("to_hit_bonus", HOOK_SUM)) > random(2000 - weapon->query_to_hit_bonus(target) - call_hooks("to_hit_bonus", HOOK_SUM)))
             {
-               add_event(target, weapon, query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
+               add_event(target, weapon, target->query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
             }
             else
             {
-               add_event(target, weapon, query_random_limb(), "miss", this_object());
+               add_event(target, weapon, target->query_random_limb(), "miss", this_object());
             }
          }
          else
          {
-            add_event(target, weapon, query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
+            add_event(target, weapon, target->query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
          }
 
          handle_events();

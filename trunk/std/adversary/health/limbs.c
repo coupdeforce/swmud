@@ -10,6 +10,7 @@ void die();
 varargs void simple_action(string, string);
 void update_health();
 int hurt_limb(string limb, int amount);
+void set_body_slots(mapping slots);
 void save_me();
 int do_unwield(string);
 int query_asleep();
@@ -27,6 +28,13 @@ private int max_fatigue = 50;
 private int fatigue = 0;
 private int dead = 0;
 
+class slot
+{
+   string name;
+   int non_armor;
+   object item;
+}
+
 //:FUNCTION update_body_style
 // int update_body_style(string body_style);
 // Queries BODY_D for the number and type of limbs that will be used.
@@ -37,6 +45,7 @@ private int dead = 0;
 int update_body_style(string body_style)
 {
    mapping new_body = BODY_D->get_body(body_style);
+   mapping body_slots = ([ ]);
 
    if (!new_body) { return 0; }
 
@@ -47,9 +56,24 @@ int update_body_style(string body_style)
       return 0;
    }
 
-    health = new_body;
+   health = new_body;
 
-    return 1;
+   foreach (string slot in keys(new_body))
+   {
+      body_slots += ([ slot : new(class slot, name: slot, non_armor: 0, item: 0) ]);
+   }
+
+   if (body_style == "humanoid")
+   {
+      body_slots += ([ "neck" : new(class slot, name : "neck", non_armor : 1, item: 0) ]);
+      body_slots += ([ "waist" : new(class slot, name : "waist", non_armor : 1, item: 0) ]);
+      body_slots += ([ "back" : new(class slot, name : "back", non_armor : 1, item: 0) ]);
+      body_slots += ([ "chest" : new(class slot, name : "chest", non_armor : 1, item: 0) ]);
+   }
+
+   this_object()->set_body_slots(body_slots);
+
+   return 1;
 }
 
 int is_vital_limb(string limb)

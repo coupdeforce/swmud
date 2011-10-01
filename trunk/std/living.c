@@ -33,7 +33,15 @@ void mudlib_setup()
    assign_flag(F_FORCE_SENSITIVE, 1);
 }
 
-string query_name() { return name; }
+string query_name()
+{
+   if (strlen(name))
+   {
+      return name;
+   }
+
+   return this_object()->query_primary_id();
+}
 
 void set_name(string new_name)
 {

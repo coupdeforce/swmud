@@ -222,7 +222,7 @@ class event_info sink_modify_event(class event_info evt)
          damage_chance = (damage_before_sink - event_damage(evt)) / 2;
       }
 
-      if (damage_chance > random(100))
+      if ((damage_chance > random(100)) || evt->data["acid"])
       {
          // X in 100 chance of the armor getting damaged
          decrease_class(1);
