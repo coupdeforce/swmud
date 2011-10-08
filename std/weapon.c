@@ -10,6 +10,8 @@ int cortosis_weave = 0;
 void mudlib_setup()
 {
    object::mudlib_setup();
+   m_damage_source::mudlib_setup();
+   m_valuable::mudlib_setup();
    m_wieldable::mudlib_setup();
    add_id("weapon");
    add_save( ({ "cortosis_weave", "persist_flags" }) );

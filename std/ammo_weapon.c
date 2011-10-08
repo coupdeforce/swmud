@@ -19,8 +19,8 @@ private mapping out_of_ammo_damage_bonuses = ([ ]);
 
 void mudlib_setup()
 {
+   weapon::mudlib_setup();
    add_save(({ "ammo", "last_regen_time", "last_recharge_time", "ammo_capacity_bonus", "ammo_regen_rate_bonus", "max_ammo_recharge_time_bonus", "out_of_ammo_combat_messages", "out_of_ammo_damage_types", "out_of_ammo_damage_bonuses" }));
-   ::mudlib_setup();
 }
 
 int requires_ammo() { return 1; }

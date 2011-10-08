@@ -42,7 +42,7 @@ int compare_objects(object o1, object o2)
       && (o1->ob_state() == o2->ob_state())
       && (o1->get_attributes() == o2->get_attributes())
       && (o1->short() == o2->short())
-      && (o1->query_value() == o2->query_value())
+//      && (o1->query_value() == o2->query_value())
       && ((int)o2->ob_state() != -1));
 }
 

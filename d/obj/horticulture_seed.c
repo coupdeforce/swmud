@@ -7,8 +7,8 @@ private int potency = 20;
 
 void mudlib_setup()
 {
+   m_valuable::mudlib_setup();
    add_save(({ "type", "potency" }));
-   ::mudlib_setup();
 }
 
 varargs void setup(string set_type, int set_potency)

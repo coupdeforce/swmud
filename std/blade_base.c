@@ -2,9 +2,9 @@ inherit WEAPON;
 
 void mudlib_setup()
 {
+   weapon::mudlib_setup();
    add_id("blade");
    set_combat_messages("combat-blade");
-   ::mudlib_setup();
 }
 
 int is_blade() { return 1; }

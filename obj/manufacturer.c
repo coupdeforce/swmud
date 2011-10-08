@@ -1,31 +1,3 @@
-void destroy_quantity(object body, string ingredient, int amount)
-{
-   int count = 0;
-
-   foreach (object thing in all_inventory(body))
-   {
-      if (count >= amount) { return; }
-
-      if (thing->id(ingredient))
-      {
-         destruct(thing);
-
-         count++;
-      }
-   }
-}
-
-void destroy_ingredients(mixed ingredients)
-{
-   foreach (mixed ingredient in ingredients)
-   {
-      if (ingredient[2] > 0)
-      {
-         destroy_quantity(this_body(), ingredient[0], ingredient[2]);
-      }
-   }
-}
-
 int count_quantity(object body, string ingredient)
 {
    int count = 0;
@@ -39,24 +11,6 @@ int count_quantity(object body, string ingredient)
    }
 
    return count;
-}
-
-mapping check_items(mixed items)
-{
-   int number_needed;
-   mapping missing = ([ ]);
-
-   foreach (mixed item in items)
-   {
-      number_needed = item[2] - count_quantity(this_body(), item[0]);
-
-      if (number_needed > 0)
-      {
-         missing[item[1]] = number_needed;
-      }
-   }
-
-   return missing;
 }
 
 mapping check_tools(mixed tools)
@@ -84,18 +38,19 @@ mapping check_tools(mixed tools)
 
 void generate_list(object player)
 {
-   string array all_products = CONSTRUCT_D->query_product_internal_names();
+   string array all_products = MANUFACTURE_D->query_product_internal_names();
    string array product_list = ({ });
    mixed array guild_requirements;
    mixed array skill_requirements;
    string array learn_requirements;
+   string array race_requirements;
    int has_required;
 
    foreach (string name in all_products)
    {
-      guild_requirements = CONSTRUCT_D->query_guild_requirements(name);
-      skill_requirements = CONSTRUCT_D->query_skill_requirements(name);
-      learn_requirements = CONSTRUCT_D->query_learn_requirements(name);
+      guild_requirements = MANUFACTURE_D->query_guild_requirements(name);
+      skill_requirements = MANUFACTURE_D->query_skill_requirements(name);
+      learn_requirements = MANUFACTURE_D->query_learn_requirements(name);
       has_required = 1;
 
       foreach (mixed requirement in guild_requirements)
@@ -130,14 +85,19 @@ void generate_list(object player)
          }
       }
 
+      if (member_array(player->query_race(), MANUFACTURE_D->query_race_requirements(name)) == -1)
+      {
+         has_required = 0;
+      }
+
       if (!has_required) { continue; }
 
-      product_list += ({ CONSTRUCT_D->query_product_name(name) });
+      product_list += ({ MANUFACTURE_D->query_product_name(name) });
    }
 
    if (sizeof(product_list))
    {
-      write("You know how to construct the following products:\n");
+      write("You know how to manufacture the following products:\n");
 
       foreach (string name in sort_array(product_list, 1))
       {
@@ -146,13 +106,13 @@ void generate_list(object player)
    }
    else
    {
-      write("You don't seem to know how to construct anything yet.\n");
+      write("You don't seem to know how to manufacture anything yet.\n");
    }
 }
 
-int construct_object(object player, string product_name, string verb_used)
+int manufacture_object(object player, string product_name, string verb_used)
 {
-   string internal_name = CONSTRUCT_D->query_internal_name(product_name);
+   string internal_name = MANUFACTURE_D->query_internal_name(product_name);
    string file_name;
    mixed array guild_requirements;
    mixed array skill_requirements;
@@ -161,8 +121,6 @@ int construct_object(object player, string product_name, string verb_used)
    mixed array tool_list;
    mapping items_missing;
    mapping tools_missing;
-   int number_needed;
-   int number_destroyed;
    object array inventory;
    object product;
 
@@ -179,12 +137,12 @@ int construct_object(object player, string product_name, string verb_used)
       return 0;
    }
 
-   file_name = CONSTRUCT_D->query_file_name(internal_name);
-   guild_requirements = CONSTRUCT_D->query_guild_requirements(internal_name);
-   skill_requirements = CONSTRUCT_D->query_skill_requirements(internal_name);
-   learn_requirements = CONSTRUCT_D->query_learn_requirements(internal_name);
-   item_list = CONSTRUCT_D->query_item_list(internal_name);
-   tool_list = CONSTRUCT_D->query_tool_list(internal_name);
+   file_name = MANUFACTURE_D->query_file_name(internal_name);
+   guild_requirements = MANUFACTURE_D->query_guild_requirements(internal_name);
+   skill_requirements = MANUFACTURE_D->query_skill_requirements(internal_name);
+   learn_requirements = MANUFACTURE_D->query_learn_requirements(internal_name);
+   item_list = MANUFACTURE_D->query_item_list(internal_name);
+   tool_list = MANUFACTURE_D->query_tool_list(internal_name);
    inventory = all_inventory(player);
 
    // Required guild name: requirement[0]
@@ -194,12 +152,12 @@ int construct_object(object player, string product_name, string verb_used)
    {
       if (player->query_guild_level(requirement[0]) < requirement[1])
       {
-         write("You need more experience as a " + title_capitalize(requirement[0]) + " to construct " + add_article(product_name) + ".\n");
+         write("You need more experience as a " + title_capitalize(requirement[0]) + " to manufacture " + add_article(product_name) + ".\n");
          return 0;
       }
       else if (player->query_guild_rank(requirement[0]) < requirement[2])
       {
-         write("You require greater status as a " + title_capitalize(requirement[0]) + " to construct " + add_article(product_name) + ".\n");
+         write("You require greater status as a " + title_capitalize(requirement[0]) + " to manufacture " + add_article(product_name) + ".\n");
          return 0;
       }
    }
@@ -210,7 +168,7 @@ int construct_object(object player, string product_name, string verb_used)
    {
       if (player->query_skill(requirement[0]) < requirement[1])
       {
-         write("You require greater skill in " + SKILL_D->query_skill(requirement[0])[0] + " to construct " + add_article(product_name) + ".\n");
+         write("You require greater skill in " + SKILL_D->query_skill(requirement[0])[0] + " to manufacture " + add_article(product_name) + ".\n");
          return 0;
       }
    }
@@ -219,12 +177,17 @@ int construct_object(object player, string product_name, string verb_used)
    {
       if (!player->has_learned_construction(requirement))
       {
-         write("You have not learned how to construct " + add_article(product_name) + ".\n");
+         write("You have not learned how to manufacture " + add_article(product_name) + ".\n");
          return 0;
       }
    }
 
-   items_missing = check_items(item_list);
+   if (member_array(player->query_race(), MANUFACTURE_D->query_race_requirements(internal_name)) == -1)
+   {
+      write("Only a member of the following races can manufacture " + add_article(product_name) + ": " + title_capitalize(implode(MANUFACTURE_D->query_race_requirements(internal_name), ", ")) + ".\n");
+      return 0;
+   }
+
    tools_missing = check_tools(tool_list);
 
    if (sizeof(items_missing) || sizeof(tools_missing))
@@ -265,29 +228,15 @@ int construct_object(object player, string product_name, string verb_used)
       return 0;
    }
 
-   if (CONSTRUCT_D->query_unique_constructor(internal_name))
+   if (load_object(file_name))
    {
-      if (load_object(file_name))
-      {
-         find_object(file_name)->construct_object(this_body());
-
-         destroy_ingredients(item_list);
-      }
-      else
-      {
-         write("Unable to construct " + product_name + ", please tell a wizard.\n");
-
-         return 0;
-      }
+      new(file_name)->manufacture_object(this_body());
    }
    else
    {
-      product = clone_object(file_name);
-      product->move(player);
+      write("Unable to manufacture " + product_name + ", please tell a wizard.\n");
 
-      destroy_ingredients(item_list);
-
-      player->simple_action("$N carefully $vconstruct a $o.", product);
+      return 0;
    }
 
    return 1;

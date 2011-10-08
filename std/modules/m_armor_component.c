@@ -15,11 +15,11 @@ int body_armor_bonus = 0;
 
 void mudlib_setup()
 {
+   m_valuable::mudlib_setup();
+
    set_id("armor_component");
 
    add_save(({ "name", "component_type", "attribute_bonuses", "resistance_bonuses", "weakness_bonuses", "skill_bonuses", "to_hit_bonus", "heal_bonus", "armor_bonus", "body_armor_bonus" }));
-
-   ::mudlib_setup();
 }
 
 int is_armor_component() { return 1; }

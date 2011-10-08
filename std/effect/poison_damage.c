@@ -59,6 +59,8 @@ void do_effect(object ob)
 
    if (poison_strength <= 0)
    {
+      tell(ob, "You feel better as the last of the toxins are removed from your body.\n");
+
       destruct(this_object());
    }
 }

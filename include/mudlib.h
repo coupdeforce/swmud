@@ -290,8 +290,7 @@
 #define DATAEDIT                "/trans/obj/dataedit"
 
 #define CONSTRUCTOR             "/obj/constructor"
-#define PRODUCT                 "/obj/construct/product"
-#define SPECIAL_PROPERTIES      "/obj/construct/special_properties"
+#define MANUFACTURER            "/obj/manufacturer"
 
 #define ALIASMENU               "/obj/mudlib/aliasmenu"
 #define ANNO_MENU               "/obj/mudlib/annotationmenu"
