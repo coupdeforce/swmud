@@ -1,18 +1,17 @@
-// Last edited by deforce on 05-06-2010
 inherit WEAPON;
 inherit M_GETTABLE;
 inherit M_VALUABLE;
 
 #include <syringe_bottle.h>
 
-void add_save(string array);
-
 string type = "";
 int doses = 0;
 
-void internal_setup()
+void mudlib_setup()
 {
-   this_object()->add_save( ({ "type", "doses" }) );
+   weapon::mudlib_setup();
+   m_valuable::mudlib_setup();
+   add_save( ({ "type", "doses" }) );
 }
 
 void setup()

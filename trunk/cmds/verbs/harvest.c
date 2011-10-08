@@ -47,7 +47,7 @@ void do_harvest_obj(object ob)
                load_object("/d/obj/horticulture_herb");
                new("/d/obj/horticulture_herb", type, potency)->move(this_body());
 
-               this_body()->add_experience((this_body()->query_primary_level() > 0) ? (10 * this_body()->query_primary_level()) : 10);
+               this_body()->add_experience((this_body()->query_primary_level() > 0) ? (10 * array_sum(this_body()->query_guild_levels())) : 10);
 
                environment(this_body())->add_seed(type);
             }

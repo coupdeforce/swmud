@@ -21,7 +21,7 @@ private int durability = 1;
 private int max_durability = 1;
 private int chance_to_be_damaged = 5;
 
-void internal_setup()
+void mudlib_setup()
 {
    this_object()->add_save( ({ "armor_class", "max_armor_class", "armor_bonus", "durability", "max_durability", "chance_to_be_damaged", "resistances", "resistance_bonuses", "weaknesses", "weakness_bonuses", "persist_flags" }) );
 }

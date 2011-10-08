@@ -10,8 +10,9 @@ void hook_state(string, mixed, int);
 string worn_extra_short();
 int test_flag(int);
 void assign_flag(int, int);
-void add_save(string array);
 void clear_flag(int);
+void on_wear();
+void on_remove();
 
 private string array required_learned_skills = ({ });
 private mapping required_skills = ([ ]);
@@ -31,10 +32,11 @@ private nosave function to_hit_hook;
 private int heal_bonus = 0;
 private nosave function heal_hook;
 private int body_armor_bonus = 0;
+private string wear_relation = "over";
 
 void mudlib_setup()
 {
-   add_save(({ "body_size", "slots", "required_learned_skills", "required_skills", "required_guilds", "wear_message", "remove_message", "resize_count", "attribute_modifiers", "attribute_bonuses", "skill_bonuses", "to_hit_bonus", "heal_bonus", "body_armor_bonus", "persist_flags" }));
+   this_object()->add_save(({ "body_size", "slots", "required_learned_skills", "required_skills", "required_guilds", "wear_message", "remove_message", "resize_count", "attribute_modifiers", "attribute_bonuses", "skill_bonuses", "to_hit_bonus", "heal_bonus", "body_armor_bonus", "wear_relation", "persist_flags" }));
 }
 
 mixed ob_state()
@@ -82,6 +84,20 @@ string query_remove_message()
    return remove_message;
 }
 
+//:FUNCTION set_wear_relation
+//Sets the relation of the object to the player, such as "over" or "on".
+void set_wear_relation(string relation)
+{
+   wear_relation = relation;
+}
+
+//:FUNCTION query_wear_relation
+//Return the wear relation.
+string query_wear_relation()
+{
+   return wear_relation;
+}
+
 //:FUNCTION add_a_resize
 //Increments the resize counter when an object is resized.
 void add_a_resize()
@@ -100,7 +116,7 @@ int query_resized()
 //Set the body size that can wear it.
 void set_body_size(int value)
 {
-   if ((value >= 1) && (value <= 5))
+   if ((value >= 0) && (value <= 5))
    {
       body_size = value;
    }
@@ -190,20 +206,15 @@ string worn_attributes()
 
       if (sizeof(limbs) > 1)
       {
-         return " worn over " + implode(limbs[0..(sizeof(limbs) - 2)], ", ") +
+         return " worn " + wear_relation + " " + implode(limbs[0..(sizeof(limbs) - 2)], ", ") +
             " and " + limbs[sizeof(limbs) - 1];
       }
       else
       {
-         return " worn over " + limbs[0];
+         return " worn " + wear_relation + " " + limbs[0];
       }
    }
-   else if ((slots[0] == "neck") || (slots[0] == "waist"))
-   {
-      return " worn around " + slots[0];
-   }
-   else if (slots[0] == "back") { return " worn on " + slots[0]; }
-   else { return " worn over " + slots[0]; }
+   else { return " worn " + wear_relation + " " + environment()->query_slot_name(slots[0]); }
 }
 
 void set_attribute_modifiers(mapping modifiers)
@@ -392,6 +403,15 @@ void set_worn(int g)
    }
 
    owner(this_object())->refresh_stats();
+
+   if (g)
+   {
+      on_wear();
+   }
+   else
+   {
+      on_remove();
+   }
 }
 
 void remove()
@@ -438,6 +458,8 @@ void do_wear()
 
    set_worn(1);
    environment()->simple_action(query_wear_message(), this_object());
+
+   if (body_size < 1) { return; }
 
    if (environment()->query_body_size() < body_size)
    {
@@ -639,4 +661,12 @@ mixed direct_remove_obj()
    }
 
    return 1;
+}
+
+void on_wear()
+{
+}
+
+void on_remove()
+{
 }

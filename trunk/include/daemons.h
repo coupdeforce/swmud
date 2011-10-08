@@ -25,6 +25,7 @@
 #define IMUD_D          "/daemons/imud_d"
 #define LAST_LOGIN_D    "/daemons/last_login_d"
 #define MAILBOX_D       "/daemons/mailbox_d"
+#define MANUFACTURE_D   "/daemons/manufacture_d"
 #define MESSAGES_D      "/daemons/messages_d"
 #define METHOD_D        "/daemons/method_d"
 #define MONEY_D         "/daemons/money_d"

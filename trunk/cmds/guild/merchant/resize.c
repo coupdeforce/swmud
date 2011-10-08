@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-15-2010
 #include <flags.h>
 
 inherit M_INPUT;
@@ -74,6 +73,20 @@ void do_resize_obj(object thing)
    object this_body = this_body();
    int rank = this_body->query_skill("resize") / 100;
 
+   if (!thing->query_slots())
+   {
+      write("The " + thing->short() + " is not something that needs to be worn, and does not need to be a certain size.\n");
+
+      return;
+   }
+
+   if (thing->query_body_size() < 1)
+   {
+      write(capitalize(thing->the_short()) + " is not something that needs to be resized.\n");
+
+      return;
+   }
+
    if (thing->test_flag(F_WORN))
    {
       write("You'll need to remove " + thing->the_short() + " before attempting to resize it.\n");
@@ -98,13 +111,6 @@ void do_resize_obj(object thing)
       {
          write("You should try appreciating " + thing->short() + " for who " + thing->query_pronoun() + " is, without wanting " + thing->query_objective() + " to be any smaller or larger.\n");
       }
-
-      return;
-   }
-
-   if (!thing->query_slots())
-   {
-      write("The " + thing->short() + " is not something that needs to be worn, and does not need to be a certain size.\n");
 
       return;
    }

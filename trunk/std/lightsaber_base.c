@@ -10,11 +10,11 @@ string name_crystal = "";
 
 void mudlib_setup()
 {
+   weapon::mudlib_setup();
    add_id("lightsaber", "saber");
    set_combat_messages("combat-blade");
    set_skill_used("saber_combat");
    add_save(({ "color", "deflection_bonus", "alignment", "name_crystal" }));
-   ::mudlib_setup();
 }
 
 int is_lightsaber() { return 1; }

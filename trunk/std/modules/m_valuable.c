@@ -1,6 +1,6 @@
 int object_value = 0;
 
-void internal_setup()
+void mudlib_setup()
 {
    this_object()->add_save(({ "object_value" }));
 }

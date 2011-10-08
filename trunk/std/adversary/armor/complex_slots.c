@@ -25,6 +25,8 @@ private mapping body_slots = ([
    "waist" : new(class slot, name : "waist", non_armor : 1, item: 0),
    "back" : new(class slot, name : "back", non_armor : 1, item: 0),
    "chest" : new(class slot, name : "chest", non_armor : 1, item: 0),
+   "healing patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, item: 0),
+   "antidote patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, item: 0),
 ]);
 
 protected nomask void set_body_slots(mapping what)
@@ -119,6 +121,8 @@ nomask void reset_body_slots()
       "waist" : new(class slot, name : "waist", non_armor : 1, item: 0),
       "back" : new(class slot, name : "back", non_armor : 1, item: 0),
       "chest" : new(class slot, name : "chest", non_armor : 1, item: 0),
+      "healing patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, item: 0),
+      "antidote patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, item: 0),
    ]);
 }
 
@@ -128,6 +132,16 @@ nomask void reset_body_slots()
 nomask int has_body_slot(string what)
 {
    return !!body_slots[what];
+}
+
+string query_slot_name(string slot)
+{
+   if (body_slots[slot])
+   {
+      return body_slots[slot]->name;
+   }
+
+   return "unknown";
 }
 
 //:FUNCTION query_armor_slot

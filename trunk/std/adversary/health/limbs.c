@@ -63,13 +63,12 @@ int update_body_style(string body_style)
       body_slots += ([ slot : new(class slot, name: slot, non_armor: 0, item: 0) ]);
    }
 
-   if (body_style == "humanoid")
-   {
-      body_slots += ([ "neck" : new(class slot, name : "neck", non_armor : 1, item: 0) ]);
-      body_slots += ([ "waist" : new(class slot, name : "waist", non_armor : 1, item: 0) ]);
-      body_slots += ([ "back" : new(class slot, name : "back", non_armor : 1, item: 0) ]);
-      body_slots += ([ "chest" : new(class slot, name : "chest", non_armor : 1, item: 0) ]);
-   }
+   body_slots += ([ "neck" : new(class slot, name : "neck", non_armor : 1, item: 0),
+      "waist" : new(class slot, name : "waist", non_armor : 1, item: 0),
+      "back" : new(class slot, name : "back", non_armor : 1, item: 0),
+      "healing patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, item: 0),
+      "antidote patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, item: 0),
+      "chest" : new(class slot, name : "chest", non_armor : 1, item: 0) ]);
 
    this_object()->set_body_slots(body_slots);
 

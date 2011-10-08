@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-25-2010
 inherit OBJ;
 inherit M_GETTABLE;
 inherit M_VALUABLE;
@@ -12,6 +11,7 @@ private int doses_per_fill = 0;
 
 void mudlib_setup()
 {
+   m_valuable::mudlib_setup();
    add_save(({ "type", "fills", "max_fills", "doses_per_fill" }));
 }
 

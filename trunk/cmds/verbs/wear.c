@@ -1,4 +1,3 @@
-// Last modified by deforce on 03-14-2010
 inherit VERB_OB;
 
 void do_wear_obj(object ob)
@@ -38,46 +37,44 @@ void do_wear_obj(object ob)
       return 0;
    }
 
-   if ((this_body()->query_body_size() - ob->query_body_size()) > 1)
+   if (ob->query_body_size() > 0)
    {
-      write(capitalize(ob->the_short()) + " is too small for you to wear.\n");
+      if ((this_body()->query_body_size() - ob->query_body_size()) > 1)
+      {
+         write(capitalize(ob->the_short()) + " is too small for you to wear.\n");
 
-      return 0;
-   }
-   else if ((this_body()->query_body_size() - ob->query_body_size()) < -1)
-   {
-      write(capitalize(ob->the_short()) + " is too large for you to wear.\n");
+         return 0;
+      }
+      else if ((this_body()->query_body_size() - ob->query_body_size()) < -1)
+      {
+         write(capitalize(ob->the_short()) + " is too large for you to wear.\n");
 
-      return 0;
+         return 0;
+      }
    }
 
    if (ob->valid_wear()) { ob->do_wear(); }
 }
 
-void do_wear_str(string arg)
+void do_wear_obs(array info, string name)
 {
-   if (arg == "all")
+   if (name == "all")
    {
       foreach (object thing in all_inventory(this_body()))
       {
-         do_wear_obj(thing);
+         if (thing->valid_wear())
+         {
+            do_wear_obj(thing);
+         }
       }
    }
    else
    {
-      foreach (object thing in all_inventory(this_body()))
-      {
-         if (thing->id(arg))
-         {
-            do_wear_obj(thing);
-
-            return;
-         }
-      }
+      handle_obs(info, (: do_wear_obj :));
    }
 }
 
 void create()
 {
-   add_rules(({ "OBJ", "STR" }), ({ "put on" }));
+   add_rules(({ "OBJ", "OBS" }), ({ "put on" }));
 }

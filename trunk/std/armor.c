@@ -1,4 +1,3 @@
-// Last edited by deforce on 07-02-2008
 inherit OBJ;
 inherit M_WEARABLE;
 inherit M_GETTABLE;
@@ -12,6 +11,8 @@ inherit M_VALUABLE;
 void mudlib_setup()
 {
    object::mudlib_setup();
+   m_damage_sink::mudlib_setup();
+   m_valuable::mudlib_setup();
    m_wearable::mudlib_setup();
 //   add_id("armor", "armour");
    add_save( ({ "persist_flags" }) );

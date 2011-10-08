@@ -7,6 +7,7 @@ private int potency = 20;
 
 void mudlib_setup()
 {
+   m_valuable::mudlib_setup();
    add_save(({ "type", "potency" }));
 }
 

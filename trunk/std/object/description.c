@@ -76,7 +76,7 @@ string long()
 
    if (!this_object()->is_body())
    {
-      if (this_object()->query_body_size())
+      if (this_object()->query_body_size() > 0)
       {
          output += "It is " + size_description(this_object()->query_body_size()) + " sized.\n";
       }
