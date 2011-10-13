@@ -1,18 +1,3 @@
-int count_quantity(object body, string ingredient)
-{
-   int count = 0;
-
-   foreach (object thing in all_inventory(body))
-   {
-      if (thing->id(ingredient))
-      {
-         count++;
-      }
-   }
-
-   return count;
-}
-
 mapping check_tools(mixed tools)
 {
    mapping missing = ([ ]);
@@ -78,14 +63,14 @@ void generate_list(object player)
 
       foreach (string requirement in learn_requirements)
       {
-         if (!player->has_learned_construction(requirement))
+         if (!player->has_learned_manufacture(requirement))
          {
             has_required = 0;
             break;
          }
       }
 
-      if (member_array(player->query_race(), MANUFACTURE_D->query_race_requirements(name)) == -1)
+      if (sizeof(MANUFACTURE_D->query_race_requirements(name)) && (member_array(player->query_race(), MANUFACTURE_D->query_race_requirements(name)) == -1))
       {
          has_required = 0;
       }
@@ -175,14 +160,14 @@ int manufacture_object(object player, string product_name, string verb_used)
 
    foreach (string requirement in learn_requirements)
    {
-      if (!player->has_learned_construction(requirement))
+      if (!player->has_learned_manufacture(requirement))
       {
          write("You have not learned how to manufacture " + add_article(product_name) + ".\n");
          return 0;
       }
    }
 
-   if (member_array(player->query_race(), MANUFACTURE_D->query_race_requirements(internal_name)) == -1)
+   if (sizeof(MANUFACTURE_D->query_race_requirements(internal_name)) && (member_array(player->query_race(), MANUFACTURE_D->query_race_requirements(internal_name)) == -1))
    {
       write("Only a member of the following races can manufacture " + add_article(product_name) + ": " + title_capitalize(implode(MANUFACTURE_D->query_race_requirements(internal_name), ", ")) + ".\n");
       return 0;

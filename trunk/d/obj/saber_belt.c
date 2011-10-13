@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-03-2010
 inherit HOLSTER;
 
 void setup()
@@ -10,6 +9,7 @@ void setup()
    set_mass(400);
    set_max_capacity(200);
    set_slot("waist");
+   set_wear_relation("around");
 }
 
 int indirect_attach_obj_to_obj() { return 1; }

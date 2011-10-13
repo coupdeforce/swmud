@@ -4,7 +4,7 @@ inherit M_WEARABLE;
 
 int query_value();
 
-private string type = "healing";
+private string type = "bacta";
 private int total_healed = 0;
 private int heal_capacity = 1;
 private int heal_rate = 1;
@@ -33,9 +33,18 @@ void setup(string set_type, int set_heal_capacity, int set_heal_rate)
    }
 
    set_id(type + " patch", "patch");
-   set_long("A transdermal " + type + " patch, made by an Ithorian from organically grown " + type + " plants.  It will automatically release medication when it's needed, until its reservoir is depleted.");
-   set_mass(10);
-   set_slot(type + " patch");
+   set_long("A transdermal " + type + " patch, made by a physician from synthesized components.  It will automatically release medication when it's needed, until its reservoir is depleted.");
+   set_mass(300);
+
+   if (type == "bacta")
+   {
+      set_slot("healing patch");
+   }
+   else
+   {
+      set_slot(type + " patch");
+   }
+
    set_wear_relation("on");
    set_body_size(0);
 }
@@ -55,7 +64,7 @@ void heart_beat()
          heal_rate = heal_capacity - total_healed;
       }
 
-      if (type == "healing")
+      if (type == "bacta")
       {
          amount_healed = env->heal_us(heal_rate, "none");
 

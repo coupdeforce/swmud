@@ -1,10 +1,8 @@
-// Last edited by deforce on 03-03-2010
 inherit VERB_OB;
 
-object medpac;
+#include <medpac.h>
 
 void heal(object body);
-int all_healthy(object body);
 
 void do_minor_liv(object living)
 {
@@ -20,7 +18,7 @@ void do_minor_liv(object living)
       {
          write("You are unable to perform surgery while in combat.\n");
       }
-      else if ((living->query_health() >= living->query_max_health()) && all_healthy(living))
+      else if (living->all_healthy())
       {
          if (living == this_body)
          {
@@ -31,52 +29,39 @@ void do_minor_liv(object living)
             write(living->short() + " is already at full health.\n");
          }
       }
+      else if (check_medpacs_for_bacta(2) < 2)
+      {
+         write("You don't have enough bacta to perform minor surgery.\n");
+      }
       else
       {
-         foreach (object thing in all_inventory(this_body))
+         if (this_body->test_skill("surgery_minor", (this_body->query_guild_level("physician") * 16)))
          {
-            if (thing->is_surgery_medpac())
+            if (remove_bacta_from_medpacs(2) == 2)
             {
-               medpac = thing;
-               break;
-            }
-         }
-
-         if (!medpac)
-         {
-            foreach (object thing in all_inventory(environment(this_body)))
-            {
-               if (thing->is_surgery_medpac())
-               {
-                  medpac = thing;
-                  break;
-               }
-            }
-         }
-
-         if (medpac)
-         {
-            if (this_body->test_skill("surgery_minor", (this_body->query_guild_level("physician") * 16)))
-            {
-               destruct(medpac);
                heal(living);
-            }
-            else
-            {
-               if (this_body == living)
-               {
-                  this_body->my_action("$N $vfail to perform minor surgery on $r.");
-                  this_body->other_action("$N $vfail to perform minor surgery on $r.");
-               }
-               else
-               {
-                  this_body->targetted_action("$N $vfail to perform minor surgery on $t.", living);
-               }
             }
          }
          else
          {
-            write("Performing minor surgery requires a medpac.\n");
+            string waste = "";
+
+            if ((200 - (this_body->query_int() * 2)) > this_body->query_skill("surgery_minor"))
+            {
+               remove_bacta_from_medpacs(2);
+
+               waste = ", and $vwaste 2 vials of bacta";
+            }
+
+            if (this_body == living)
+            {
+               this_body->my_action("$N $vfail to perform minor surgery on $r" + waste + ".");
+               this_body->other_action("$N $vfail to perform minor surgery on $r" + waste + ".");
+            }
+            else
+            {
+               this_body->targetted_action("$N $vfail to perform minor surgery on $t" + waste + ".", living);
+            }
          }
       }
    }
@@ -94,14 +79,16 @@ void do_minor()
 void heal(object body)
 {
    object this_body = this_body();
-   int rank = to_int(floor(this_body->query_skill("surgery_minor") / 100.0));
-   int heal_amount = this_body->query_guild_level("physician")
-      + to_int(floor(this_body->query_int() / 5)) + to_int(floor(this_body->query_dex() / 5))
-      - (50 - (rank * 5));
+   int level = this_body->query_guild_level("physician");
+   int rank = this_body->query_skill("surgery_minor") / 100;
+   int spec = body->query_guild_specialization_rank("physician", "healing");
+   int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
+   int heal_amount = to_int(ceil((level + rank_spec + this_body->query_int()) * this_body->query_int() / 100.0));
+   int total_healed = 0;
 
-   if (heal_amount < (10 + (rank * 4)))
+   if (heal_amount < (level * rank / 10))
    {
-      heal_amount = 10 + (rank * 4);
+      heal_amount = level * rank / 10;
    }
 
    if (this_body == body)
@@ -114,28 +101,24 @@ void heal(object body)
       this_body->targetted_action("$N $vperform minor surgery on $t.", body);
    }
 
-   body->heal_us(heal_amount);
+   total_healed += body->heal_us(heal_amount);
 
    foreach (string limb in body->query_limbs())
    {
       if (body->query_limb_health(limb) < body->query_max_health(limb))
       {
-         body->heal_limb(limb, heal_amount);
+         total_healed += body->heal_us(heal_amount, limb);
       }
    }
-}
 
-int all_healthy(object body)
-{
-   foreach (string limb in body->query_limbs())
+   if ((this_body->query_race() == "ithorian") && (body != this_body))
    {
-      if (body->query_limb_health(limb) < body->query_max_health(limb))
-      {
-         return 0;
-      }
+      this_body->add_experience(total_healed * 5);
    }
-
-   return 1;
+   else
+   {
+      this_body->add_experience(total_healed);
+   }
 }
 
 void create()

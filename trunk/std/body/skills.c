@@ -11,6 +11,10 @@ mixed call_hooks(string, int);
 private mapping skills = ([ ]);
 private string array learned_skills = ({ });
 private string array blocked_skills = ({ });
+private string array learned_constructions = ({ });
+private string array blocked_constructions = ({ });
+private string array learned_manufactures = ({ });
+private string array blocked_manufactures = ({ });
 
 int set_skill(string skill, int skill_points, int training_points)
 {
@@ -164,11 +168,13 @@ void learn_skill(string skill, int value)
          my_skill[0] += 1;
          my_skill[1] = 0;
 
-         tell(this_object(), "%^SKILL_IMPROVE%^You feel better at " + skill_data[0] + "." + (my_skill[0] < 1000 ? "  You are now " + (my_skill[0] % 100) + "% towards Rank " + ((my_skill[0] / 100) + 1) + "." : "") + "%^RESET%^\n");
-
-         if (!(my_skill[0] % 100))
+         if (my_skill[0] % 100)
          {
-            tell(this_object(), "%^SKILL_IMPROVE%^You have acheived Rank " +  (my_skill[0] / 100) + " in " + skill_data[0] + ".%^RESET%^\n");
+            tell(this_object(), "%^SKILL_IMPROVE%^You feel better at " + skill_data[0] + "." + (my_skill[0] < 1000 ? "  You are now " + (my_skill[0] % 100) + "% towards Rank " + ((my_skill[0] / 100) + 1) + "." : "") + "%^RESET%^\n");
+         }
+         else
+         {
+            tell(this_object(), "%^SKILL_IMPROVE%^You feel better at " + skill_data[0] + ".  You have acheived Rank " +  (my_skill[0] / 100) + ".%^RESET%^\n");
          }
       }
 
@@ -337,6 +343,90 @@ string array query_learned_skills()
    return sort_array(learned_skills, 1);
 }
 
+void add_learned_construction(string construction)
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("add " + construction + " to " + this_object()->short() + "'s learned constructions", previous_object(-1)); }
+
+   if (member_array(construction, learned_constructions) == -1)
+   {
+      learned_constructions += ({ construction });
+   }
+}
+
+void remove_learned_construction(string construction)
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("remove " + construction + " from " + this_object()->short() + "'s learned constructions", previous_object(-1)); }
+
+   if (member_array(construction, learned_constructions) > -1)
+   {
+      learned_constructions -= ({ construction });
+   }
+}
+
+void reset_learned_constructions()
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("reset " + this_object()->short() + "'s learned constructions", previous_object(-1)); }
+
+   learned_constructions = ({ });
+}
+
+int has_learned_construction(string construction)
+{
+   if (member_array(construction, learned_constructions) > -1)
+   {
+      return 1;
+   }
+
+   return 0;
+}
+
+string array query_learned_constructions()
+{
+   return sort_array(learned_constructions, 1);
+}
+
+void add_learned_manufacture(string manufacture)
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("add " + manufacture + " to " + this_object()->short() + "'s learned manufactures", previous_object(-1)); }
+
+   if (member_array(manufacture, learned_manufactures) == -1)
+   {
+      learned_manufactures += ({ manufacture });
+   }
+}
+
+void remove_learned_manufacture(string manufacture)
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("remove " + manufacture + " from " + this_object()->short() + "'s learned manufactures", previous_object(-1)); }
+
+   if (member_array(manufacture, learned_manufactures) > -1)
+   {
+      learned_manufactures -= ({ manufacture });
+   }
+}
+
+void reset_learned_manufactures()
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("reset " + this_object()->short() + "'s learned manufactures", previous_object(-1)); }
+
+   learned_manufactures = ({ });
+}
+
+int has_learned_manufacture(string manufacture)
+{
+   if (member_array(manufacture, learned_manufactures) > -1)
+   {
+      return 1;
+   }
+
+   return 0;
+}
+
+string array query_learned_manufactures()
+{
+   return sort_array(learned_manufactures, 1);
+}
+
 void add_blocked_skill(string skill)
 {
    if (this_object()->is_body()) { this_object()->check_wizard_set("add " + skill + " to " + this_object()->short() + "'s blocked skills", previous_object(-1)); }
@@ -370,6 +460,76 @@ int has_blocked_skill(string skill)
 string array query_blocked_skills()
 {
    return sort_array(blocked_skills, 1);
+}
+
+void add_blocked_construction(string construction)
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("add " + construction + " to " + this_object()->short() + "'s blocked constructions", previous_object(-1)); }
+
+   if (member_array(construction, blocked_constructions) == -1)
+   {
+      blocked_constructions += ({ construction });
+   }
+}
+
+void remove_blocked_construction(string construction)
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("remove " + construction + " from " + this_object()->short() + "'s blocked constructions", previous_object(-1)); }
+
+   if (member_array(construction, blocked_constructions) > -1)
+   {
+      blocked_constructions -= ({ construction });
+   }
+}
+
+int has_blocked_construction(string construction)
+{
+   if (member_array(construction, blocked_constructions) > -1)
+   {
+      return 1;
+   }
+
+   return 0;
+}
+
+string array query_blocked_constructions()
+{
+   return sort_array(blocked_constructions, 1);
+}
+
+void add_blocked_manufacture(string manufacture)
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("add " + manufacture + " to " + this_object()->short() + "'s blocked manufactures", previous_object(-1)); }
+
+   if (member_array(manufacture, blocked_manufactures) == -1)
+   {
+      blocked_manufactures += ({ manufacture });
+   }
+}
+
+void remove_blocked_manufacture(string manufacture)
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("remove " + manufacture + " from " + this_object()->short() + "'s blocked manufactures", previous_object(-1)); }
+
+   if (member_array(manufacture, blocked_manufactures) > -1)
+   {
+      blocked_manufactures -= ({ manufacture });
+   }
+}
+
+int has_blocked_manufacture(string manufacture)
+{
+   if (member_array(manufacture, blocked_manufactures) > -1)
+   {
+      return 1;
+   }
+
+   return 0;
+}
+
+string array query_blocked_manufactures()
+{
+   return sort_array(blocked_manufactures, 1);
 }
 
 int get_skill_point_minimum(int adv_rate)
