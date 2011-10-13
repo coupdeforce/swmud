@@ -9,7 +9,7 @@ private mapping file_names = ([ ]); // Internal name : file name
 private mapping guild_requirements = ([ ]); // Internal name : ({ ({ guild_name, guild_level, rank }) })
 private mapping skill_requirements = ([ ]); // Internal name : ({ ({ skill_name, skill_level }) })
 private mapping learn_requirements = ([ ]); // Internal name : ({ learn_name })
-private mapping race_requirements = ([ ]); // Internal name : ({ learn_name })
+private mapping race_requirements = ([ ]); // Internal name : ({ race_name })
 private mapping item_list = ([ ]); // Internal name : ({ ({ internal_name, item_name }) })
 private mapping tool_list = ([ ]); // Internal name : ({ ({ internal_name, tool_name, location }) location is either 0 (anywhere), 1 (only inventory), 2 (only environment)
 

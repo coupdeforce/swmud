@@ -1,8 +1,9 @@
 inherit OBJ;
 inherit M_GETTABLE;
-inherit M_VALUABLE;
 
 #include <syringe_bottle.h>
+
+int query_value();
 
 private string type = keys(liquid_color)[0];
 private int fills = 0;
@@ -11,7 +12,6 @@ private int doses_per_fill = 0;
 
 void mudlib_setup()
 {
-   m_valuable::mudlib_setup();
    add_save(({ "type", "fills", "max_fills", "doses_per_fill" }));
 }
 
@@ -29,7 +29,6 @@ varargs void setup(string set_type)
    set_id("bottle of " + format_liquid_color(type) + " liquid", "bottle", type + " bottle");
    set_long("A bottle that contains " + format_liquid_color(type) + " liquid, which can be used with a syringe.");
    set_mass(10);
-   set_value(liquid_value[type]);
 }
 
 string query_liquid_type() { return type; }
@@ -47,7 +46,6 @@ int get_a_fill()
          clear_id();
          set_id("bottle", "empty bottle");
          set_long("An empty bottle.");
-         set_value(10);
       }
 
       return doses_per_fill;
@@ -91,6 +89,26 @@ string fill_description()
    }
 
    return "filled oddly, please tell a wizard";
+}
+
+int query_value_pure()
+{
+   return query_value();
+}
+
+int query_value()
+{
+   if (fills > 0)
+   {
+      return fills * liquid_value[type] / max_fills;
+   }
+
+   return 10;
+}
+
+int query_mass()
+{
+   return 300 + (fills * 500 / max_fills);
 }
 
 void do_check_obj()

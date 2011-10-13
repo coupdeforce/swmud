@@ -5,9 +5,13 @@ array get_trainable_guilds();
 mapping get_trainable_abilities();
 void set_trainable_guild(string guild);
 varargs void set_trainable_ability(string ability, mapping prerequisites);
+varargs void set_trainable_construction(string construction, mapping prerequisites);
+varargs void set_trainable_manufacture(string manufacture, mapping prerequisites);
 varargs void set_trainable_specialization(string guild, string specialization, mapping prerequisites);
 void generate_training_options();
 void train(string ability);
+void teach_construction(string construction);
+void teach_manufacture(string manufacture);
 varargs void advance(string guild);
 int guild_check();
 int query_jedi_alignment();
@@ -17,6 +21,8 @@ void set_nothing_to_teach(string text);
 
 array trainable_guilds = ({ });
 mapping trainable_abilities = ([ ]);
+mapping trainable_constructions = ([ ]);
+mapping trainable_manufactures = ([ ]);
 mapping trainable_specializations = ([ ]);
 mapping specialization_guilds = ([ ]);
 string not_guild_member = "You're not a member of the guild.";
@@ -34,6 +40,16 @@ mapping get_trainable_abilities()
    return trainable_abilities;
 }
 
+mapping get_trainable_constructions()
+{
+   return trainable_constructions;
+}
+
+mapping get_trainable_manufactures()
+{
+   return trainable_manufactures;
+}
+
 mapping get_trainable_specializations()
 {
    return trainable_specializations;
@@ -49,6 +65,8 @@ void generate_training_options()
    object player = get_current_player();
    string array guild_options = ({ });
    string array ability_options = ({ });
+   string array construction_options = ({ });
+   string array manufacture_options = ({ });
    string array begin_specialization_options = ({ });
 
    if (!player) { return; }
@@ -144,11 +162,96 @@ void generate_training_options()
       }
    }
 
+   foreach (string construction in sort_array(keys(trainable_constructions), 1))
+   {
+      if (member_array(construction, player->query_learned_constructions()) == -1)
+      {
+         if (sizeof(trainable_constructions[construction]))
+         {
+            int check = 1;
+
+            foreach (string prereq in keys(trainable_constructions[construction]))
+            {
+               if (player->query_skill(prereq) < trainable_constructions[construction][prereq])
+               {
+                  check = 0;
+               }
+            }
+
+            if (check)
+            {
+               construction_options += ({ construction });
+               add_options(([ "$learn construction$" + construction : "I would like to learn how to construct " + add_article(construction) + "." ]));
+               add_responses(([ "$learn construction$" + construction : "$learn construction$" + construction + "@@@@" + "$learn construction$" + construction ]));
+            }
+         }
+         else
+         {
+            construction_options += ({ construction });
+            add_options(([ "$learn construction$" + construction : "I would like to learn how to construct " + add_article(construction) + "." ]));
+            add_responses(([ "$learn construction$" + construction : "$learn construction$" + construction + "@@@@" + "$learn construction$" + construction ]));
+         }
+      }
+   }
+
+   foreach (string manufacture in sort_array(keys(trainable_manufactures), 1))
+   {
+      if (member_array(manufacture, player->query_learned_manufactures()) == -1)
+      {
+         if (sizeof(trainable_manufactures[manufacture]))
+         {
+            int check = 1;
+
+            foreach (string prereq in keys(trainable_manufactures[manufacture]))
+            {
+               if (player->query_skill(prereq) < trainable_manufactures[manufacture][prereq])
+               {
+                  check = 0;
+               }
+            }
+
+            if (check)
+            {
+               manufacture_options += ({ manufacture });
+               add_options(([ "$learn manufacture$" + manufacture : "I would like to learn how to manufacture " + add_article(manufacture) + "." ]));
+               add_responses(([ "$learn manufacture$" + manufacture : "$learn manufacture$" + manufacture + "@@@@" + "$learn manufacture$" + manufacture ]));
+            }
+         }
+         else
+         {
+            manufacture_options += ({ manufacture });
+            add_options(([ "$learn manufacture$" + manufacture : "I would like to learn how to manufacture " + add_article(manufacture) + "." ]));
+            add_responses(([ "$learn manufacture$" + manufacture : "$learn manufacture$" + manufacture + "@@@@" + "$learn manufacture$" + manufacture ]));
+         }
+      }
+   }
+
    add_options(([ "$ask_learn$" : "Is there anything you can teach me?" ]));
 
-   if (sizeof(ability_options))
+   if (sizeof(ability_options) || sizeof(construction_options) || sizeof(manufacture_options))
    {
-      add_responses(([ "$ask_learn$" : got_stuff_to_teach + ": " + title_capitalize(implode(ability_options, ", ")) + "@@$train$" + implode(ability_options, ",$train$") + "@@$clear$" ]));
+      string teach_list = "";
+      string response_list = "";
+
+      if (sizeof(ability_options))
+      {
+         teach_list += title_capitalize(implode(ability_options, ", "));
+         response_list += "$train$" + implode(ability_options, ",$train$");
+      }
+
+      if (sizeof(construction_options))
+      {
+         teach_list += (strlen(teach_list) ? ", " : "") + title_capitalize(implode(construction_options, " construction, ") + " construction");
+         response_list += (strlen(response_list) ? "," : "") + "$learn construction$" + implode(construction_options, ",$learn construction$");
+      }
+
+      if (sizeof(manufacture_options))
+      {
+         teach_list += (strlen(teach_list) ? ", " : "") + title_capitalize(implode(manufacture_options, " manufacturing, ") + " manufacturing");
+         response_list += (strlen(response_list) ? "," : "") + "$learn manufacture$" + implode(manufacture_options, ",$learn manufacture$");
+      }
+
+      add_responses(([ "$ask_learn$" : got_stuff_to_teach + ": " + teach_list + "@@" + response_list + "@@$clear$" ]));
    }
    else
    {
@@ -245,6 +348,20 @@ void train(string ability)
    get_current_player()->add_learned_skill(ability);
 
    targetted_action("$N teaches $t " + title_capitalize(ability) + ".", get_current_player());
+}
+
+void teach_construction(string construction)
+{
+   get_current_player()->add_learned_construction(construction);
+
+   targetted_action("$N teaches $t how to construct " + add_article(construction) + ".", get_current_player());
+}
+
+void teach_manufacture(string manufacture)
+{
+   get_current_player()->add_learned_manufacture(manufacture);
+
+   targetted_action("$N teaches $t how to manufacture " + add_article(manufacture) + ".", get_current_player());
 }
 
 void advance(string guild)
@@ -347,6 +464,32 @@ varargs void set_trainable_ability(string ability, mapping prerequisites)
 //         }
 
            trainable_abilities[ability] = prerequisites;
+      }
+   }
+}
+
+varargs void set_trainable_construction(string construction, mapping prerequisites)
+{
+   if (strlen(construction) && (member_array(construction, keys(trainable_constructions)) == -1))
+   {
+      trainable_constructions[construction] = ([ ]);
+
+      if (sizeof(prerequisites))
+      {
+           trainable_constructions[construction] = prerequisites;
+      }
+   }
+}
+
+varargs void set_trainable_manufacture(string manufacture, mapping prerequisites)
+{
+   if (strlen(manufacture) && (member_array(manufacture, keys(trainable_manufactures)) == -1))
+   {
+      trainable_manufactures[manufacture] = ([ ]);
+
+      if (sizeof(prerequisites))
+      {
+           trainable_manufactures[manufacture] = prerequisites;
       }
    }
 }

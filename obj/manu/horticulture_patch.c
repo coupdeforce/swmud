@@ -4,6 +4,7 @@ object this_body;
 object array herbs = ({ });
 string array herb_types = ({ });
 mapping usable_herbs = ([ ]);
+mapping average_potency = ([ ]);
 int rank = 0;
 int herb_limit = 0;
 
@@ -26,13 +27,11 @@ private void manufacture_patch(string type)
    int heal_capacity = 0;
    int heal_rate = 0;
    int mass = 0;
-   int value = 0;
    object product;
 
    foreach (object herb in usable_herbs[type])
    {
       mass += herb->query_mass();
-      value += herb->query_value();
       heal_capacity += herb->query_herb_potency();
 
       destruct(herb);
@@ -45,13 +44,14 @@ private void manufacture_patch(string type)
 //   product->set_id(type + " patch", "patch");
 //   product->set_long("A transdermal " + type + " patch, made by an Ithorian from organically grown " + type + " plants.  It will automatically release medication when it's needed, until its reservoir is depleted.");
    product->set_mass(mass);
-   product->set_value(value);
 //   product->set_slot(type + " patch");
    product->move(this_body);
 
    this_body->add_experience((this_body->query_primary_level() > 0) ? (sizeof(usable_herbs[type]) * array_sum(this_body->query_guild_levels())) : 10);
 
    this_body->simple_action("$N $vmanufacture " + add_article(type) + " patch.");
+
+   this_body->test_skill("horticulture");
 }
 
 private void type_input(string input)
@@ -77,7 +77,7 @@ void show_type_menu()
 
    for (int count = 0; count < sizeof(herb_types); count++)
    {
-      write(sprintf("%2i: %s (%i herbs)\n", (count + 1), herb_types[count], sizeof(usable_herbs[herb_types[count]])));
+      write(sprintf("%2i: %s (%i herbs at %i%% potency)\n", (count + 1), herb_types[count], sizeof(usable_herbs[herb_types[count]]), average_potency[herb_types[count]]));
    }
 
    modal_simple((: type_input :), "\nEnter blank or 'q' to cancel > ");
@@ -106,14 +106,21 @@ void manufacture_object(object body)
       {
          herb_types += ({ herb->query_herb_type() });
          usable_herbs[herb->query_herb_type()] = ({ });
+         average_potency[herb->query_herb_type()] = 0;
       }
 
       if (sizeof(usable_herbs[herb->query_herb_type()]) < herb_limit)
       {
          usable_herbs[herb->query_herb_type()] += ({ herb });
+         average_potency[herb->query_herb_type()] += herb->query_herb_potency();
       }
 
 //      write(herb->query_herb_potency() + "\n");
+   }
+
+   foreach (string type in keys(average_potency))
+   {
+      average_potency[type] /= sizeof(usable_herbs[type]);
    }
 
    show_type_menu();

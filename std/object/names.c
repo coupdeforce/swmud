@@ -27,7 +27,7 @@ void create()
    plurals = ({});
    adjs = ({});
    resync();
-   this_object()->add_save(({ "ids", "plurals", "adjs", "primary_id", "primary_adj", "internal_short", "long" }));
+   this_object()->add_save(({ "ids", "plurals", "adjs", "primary_id", "primary_adj", "internal_short", "long", "mass" }));
 }
 
 //:FUNCTION set_proper_name

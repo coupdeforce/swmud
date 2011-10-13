@@ -1,4 +1,3 @@
-// Last modified by deforce on 03-03-2010
 // Rust.
 
 private int mass;
@@ -33,8 +32,9 @@ int query_mass()
 float query_weight()
 {
    int gravity;
-   int mass = this_object()->query_mass();
-   float weight = (mass * 2.0) / 1000.0;
+   float weight;
+   mass = this_object()->query_mass();
+   weight = (mass * 2.0) / 1000.0;
 
    if (!environment(this_object()))
    {

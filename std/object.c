@@ -1,12 +1,8 @@
-// Last edited by deforce on 05-14-2010
 // object.c  about 1/2 Rust and 1/2 Nevyn
 // Modifications:  Peregrin@ZorkMUD (GUE),  Mar '94
-// Beek - rewrote the DISCARDED_MESSAGE stuff b/c it was hideously
-//      - inefficient.
-// Beek --- Added the OFFICIAL "what these vars should contain"
-// documentation
-// Sep 9 1994
-// Rust moved everything into modules.
+// Beek - rewrote the DISCARDED_MESSAGE stuff b/c it was hideously inefficient.
+// Beek --- Added the OFFICIAL "what these vars should contain" documentation
+// Sep 9 1994 - Rust moved everything into modules.
 
 #include <flags.h>
 #include <clean_up.h>
@@ -15,7 +11,6 @@ inherit BASE_OBJ;
 inherit M_SAVE;
 
 inherit __DIR__ "object/mass";
-
 inherit __DIR__ "object/light";		// before non_object
 inherit __DIR__ "object/properties";
 inherit __DIR__ "object/move";
@@ -24,8 +19,6 @@ inherit __DIR__ "object/hooks";
 inherit __DIR__ "object/msg_recipient";
 
 int test_unique();
-
-mapping lpscript_attributes;
 
 //:FUNCTION stat_me
 //return some debugging info about the state of the object
@@ -36,7 +29,6 @@ string stat_me()
 
    return result;
 }
-
 
 //:FUNCTION setup
 // This function is overloaded by area implementors.  Nothing in
@@ -142,21 +134,6 @@ void on_clone( mixed array args... )
 {
 }
 
-void set_lpscript_attributes(mapping attributes)
-{
-   if (base_name(previous_object())!=LPSCRIPT_D)
-   {
-      error("Access violation:  Illegal attempt to set_lpscript_attributes");
-   }
-
-   lpscript_attributes=attributes;
-}
-
-string array list_lpscript_attributes()
-{
-   return copy(keys(lpscript_attributes));
-}
-
 string query_unique_id()
 {
    string output = "";
@@ -169,10 +146,4 @@ string query_unique_id()
 void do_check_obj()
 {
    write("You check " + this_object()->the_short() + " and you detect nothing unusual.\n");
-}
-
-// LPScript stuff is kept here just so lots of the lib examples don't break
-mapping dump_lpscript_attributes()
-{
-   return copy(lpscript_attributes);
 }
