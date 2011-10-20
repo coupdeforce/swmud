@@ -102,11 +102,14 @@ void heart_beat()
       tell(env, "%^BOLD%^%^RED%^" + capitalize(this_object()->the_short()) + " has been used up.%^RESET%^\n");
 
       set_proper_name("used " + type + " patch");
+      set_id("used " + type + " patch", "used patch");
       set_long("A transdermal " + type + " patch that has been used up.");
       this_object()->do_remove();
       set_slots(({}));
    }
 }
+
+int deny_alter_value() { return 1; }
 
 void on_wear()
 {

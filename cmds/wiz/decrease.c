@@ -5,9 +5,9 @@ void do_decrease_obj(object thing)
 {
    if (thing->is_armor() || thing->is_weapon())
    {
-      thing->decrease_class(1);
+      thing->decrease_durability(1);
 
-      this_body()->simple_action("$N $vdecrease the class of $o.", thing);
+      this_body()->simple_action("$N $vdecrease the durability of $o by 1.", thing);
    }
 }
 
@@ -17,15 +17,15 @@ void do_decrease_obj_by_str(object thing, string value)
 
    if (thing->is_armor() || thing->is_weapon())
    {
-      thing->decrease_class(amount);
+      thing->decrease_durability(amount);
 
-      this_body()->simple_action("$N $vdecrease the class of $o by " + value + ".", thing);
+      this_body()->simple_action("$N $vdecrease the durability of $o by " + value + ".", thing);
    }
 }
 
 void do_decrease()
 {
-   write("Decrease the class of what?\n");
+   write("Decrease the durability of what?\n");
 }
 
 mixed can_decrease_obj() { return wizardp(this_body()); }

@@ -417,7 +417,7 @@ void advance(string guild)
    player->advance_guild_level(guild);
    player->subtract_experience(required_experience);
 
-   targetted_action("$N $vtrain $t more in the " + title_capitalize(guild) + " guild.", get_current_player());
+   targetted_action("$N " + ((player->query_guild_level(guild) >= 2) ? "$vtrain $t more" : "$vbegin $p1 training") + " in the " + title_capitalize(guild) + " guild.", get_current_player());
 
    tell(player, "You advance to level " + player->query_guild_level(guild) + " in " + title_capitalize(guild) + " at the cost of " + required_experience + " experience.\n");
 

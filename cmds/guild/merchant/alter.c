@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-03-2010
 #include <flags.h>
 
 inherit M_INPUT;
@@ -47,6 +46,12 @@ void do_alter_wrd_of_obj(string type, object thing)
 
          return;
       }
+      else if (thing->deny_alter_weight())
+      {
+         write("It seems impossible to alter the weight of " + thing->the_short() + ".\n");
+
+         return;
+      }
    }
    else if (type == "value")
    {
@@ -72,6 +77,12 @@ void do_alter_wrd_of_obj(string type, object thing)
       else if (!thing->query_value())
       {
          write(capitalize(thing->the_short()) + " is already worthless enough.\n");
+
+         return;
+      }
+      else if (thing->deny_alter_value())
+      {
+         write("It seems impossible to alter the value of " + thing->the_short() + ".\n");
 
          return;
       }
@@ -179,9 +190,9 @@ void do_alter()
 void alter(string type, object thing)
 {
    object this_body = this_body();
-   float level = this_body->query_guild_level("merchant");
-   int rank = to_int(floor(this_body->query_skill("alter") / 100.0));
-   int adjustment = (level / 2) + rank;
+   int level = this_body->query_guild_level("merchant");
+   int rank = this_body->query_skill("alter") / 100;
+   int adjustment = (level * 5 / 10) + rank;
 
    if (adjustment < 1)
    {
@@ -191,16 +202,19 @@ void alter(string type, object thing)
    if (type == "capacity")
    {
       thing->set_max_capacity(thing->query_max_capacity() + to_int(ceil(thing->query_max_capacity() * adjustment / 100.0)));
+      thing->set_customize_record("altered capacity", this_body->short());
       thing->assign_flag(F_ALTERED_CAPACITY, 1);
    }
    else if (type == "value")
    {
       thing->set_value(thing->query_value() + to_int(ceil(thing->query_value() * adjustment / 100.0)));
+      thing->set_customize_record("altered value", this_body->short());
       thing->assign_flag(F_ALTERED_VALUE, 1);
    }
    else if (type == "weight")
    {
       thing->set_mass(thing->query_mass() - to_int(ceil(thing->query_mass() * adjustment / 100.0)));
+      thing->set_customize_record("altered weight", this_body->short());
       thing->assign_flag(F_ALTERED_WEIGHT, 1);
    }
 
@@ -281,23 +295,43 @@ void alter_name(object thing)
    modal_simple((: number_input, ids, thing :), "\nEnter blank or 'q' to cancel > ");
 }
 
+int generalize_elapsed_time(int time)
+{
+   if (time > 60)
+   {
+      if (time > 3600)
+      {
+         if (time > 86400)
+         {
+            return time / 86400 * 86400;
+         }
+
+         return time / 3600 * 3600;
+      }
+
+      return time / 60 * 60;
+   }
+
+   return time;
+}
+
 void check_status(object thing)
 {
    string status = "";
 
-   if (thing->test_flag(F_ALTERED_WEIGHT))
+   if (thing->test_flag(F_ALTERED_WEIGHT) && thing->query_customize_record("altered weight"))
    {
-      status += "You notice that the weight of " + thing->the_short() + " has been altered.\n";
+      status += "The weight of " + thing->the_short() + " was altered by %^BOLD%^" + thing->query_customize_record("altered weight") + "%^RESET%^ about " + convert_time(generalize_elapsed_time(time() - thing->query_customize_time("altered weight")), 0) + " ago.\n";
    }
 
-   if (thing->test_flag(F_ALTERED_VALUE))
+   if (thing->test_flag(F_ALTERED_VALUE) && thing->query_customize_record("altered value"))
    {
-      status += "You notice that the value of " + thing->the_short() + " has been altered.\n";
+      status += "The value of " + thing->the_short() + " was altered by %^BOLD%^" + thing->query_customize_record("altered value") + "%^RESET%^ about " + convert_time(generalize_elapsed_time(time() - thing->query_customize_time("altered value")), 0) + " ago.\n";
    }
 
-   if (thing->test_flag(F_ALTERED_CAPACITY))
+   if (thing->test_flag(F_ALTERED_CAPACITY) && thing->query_customize_record("altered capacity"))
    {
-      status += "You notice that the capacity of " + thing->the_short() + " has been altered.\n";
+      status += "The capacity of " + thing->the_short() + " was altered by %^BOLD%^" + thing->query_customize_record("altered capacity") + "%^RESET%^ about " + convert_time(generalize_elapsed_time(time() - thing->query_customize_time("altered capacity")), 0) + " ago.\n";
    }
 
    if (thing->test_flag(F_ALTERED))

@@ -44,7 +44,9 @@ void manufacture_object(object body)
 
    if (remove_bacta_from_medpacs(bacta_count) == bacta_count)
    {
-      clone_object("/d/obj/transdermal_patch", "bacta", heal_capacity, heal_rate)->move(body);
+      object product = clone_object("/d/obj/transdermal_patch", "bacta", heal_capacity, heal_rate);
+      product->set_customize_record("manufactured", body->short());
+      product->move(body);
 
       body->my_action("$N $vmanufacture a bacta patch from " + bacta_count + " vials of bacta, at " + heal_rate + "% of standard potency.");
       body->other_action("$N $vmanufacture a bacta patch.");

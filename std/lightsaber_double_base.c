@@ -4,8 +4,8 @@ int blade_setup = 2;
 
 void mudlib_setup()
 {
-   lightsaber_base::mudlib_setup();
    add_id("double-bladed lightsaber", "double saber", "dsaber");
+   lightsaber_base::mudlib_setup();
    set("two_hands", 1);
    set_weapon_speed(2);
    set_to_hit_base(-25);

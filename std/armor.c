@@ -2,6 +2,7 @@ inherit OBJ;
 inherit M_WEARABLE;
 inherit M_GETTABLE;
 inherit M_DAMAGE_SINK;
+inherit M_DURABILITY;
 inherit M_VALUABLE;
 
 //:MODULE
@@ -12,6 +13,7 @@ void mudlib_setup()
 {
    object::mudlib_setup();
    m_damage_sink::mudlib_setup();
+   m_durability::mudlib_setup();
    m_valuable::mudlib_setup();
    m_wearable::mudlib_setup();
 //   add_id("armor", "armour");

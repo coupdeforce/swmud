@@ -232,9 +232,9 @@ void concentration(object thing, object location, string location_name, object d
 
       this_body->handle_events();
 
-      if (thing->query_durability() || !thing->test_flag(F_BROKEN))
+      if (!thing->test_flag(F_BROKEN))
       {
-         thing->decrease_class(random(damage));
+         thing->decrease_durability(random(damage));
 
          if (destination->is_adversary())
          {
@@ -243,11 +243,6 @@ void concentration(object thing, object location, string location_name, object d
          else
          {
             thing->move(destination);
-         }
-
-         if (!thing->query_durability() && !thing->test_flag(F_BROKEN))
-         {
-            thing->assign_flag(F_BROKEN, 1);
          }
       }
       else

@@ -1,11 +1,13 @@
-// Last edited by deforce on 04-06-2010
 // Verpine racial skill
 #include <flags.h>
 
 inherit VERB_OB;
 
 void test_flag(int);
+assign_flag(int, int);
+void clear_flag(int);
 void adjust(object thing);
+int generalize_elapsed_time(int time);
 
 void do_adjust_obj(object thing)
 {
@@ -22,9 +24,21 @@ void do_adjust_obj(object thing)
          write("If you want to adjust yourself, you could try installing implants instead.\n");
       }
    }
-   else if (!thing->test_flag(F_ADJUSTED))
+   else if (thing->test_flag(F_BROKEN))
    {
-      this_body->add_skill_delay(8);
+      write("The " + thing->short() + " is broken and cannot be adjusted.\n");
+   }
+   else if (thing->test_flag(F_ADJUSTED) && thing->query_customize_record("adjusted"))
+   {
+      write("The " + thing->short() + " was adjusted by %^BOLD%^" + thing->query_customize_record("adjusted") + "%^RESET%^ about " + convert_time(generalize_elapsed_time(time() - thing->query_customize_time("adjusted")), 0) + " ago.\n");
+   }
+   else if (!thing->is_armor() && !thing->is_weapon())
+   {
+      write("The " + thing->short() + " is not something that can be adjusted.\n");
+   }
+   else
+   {
+//      this_body->add_skill_delay(8);
 
       if (this_body->test_skill("adjust", this_body->query_primary_level() * 10))
       {
@@ -36,13 +50,9 @@ void do_adjust_obj(object thing)
 
          if (thing->is_armor() || thing->is_weapon())
          {
-            thing->decrease_class(1);
+            thing->decrease_durability(1);
          }
       }
-   }
-   else
-   {
-      write("The " + thing->short() + " has already been adjusted.\n");
    }
 }
 
@@ -88,17 +98,48 @@ mixed can_adjust()
    return 1;
 }
 
+int generalize_elapsed_time(int time)
+{
+   if (time > 60)
+   {
+      if (time > 3600)
+      {
+         if (time > 86400)
+         {
+            return time / 86400 * 86400;
+         }
+
+         return time / 3600 * 3600;
+      }
+
+      return time / 60 * 60;
+   }
+
+   return time;
+}
+
 void adjust(object thing)
 {
-   int skill = this_body()->query_skill("adjust");
-   int rank = skill / 100;
-   int amount = (random(skill) == 0 ? -1 : 0) + (skill > random(100) ? 1 : 0) + ((rank * 10) > random(100) ? 1 : 0);
+   int rank = this_body()->query_skill("adjust") / 100;
+   int amount = rank + random(11 - rank);
 
-   if (amount < 0) { amount = 0; }
+   if (amount < 1) { amount = 1; }
 
-   this_body()->other_action("$N $vstudy $o for a moment, and adjust things in various places.", thing);
+   this_body()->my_action("$N $vstudy $o for a moment, and adjust things in various places.", thing);
 
-   thing->do_adjust(amount);
+   if (thing->is_weapon() || thing->is_armor())
+   {
+      thing->do_adjust_weapon(amount);
+      thing->do_adjust_armor(amount);
+      thing->do_adjust_durability(amount);
+
+      thing->clear_flag(F_DAMAGED);
+      thing->set_durability(thing->query_max_durability());
+   }
+
+   thing->set_customize_record("adjusted", this_body()->short());
+
+   thing->assign_flag(F_ADJUSTED, 1);
 }
 
 void create()

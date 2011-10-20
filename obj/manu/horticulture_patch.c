@@ -45,6 +45,7 @@ private void manufacture_patch(string type)
 //   product->set_long("A transdermal " + type + " patch, made by an Ithorian from organically grown " + type + " plants.  It will automatically release medication when it's needed, until its reservoir is depleted.");
    product->set_mass(mass);
 //   product->set_slot(type + " patch");
+   product->set_customize_record("manufactured", this_body->short());
    product->move(this_body);
 
    this_body->add_experience((this_body->query_primary_level() > 0) ? (sizeof(usable_herbs[type]) * array_sum(this_body->query_guild_levels())) : 10);

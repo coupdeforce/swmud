@@ -1,3 +1,4 @@
+#include <flags.h>
 #include <hooks.h>
 inherit M_PARSING;
 
@@ -440,4 +441,13 @@ mixed direct_listen_to_obj(object obj)
    if (!default_object_checks()) { return 0; }
 
    return "You hear nothing special.";
+}
+
+//:FUNCTION direct_repair_obj
+//Handle parser checks for "repair OBJ"
+mixed direct_repair_obj(object ob)
+{
+   if (ob->test_flag(F_DAMAGED)) { return 1; }
+
+   return capitalize(ob->the_short()) + " does not need to be repaired.";
 }

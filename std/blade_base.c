@@ -9,8 +9,6 @@ void mudlib_setup()
 
 int is_blade() { return 1; }
 
-mixed direct_holster_obj_to_obj() { return 1; }
-mixed direct_unholster_obj_from_obj() { return 1; }
 /*
 class event_info source_modify_event(class event_info evt)
 {

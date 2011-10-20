@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-22-2010
 #include <mudlib.h>
 #include <setbit.h>
 
@@ -10,6 +9,8 @@ inherit M_GRAMMAR;
 // plural_in_room_desc: Message for more than 1.
 // If these are zero, sane defaults are used based on 'names'.
 private mixed long;
+private mapping customize_record = ([ ]);
+private mapping customize_times = ([ ]);
 private nosave mixed in_room_desc;
 private nosave string plural_in_room_desc;
 private nosave string listen_desc;
@@ -32,6 +33,7 @@ private string health();
 string team_description(int alignment);
 string health_description(int percent);
 string size_description(int size);
+string customize_description(string type, string name);
 varargs mixed call_hooks();
 
 // This one is here, but this is a forward declaration.
@@ -68,36 +70,29 @@ string get_extra_long()
    return call_hooks("extra_long", (: $1 + $2 :), "") || "";
 }
 
-//:FUNCTION long
-//Return the verbose description of an object that you see when you look at it.
-string long()
+string get_desc_properties()
 {
-   string output = get_base_long() + team_health() + get_extra_long();
+   string output = "";
 
    if (!this_object()->is_body())
    {
       if (this_object()->query_body_size() > 0)
       {
-         output += "It is " + size_description(this_object()->query_body_size()) + " sized.\n";
-      }
-
-      if (test_flag(F_ADJUSTED))
-      {
-         output += "It has been adjusted by a Verpine.\n";
-      }
-
-      if (test_flag(F_ALTERED_WEIGHT) || test_flag(F_ALTERED_VALUE) || test_flag(F_ALTERED_CAPACITY))
-      {
-         output += "It has been altered by a merchant.\n";
+         output += "\nIt is " + size_description(this_object()->query_body_size()) + " sized.";
       }
 
       if (test_flag(F_BROKEN))
       {
-         output += "It is broken.\n";
+         output += "\nIt is broken.";
       }
       else if (test_flag(F_DAMAGED))
       {
-         output += "It is damaged.\n";
+         output += "\nIt is damaged.";
+      }
+
+      foreach (string type in keys(customize_record))
+      {
+         output += "\n" + customize_description(type, customize_record[type]);
       }
    }
 
@@ -105,14 +100,56 @@ string long()
    {
       if (sizeof(ANNOTATION_D->retrieve_annotations(base_name(this_object()))))
       {
-         output += "%^YELLOW%^There is a 'discuss' note.\n%^RESET%^";
+         output += "\n%^YELLOW%^There is a 'discuss' note.\n%^RESET%^";
       }
    }
 
    return output;
 }
 
+//:FUNCTION long
+//Return the verbose description of an object that you see when you look at it.
+string long()
+{
+   return get_base_long() + team_health() + get_extra_long() + get_desc_properties();
+}
+
 protected string array discarded_message, plural_discarded_message;
+
+void set_customize_record(string record, string name)
+{
+   if (strlen(record) && strlen(name))
+   {
+      customize_record[record] = name;
+      customize_times[record] = time();
+   }
+}
+
+string query_customize_record(string record)
+{
+   if (strlen(record))
+   {
+      return customize_record[record];
+   }
+}
+
+int query_customize_time(string record)
+{
+   if (strlen(record))
+   {
+      return customize_times[record];
+   }
+}
+
+mapping query_customize_records() { return customize_record; }
+
+mapping query_customize_times() { return customize_times; }
+
+void remove_customize_record(string record)
+{
+   map_delete(customize_record, record);
+   map_delete(customize_times, record);
+}
 
 void set_listen(string str) { listen_desc = str; }
 
@@ -320,4 +357,24 @@ string size_description(int size)
    }
 
    return "odd";
+}
+
+string format_customize_name(string name)
+{
+   return "%^BOLD%^" + capitalize(name) + "%^RESET%^";
+}
+
+string customize_description(string type, string name)
+{
+   switch (type)
+   {
+      case "adjusted": return "It has been adjusted by " + format_customize_name(name) + ".";
+      case "altered weight": return "Its weight has been reduced by " + format_customize_name(name) + ".";
+      case "altered value": return "Its value has been increased by " + format_customize_name(name) + ".";
+      case "altered capacity": return "Its capacity has been increased by " + format_customize_name(name) + ".";
+      case "constructed": return "It was constructed by " + format_customize_name(name) + ".";
+      case "manufactured": return "It was manufactured by " + format_customize_name(name) + ".";
+   }
+
+   return "";
 }

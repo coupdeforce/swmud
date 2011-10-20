@@ -252,6 +252,7 @@
 #define M_DECAY                 "/std/modules/m_decay"
 #define M_DIGGER                "/std/modules/m_digger"
 #define M_DOCK_ROOM             "/std/modules/m_dock_room"
+#define M_DURABILITY            "/std/modules/m_durability"
 #define M_FLOW_ROOM             "/std/modules/m_flow_room"
 #define M_FOLLOW                "/std/modules/m_follow"
 #define M_GETTABLE              "/std/modules/m_gettable"

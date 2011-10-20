@@ -4,10 +4,8 @@ void setup()
 {
    set_id("lightsaber belt", "saber belt", "belt");
    set_long("A simple, brown leather belt with attachments for a standard lightsaber on both sides.");
-   add_relation("attached to");
-   set_default_relation("attached to");
+   set_holster_relation("attached");
    set_mass(400);
-   set_max_capacity(200);
    set_slot("waist");
    set_wear_relation("around");
 }
@@ -24,4 +22,15 @@ int can_attach(object attachment)
    }
 
    return 0;
+}
+
+mixed receive_object(object target, string relation)
+{
+   if (target->is_lightsaber() && !target->query("two_hands")
+      && (sizeof(all_inventory(this_object())) < 2))
+   {
+      return 1;
+   }
+
+   return target->short() + " cannot be attached to a lightsaber belt.\n";
 }

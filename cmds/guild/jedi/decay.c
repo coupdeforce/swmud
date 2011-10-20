@@ -152,8 +152,13 @@ void decay_class(object thing, int amount)
    int rank = this_body->query_skill("force_decay") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "affliction");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
-   int adjustment = (force / 5) + rank_spec;
+   int adjustment = (force + level) * rank_spec / 100;
    int delay = 600 - (rank_spec * 12) - (level * 2) - ((force / 5) * 4);
+
+   if (adjustment < 1)
+   {
+      adjustment = 1;
+   }
 
    if (amount > adjustment)
    {
@@ -174,7 +179,10 @@ void decay_class(object thing, int amount)
       this_body->simple_action("$N $vcause $o to decay.", thing);
    }
 
-   thing->decrease_class(amount);
+   if (thing->is_armor() || thing->is_weapon())
+   {
+      thing->decrease_durability(amount);
+   }
 
    this_body->add_special_skill_delay("force decay", delay);
 }
