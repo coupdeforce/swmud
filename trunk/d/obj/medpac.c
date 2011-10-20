@@ -23,6 +23,10 @@ varargs void setup(int set_bacta_count)
 
 int query_bacta_left() { return bacta_count; }
 
+int indirect_merge_obj_with_obj() { return 1; }
+int deny_alter_weight() { return 1; }
+int deny_alter_value() { return 1; }
+
 int use_bacta(int amount)
 {
    if ((bacta_count > 0) && (amount > 0))
@@ -76,7 +80,7 @@ int query_value()
       return bacta_count * 6;
    }
 
-   return 1;
+   return 0;
 }
 
 int query_mass()

@@ -1,4 +1,3 @@
-// Last edited by deforce on 12-19-2007
 #include <mudlib.h>
 #include <daemons.h>
 #include <commands.h>
@@ -13,7 +12,7 @@ void action_departure(object);
 
 private nosave function arrival_fn = (: action_arrival :);
 private nosave function departure_fn = (: action_departure :);
-private nosave string array npc_dirs = ({ "/cmds/player/", "/cmds/guild/assassin/", "/cmds/guild/bounty_hunter/", "/cmds/guild/diplomat/", "/cmds/guild/jedi/", "/cmds/guild/mechanic/", "/cmds/guild/mercenary/", "/cmds/guild/merchant/", "/cmds/guild/physician/", "/cmds/guild/pilot/", "/cmds/guild/slicer/", "/cmds/guild/smuggler/" });
+private nosave string array npc_dirs = ({ "/cmds/player/", "/cmds/guild/assassin/", "/cmds/guild/bounty_hunter/", "/cmds/guild/diplomat/", "/cmds/guild/engineer/", "/cmds/guild/jedi/", "/cmds/guild/mercenary/", "/cmds/guild/merchant/", "/cmds/guild/physician/", "/cmds/guild/pilot/", "/cmds/guild/slicer/", "/cmds/guild/smuggler/" });
 
 private function my_hook;
 private nosave string array response_queue = ({ });

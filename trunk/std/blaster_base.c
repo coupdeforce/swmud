@@ -11,6 +11,3 @@ void mudlib_setup()
 }
 
 int is_blaster() { return 1; }
-
-mixed direct_holster_obj_to_obj() { return 1; }
-mixed direct_unholster_obj_from_obj() { return 1; }

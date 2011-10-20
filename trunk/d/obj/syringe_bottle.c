@@ -33,6 +33,8 @@ varargs void setup(string set_type)
 
 string query_liquid_type() { return type; }
 int query_fills_left() { return fills; }
+int deny_alter_value() { return 1; }
+int deny_alter_weight() { return 1; }
 
 int get_a_fill()
 {
@@ -108,7 +110,7 @@ int query_value()
 
 int query_mass()
 {
-   return 300 + (fills * 500 / max_fills);
+   return 50 + (fills * 250 / max_fills);
 }
 
 void do_check_obj()

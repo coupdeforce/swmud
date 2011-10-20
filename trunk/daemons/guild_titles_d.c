@@ -25,6 +25,14 @@ mapping guild_titles =
       "$N the Diplomat",
    }),
 
+   "engineer" :
+   ({
+      "$N the Engineer",
+      "$N the Engineer",
+      "$N the Engineer",
+      "$N the Engineer",
+   }),
+
    "jedi_dark" :
    ({
       "$N the Dark Jedi Apprentice",
@@ -39,14 +47,6 @@ mapping guild_titles =
       "$N the Jedi Knight",
       "$N the Jedi Master",
       "$N the Jedi Grand Master",
-   }),
-
-   "mechanic" :
-   ({
-      "$N the Engineer",
-      "$N the Engineer",
-      "$N the Engineer",
-      "$N the Engineer",
    }),
 
    "mercenary" :

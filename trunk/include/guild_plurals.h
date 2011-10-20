@@ -2,7 +2,7 @@ mapping guilds = ([
    "assassin" : "assassins",
    "bounty hunter" : "bounty hunters",
    "diplomat" : "diplomats",
-   "mechanic" : "mechanics",
+   "engineer" : "engineers",
    "mercenary" : "mercenaries",
    "merchant" : "merchants",
    "physician" : "physicians",

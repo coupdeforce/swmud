@@ -520,7 +520,7 @@ string parser_error_message(int kind, object ob, mixed arg, int flag)
       }
          break;
       case ERR_ORDINAL:
-         if (arg > 1)
+         if ((arg > 1) && flag)
          {
             return ret + "There are only " + arg + " of them.\n";
          }

@@ -1,18 +1,16 @@
-// Last edited by deforce on 03-03-2010
 inherit HOLSTER;
 
 void setup()
 {
    set_id("weapons holster", "holster");
    set_long("A brown leather holster with enough room for two one-handed weapons, which you can wear around your waist.");
-   add_relation("holstered in");
-   set_default_relation("holstered in");
+   set_holster_relation("holstered");
    set_mass(800);
-   set_max_capacity(200);
    set_slot("waist");
+   set_wear_relation("around");
 }
 
-int indirect_holster_obj_to_obj() { return 1; }
+int indirect_holster_obj_in_obj() { return 1; }
 int indirect_unholster_obj_from_obj() { return 1; }
 
 int can_holster(object attachment)
@@ -25,4 +23,16 @@ int can_holster(object attachment)
    }
 
    return 0;
+}
+
+mixed receive_object(object target, string relation)
+{
+   if (target->is_weapon() && !target->query("two_hands")
+      && !target->is_lightsaber() && !target->is_blaster()
+      && (sizeof(all_inventory(this_object())) < 2))
+   {
+      return 1;
+   }
+
+   return target->short() + " cannot be holstered in a weapons holster.\n";
 }

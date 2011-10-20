@@ -63,7 +63,7 @@ void get_info(object body)
    int health_other = body->query_max_health();
    int array guilds = ({ });
    int array guilds_other = ({ });
-   string array guild_list = ({ "assassin", "bounty hunter", "diplomat", "jedi", "mechanic", "mercenary", "merchant", "physician", "pilot", "slicer", "smuggler" });
+   string array guild_list = ({ "assassin", "bounty hunter", "diplomat", "jedi", "engineer", "mercenary", "merchant", "physician", "pilot", "slicer", "smuggler" });
    string array guild_desc = ({ "lethality", "tracking skill", "political acumen", "strength in the Force", "engineering aptitude", "combat training", "business sense", "medical knowledge", "piloting ability", "technological proficiency", "capacity for clandestine dealings" });
    int array stats = ({ });
    int array stats_other = ({ });

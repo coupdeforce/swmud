@@ -1,5 +1,6 @@
 inherit OBJ;
 inherit M_DAMAGE_SOURCE;
+inherit M_DURABILITY;
 inherit M_WIELDABLE;
 inherit M_VALUABLE;
 inherit M_GETTABLE;
@@ -11,6 +12,7 @@ void mudlib_setup()
 {
    object::mudlib_setup();
    m_damage_source::mudlib_setup();
+   m_durability::mudlib_setup();
    m_valuable::mudlib_setup();
    m_wieldable::mudlib_setup();
    add_id("weapon");
@@ -43,7 +45,6 @@ int has_cortosis_weave()
    return cortosis_weave;
 }
 
-int indirect_kill_liv_with_obj()
-{
-   return 1;
-}
+mixed direct_holster_obj_in_obj() { return 1; }
+mixed direct_unholster_obj_from_obj() { return 1; }
+int indirect_kill_liv_with_obj() { return 1; }

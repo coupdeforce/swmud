@@ -143,6 +143,9 @@ string query_unique_id()
    return output;
 }
 
+int query_durability() { return 1; }
+int query_max_durability() { return 1; }
+
 void do_check_obj()
 {
    write("You check " + this_object()->the_short() + " and you detect nothing unusual.\n");

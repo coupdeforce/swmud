@@ -283,6 +283,7 @@ int construct_object(object player, string product_name, string verb_used)
    else
    {
       product = clone_object(file_name);
+      product->set_customize_record("constructed", player->short());
       product->move(player);
 
       destroy_ingredients(item_list);

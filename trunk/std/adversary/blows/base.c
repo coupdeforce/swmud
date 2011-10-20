@@ -106,7 +106,7 @@ int do_damage_event(class event_info evt)
       // Chance for weapon to be damaged
       if (last_weapon_used->query_chance_to_be_damaged() > random(100))
       {
-         last_weapon_used->decrease_class(1);
+         last_weapon_used->decrease_durability(1);
       }
    }
 

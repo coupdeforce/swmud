@@ -34,7 +34,7 @@ void setup(string set_type, int set_heal_capacity, int set_heal_rate)
 
    set_id(type + " patch", "patch");
    set_long("A transdermal " + type + " patch, made by an Ithorian from organically grown " + type + " plants.  It will automatically release medication when it's needed, until its reservoir is depleted.");
-   set_mass(10);
+   set_mass(150);
    set_slot(type + " patch");
    set_wear_relation("on");
    set_body_size(0);
@@ -108,6 +108,8 @@ void on_remove()
 {
    set_heart_beat(0);
 }
+
+int deny_alter_value() { return 1; }
 
 int query_value_pure()
 {
