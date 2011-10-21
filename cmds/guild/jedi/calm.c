@@ -14,7 +14,7 @@ void do_calm_liv(object target)
       this_body->add_skill_delay(8);
       this_body->adjust_jedi_alignment(this_body->has_buff("/d/buffs/force_focus") ? 2 : 1);
 
-      if (this_body->test_skill("force_calm", (alignment * (alignment < 0 ? 10 : 5)) + this_body->call_hooks("force_focus", HOOK_SUM)))
+      if (this_body->test_skill("force calm", (alignment * (alignment < 0 ? 10 : 5)) + this_body->call_hooks("force_focus", HOOK_SUM)))
       {
          calm_target(target);
       }
@@ -118,7 +118,7 @@ void calm_target(object target)
 {
    object this_body = this_body();
    object array aggressions = ({ this_body }) + target->query_targets() + target->query_unfinished_business();
-   int rank = this_body->query_skill("force_calm") / 100;
+   int rank = this_body->query_skill("force calm") / 100;
 
    if (rank < 10)
    {

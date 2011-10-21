@@ -88,7 +88,7 @@ int get_floor(object living)
    int force = this_body->query_for();
    int living_force = living->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("inflict_pain") / 100;
+   int rank = this_body->query_skill("inflict pain") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "affliction");
    int amount = (level / (15 - rank)) + ((level / (20 - rank)) * 2) + (force / 10) + spec;
 
@@ -106,7 +106,7 @@ int get_ceiling(object living)
    int force = this_body->query_for();
    int living_force = living->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("inflict_pain") / 100;
+   int rank = this_body->query_skill("inflict pain") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "affliction");
    int amount = (level / (12 - rank)) + (level / (15 - rank)) + (level / (20 - rank)) + (force / 5) + random((spec * 2) + 1);
 
@@ -124,7 +124,7 @@ int get_stun(object living)
    int force = this_body->query_for();
    int living_force = living->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("inflict_pain") / 100;
+   int rank = this_body->query_skill("inflict pain") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "affliction");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int amount = (level + force + (rank_spec * 15));
@@ -142,7 +142,7 @@ void concentration(object living)
    object this_body = this_body();
    int alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("inflict_pain", (alignment * -10)))
+   if (this_body->test_skill("inflict pain", (alignment * -10)))
    {
       hurt_target(living);
    }

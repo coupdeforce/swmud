@@ -62,7 +62,7 @@ void perform_valor()
    object this_body = this_body();
    int force = this_body->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("force_valor") / 100;
+   int rank = this_body->query_skill("force valor") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "control");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int amount = (level * force * (rank_spec * 3)) / 5000;
@@ -84,7 +84,7 @@ void meditation_time()
 
    if (!this_body) { return; }
 
-   if (this_body->test_skill("force_valor", (alignment * (alignment < 0 ? 25 : 5)) + this_body->call_hooks("force_focus", HOOK_SUM)))
+   if (this_body->test_skill("force valor", (alignment * (alignment < 0 ? 25 : 5)) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       perform_valor();
    }

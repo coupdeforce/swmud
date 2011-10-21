@@ -66,7 +66,7 @@ void choke_target(object living)
    object this_body = this_body();
    int level = this_body->query_guild_level("jedi");
    int force = this_body->query_for();
-   int rank = this_body->query_skill("force_choke") / 100;
+   int rank = this_body->query_skill("force choke") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "telekinesis");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int floor = rank_spec * 3 * level * force / 5000;
@@ -103,7 +103,7 @@ void concentration(object living)
    object this_body = this_body();
    int alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("force_choke", (alignment * -8) + (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300 - (living->query_guild_level("jedi") * 20)))
+   if (this_body->test_skill("force choke", (alignment * -8) + (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300 - (living->query_guild_level("jedi") * 20)))
    {
       this_body->test_skill("telekinesis", this_body->query_guild_level("jedi") * 5);
 

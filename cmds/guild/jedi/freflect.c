@@ -56,11 +56,11 @@ void concentration(object room)
    object this_body = this_body();
    int alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("force_reflect", (alignment * (alignment < 0 ? 20 : this_body->query_skill("force_shield") / 2)) + this_body->call_hooks("force_focus", HOOK_SUM)))
+   if (this_body->test_skill("force reflect", (alignment * (alignment < 0 ? 20 : this_body->query_skill("force shield") / 2)) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       int level = this_body->query_guild_level("jedi");
       int force = this_body->query_for();
-      int rank = this_body->query_skill("force_reflect") / 100;
+      int rank = this_body->query_skill("force reflect") / 100;
       int spec = this_body->query_guild_specialization_rank("jedi", "defense");
       int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
       int reduction = 5 + (level * force * rank * 9 / 5000);

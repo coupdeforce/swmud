@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-28-2010
 #include <verbs.h>
 
 inherit VERB_OB;
@@ -215,13 +214,13 @@ string inspect_corpse(object ob)
 
       text += " " + convert_time(time() - ob->query_death_time()) + " ago.\n";
    }
-   else if (ob->has_been_inspected_by(this_body->query_name()) || this_body->test_skill("inspect_corpse", this_body->query_guild_level("bounty hunter") * 12))
+   else if (ob->has_been_inspected_by(this_body->query_name()) || this_body->test_skill("inspect corpse", this_body->query_guild_level("bounty hunter") * 12))
    {
       ob->set_inspected_by(this_body->query_name(), 1);
 
       text += "It looks like they were killed " + convert_time(time() - ob->query_death_time()) + " ago.\n";
 
-      if ((ob->has_been_inspected_by(this_body->query_name()) > 1) || this_body->test_skill("inspect_corpse", this_body->query_guild_level("bounty hunter") * 8))
+      if ((ob->has_been_inspected_by(this_body->query_name()) > 1) || this_body->test_skill("inspect corpse", this_body->query_guild_level("bounty hunter") * 8))
       {
          ob->set_inspected_by(this_body->query_name(), 2);
 
@@ -234,7 +233,7 @@ string inspect_corpse(object ob)
             text += "It looks like they were killed with " + add_article(ob->query_killer_weapon()) + ".\n";
          }
 
-         if ((ob->has_been_inspected_by(this_body->query_name()) > 2) || this_body->test_skill("inspect_corpse", this_body->query_guild_level("bounty hunter") * 4))
+         if ((ob->has_been_inspected_by(this_body->query_name()) > 2) || this_body->test_skill("inspect corpse", this_body->query_guild_level("bounty hunter") * 4))
          {
             ob->set_inspected_by(this_body->query_name(), 3);
 
@@ -246,7 +245,7 @@ string inspect_corpse(object ob)
          }
       }
    }
-   else if (random(this_body->query_skill("inspect_corpse")) < (110 - this_body->query_per()))
+   else if (random(this_body->query_skill("inspect corpse")) < (110 - this_body->query_per()))
    {
       ob->set_inspected_by(this_body->query_name());
 

@@ -116,7 +116,7 @@ int get_ceiling(object living)
    int force = this_body->query_for();
    int living_force = living->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("steal_life") / 100;
+   int rank = this_body->query_skill("steal life") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "affliction");
    int amount = to_int((rank * 0.1) * (20 + ((force / 5) * 2) + (level * 2) + (spec * 4)));
 
@@ -133,7 +133,7 @@ void concentration(object living)
    object this_body = this_body();
    int alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("steal_life", (alignment * -15)))
+   if (this_body->test_skill("steal life", (alignment * -15)))
    {
       drain_target(living);
    }

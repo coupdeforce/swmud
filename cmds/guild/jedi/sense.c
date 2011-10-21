@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-25-2010
 inherit VERB_OB;
 
 void sense_room(object room);
@@ -51,7 +50,7 @@ void sense_room(object room)
 {
    if (room && strlen(room->sense_force()))
    {
-      this_body()->learn_skill("force_sense", -200);
+      this_body()->learn_skill("force sense", -200);
 
       tell(this_body(), room->sense_force());
 
@@ -65,7 +64,7 @@ void sense_object(object thing)
 {
    if (thing && strlen(thing->query_force()))
    {
-      this_body()->learn_skill("force_sense", -100);
+      this_body()->learn_skill("force sense", -100);
 
       tell(this_body(), thing->query_force() + "\n");
 
@@ -101,7 +100,7 @@ void sense_living(object living)
 
    if (living != this_body)
    {
-      this_body->learn_skill("force_sense");
+      this_body->learn_skill("force sense");
    }
 
    tell(this_body, output);

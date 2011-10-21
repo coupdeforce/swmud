@@ -148,7 +148,7 @@ void meditation_time(object body)
       return;
    }
 
-   if (this_body->test_skill("superhealing", (alignment * (alignment < 0 ? 50 : 4)) + ((this_body->query_skill("force_healing") / 2) - 500) + this_body->call_hooks("force_focus", HOOK_SUM)))
+   if (this_body->test_skill("superhealing", (alignment * (alignment < 0 ? 50 : 4)) + ((this_body->query_skill("force healing") / 2) - 500) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       perform_healing(body);
    }

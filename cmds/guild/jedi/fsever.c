@@ -95,7 +95,7 @@ void sever_target(object living)
    int level = this_body->query_guild_level("jedi");
    int target_force = living->query_for();
    int target_level = living->query_guild_level("jedi");
-   int rank = this_body->query_skill("force_sever") / 100;
+   int rank = this_body->query_skill("force sever") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "control");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int delay = 600 - (rank_spec * 6) - (((level / 5) + (force / 5)) * 4);
@@ -123,7 +123,7 @@ void concentration(object living)
 
    this_body->add_skill_delay(12);
 
-   if (this_body->test_skill("force_sever", (this_body->query_guild_level("jedi") * 10) + this_body->call_hooks("force_focus", HOOK_SUM)))
+   if (this_body->test_skill("force sever", (this_body->query_guild_level("jedi") * 10) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       this_body->targetted_action("$N $vconcentrate on severing $t from the Force.\n", living);
 

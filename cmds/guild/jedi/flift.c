@@ -169,7 +169,7 @@ void concentration(object thing, object location, string location_name, object d
    object this_body = this_body();
    int force = this_body->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = (this_body->query_skill("force_lift") + this_body->query_skill("telekinesis")) / 100;
+   int rank = (this_body->query_skill("force lift") + this_body->query_skill("telekinesis")) / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "telekinesis");
    string text = thing->the_short() + " from ";
 
@@ -192,7 +192,7 @@ void concentration(object thing, object location, string location_name, object d
       text += location_name + " to " + destination_name;
    }
 
-   if (this_body->test_skill("force_lift", (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300 + this_body->call_hooks("force_focus", HOOK_SUM)))
+   if (this_body->test_skill("force lift", (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300 + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       this_body->test_skill("telekinesis", (this_body->query_guild_level("jedi") * 5) + this_body->call_hooks("force_focus", HOOK_SUM));
 

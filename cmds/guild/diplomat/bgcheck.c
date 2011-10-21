@@ -30,7 +30,7 @@ void do_bgcheck_liv(object living)
          {
             this_body->add_skill_delay(2);
 
-            if (this_body->test_skill("bground_check", (this_body->query_guild_level("diplomat") * 20)))
+            if (this_body->test_skill("bground check", (this_body->query_guild_level("diplomat") * 20)))
             {
                get_info(living);
             }
@@ -56,7 +56,7 @@ void get_info(object body)
 {
    object this_body = this_body();
    int level = this_body->query_guild_level("diplomat");
-   int rank = this_body->query_skill("bground_check") / 100;
+   int rank = this_body->query_skill("bground check") / 100;
    int spec = this_body->query_guild_specialization_rank("diplomat", "something");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int health = this_body->query_max_health();

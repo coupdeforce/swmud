@@ -10,6 +10,9 @@ void setup()
    set_slots("torso", "left arm", "right arm", "left leg", "right leg");
 
    set_armor_class(1);
+   set_repair_skill("clothing repair");
+   set_repair_guilds(({"jedi", "merchant"}));
+   set_parts_type("clothing");
 
    set_mass(3000);
    set_value(800);

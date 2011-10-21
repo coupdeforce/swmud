@@ -62,14 +62,14 @@ void concentration()
    int alignment = this_body->query_jedi_alignment();
    int level = this_body->query_guild_level("jedi");
    float force = this_body->query_for();
-   int rank = this_body->query_skill("force_focus") / 100;
+   int rank = this_body->query_skill("force focus") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "control");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int bonus = ((rank_spec * 20) + level) * force / 50;
    int duration = ((rank_spec * 12) + level + 10) * 2;
    int delay = 900 - (((rank_spec * 5) + level) * 2);
 
-   this_body->test_skill("force_focus", alignment * 5);
+   this_body->test_skill("force focus", alignment * 5);
 
    load_object("/d/buffs/force_focus");
    this_body->add_buff(new("/d/buffs/force_focus", bonus, duration));
