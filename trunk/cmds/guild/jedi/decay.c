@@ -29,7 +29,7 @@ void do_decay_obj_by_str(object thing, string value)
          this_body->adjust_jedi_alignment(alignment < 0 ? -4 : this_body->has_buff("/d/buffs/force_focus") ? -12 : -8);
       }
 
-      if (this_body->test_skill("force_decay", (alignment * (thing->is_armor() ? (alignment < 0 ? -5 : -10) : (alignment < 0 ? -5 : 5))) + (thing->is_weapon() ? this_body->call_hooks("force_focus", HOOK_SUM) : 0)))
+      if (this_body->test_skill("force decay", (alignment * (thing->is_armor() ? (alignment < 0 ? -5 : -10) : (alignment < 0 ? -5 : 5))) + (thing->is_weapon() ? this_body->call_hooks("force_focus", HOOK_SUM) : 0)))
       {
          object env = environment(thing);
 
@@ -149,7 +149,7 @@ void decay_class(object thing, int amount)
    object this_body = this_body();
    int force = this_body->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("force_decay") / 100;
+   int rank = this_body->query_skill("force decay") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "affliction");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int adjustment = (force + level) * rank_spec / 100;

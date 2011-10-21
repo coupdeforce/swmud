@@ -130,12 +130,12 @@ void concentration(object living, object location, string location_name)
    object this_body = this_body();
    int force = this_body->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("force_stun") / 100;
+   int rank = this_body->query_skill("force stun") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "defense");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int duration = 4 + (28 * level * force * rank_spec / 100000 * 2);
 
-   if (this_body->test_skill("force_stun", (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300 + this_body->call_hooks("force_focus", HOOK_SUM)))
+   if (this_body->test_skill("force stun", (this_body->query_guild_level("jedi") * 10) + (this_body->query_skill("telekinesis") / 100 * 30) - 300 + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       if (location == environment(this_body))
       {

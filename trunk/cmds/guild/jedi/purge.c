@@ -128,7 +128,7 @@ void perform_purge(object body)
       object this_body = this_body();
       int force = this_body->query_for();
       int level = this_body->query_guild_level("jedi");
-      int rank = this_body->query_skill("purge_toxins") / 100;
+      int rank = this_body->query_skill("purge toxins") / 100;
       int spec = this_body->query_guild_specialization_rank("jedi", "healing");
       int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
       int amount = (rank * 2) + (30 * rank_spec * level * force / 100000);
@@ -171,7 +171,7 @@ void meditation_time(object body)
 
    alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("purge_toxins", (alignment * (alignment < 0 ? 25 : 10)) + this_body->call_hooks("force_focus", HOOK_SUM)))
+   if (this_body->test_skill("purge toxins", (alignment * (alignment < 0 ? 25 : 10)) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       perform_purge(body);
    }

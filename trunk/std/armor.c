@@ -18,6 +18,9 @@ void mudlib_setup()
    m_wearable::mudlib_setup();
 //   add_id("armor", "armour");
    add_save( ({ "persist_flags" }) );
+   set_repair_skill("armor repair");
+   set_repair_guilds(({"engineer", "mercenary", "bounty hunter"}));
+   set_parts_type("armor");
 }
 
 //:FUNCTION set_worn

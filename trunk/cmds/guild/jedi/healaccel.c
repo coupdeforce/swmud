@@ -83,7 +83,7 @@ void perform_healaccel(object body)
    object this_body = this_body();
    int force = this_body->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("heal_accel") / 100;
+   int rank = this_body->query_skill("heal accel") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "healing");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int amount = body->query_heal_rate() * (2 + (rank_spec * 2 * level * force / 5000));
@@ -126,7 +126,7 @@ void meditation_time(object body)
       return;
    }
 
-   if (this_body->test_skill("heal_accel", (alignment * (alignment < 0 ? 50 : 3)) + ((this_body->query_skill("force_healing") / 2) - 500 + this_body->call_hooks("force_focus", HOOK_SUM))))
+   if (this_body->test_skill("heal accel", (alignment * (alignment < 0 ? 50 : 3)) + ((this_body->query_skill("force healing") / 2) - 500 + this_body->call_hooks("force_focus", HOOK_SUM))))
    {
       perform_healaccel(body);
    }

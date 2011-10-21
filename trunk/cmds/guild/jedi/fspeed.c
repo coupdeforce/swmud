@@ -48,7 +48,7 @@ void increase_speed()
    object this_body = this_body();
    int force = this_body->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("force_speed") / 100;
+   int rank = this_body->query_skill("force speed") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "control");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int amount = (level * force * (rank_spec * 3)) / 19000;
@@ -70,7 +70,7 @@ void concentration()
 
    if (!this_body) { return; }
 
-   if (this_body->test_skill("force_speed", (alignment * (alignment < 0 ? -5 : 5)) + this_body->call_hooks("force_focus", HOOK_SUM)))
+   if (this_body->test_skill("force speed", (alignment * (alignment < 0 ? -5 : 5)) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       increase_speed();
    }

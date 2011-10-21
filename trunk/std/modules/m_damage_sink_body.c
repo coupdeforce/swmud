@@ -29,14 +29,14 @@ int query_max_armor_class()
 }
 
 //:FUNCTION query_jedi_armor_class
-// Query a Jedi's armor class, based on jedi_defense
+// Query a Jedi's armor class, based on jedi defense
 int query_jedi_armor_class()
 {
    object this_ob = this_object();
 
    if (this_ob->query_guild_level("jedi") && this_ob->has_learned_skill("jedi defense"))
    {
-      int rank = this_ob->query_skill("jedi_defense") / 100;
+      int rank = this_ob->query_skill("jedi defense") / 100;
       int spec = this_ob->query_guild_specialization_rank("jedi", "defense");
       int alignment = this_ob->query_jedi_alignment();
       float armor = this_ob->query_for_pure() * this_ob->query_guild_level("jedi");
@@ -111,7 +111,7 @@ class event_info sink_modify_event(class event_info evt)
 
       armor_class += query_jedi_armor_class();
 
-      this_ob->test_skill("jedi_defense", jedi_alignment * (jedi_alignment < 0 ? -10 : 20));
+      this_ob->test_skill("jedi defense", jedi_alignment * (jedi_alignment < 0 ? -10 : 20));
    }
 
    foreach (string type in keys(evt->data))

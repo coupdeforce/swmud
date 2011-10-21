@@ -157,7 +157,7 @@ class event_info modify_event(class event_info evt)
          {
             int level = evt->target->query_guild_level("jedi");
             int force = evt->target->query_for();
-            int rank = (evt->target->query_skill("jedi_defense") / 100) + (evt->target->query_skill("saber_defense") / 100);
+            int rank = (evt->target->query_skill("jedi defense") / 100) + (evt->target->query_skill("saber_defense") / 100);
             int spec = evt->target->query_guild_specialization_rank("jedi", "defense");
             int rank_spec;
             int attacker_advantage = 100;

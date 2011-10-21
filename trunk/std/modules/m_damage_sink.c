@@ -25,6 +25,7 @@ void set_armor_class(int x)
    if (x > 0)
    {
       armor_class = x;
+      this_object()->set_durability(armor_class);
    }
 }
 
@@ -86,7 +87,7 @@ class event_info sink_modify_event(class event_info evt)
 
       total_armor_class += wearer->query_jedi_armor_class();
 
-      wearer->test_skill("jedi_defense", jedi_alignment * (jedi_alignment < 0 ? -10 : 20));
+      wearer->test_skill("jedi defense", jedi_alignment * (jedi_alignment < 0 ? -10 : 20));
    }
 
    if (combined_armor_class >= max_durability)

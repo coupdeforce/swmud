@@ -119,7 +119,7 @@ void wipe_target(object living, string skill)
    int force = this_body->query_for();
    int level = this_body->query_guild_level("jedi");
    int target_level = living->query_guild_level("jedi");
-   int rank = this_body->query_skill("memory_wipe") / 100;
+   int rank = this_body->query_skill("memory wipe") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "affliction");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int adjustment = (rank_spec * 30) + force + (level * 6);
@@ -151,7 +151,7 @@ void concentration(object living, string skill)
    object this_body = this_body();
    int alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("memory_wipe", alignment * (alignment < 0 ? -5 : -10)))
+   if (this_body->test_skill("memory wipe", alignment * (alignment < 0 ? -5 : -10)))
    {
       this_body->targetted_action("$N $vconcentrate on wiping $p1 memory.\n", living);
 

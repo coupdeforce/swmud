@@ -124,7 +124,7 @@ void perform_healing(object body)
    object this_body = this_body();
    int force = this_body->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("force_healing") / 100;
+   int rank = this_body->query_skill("force healing") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "healing");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int amount = (force / 5) + (rank_spec * 8 * level * force / 5000);
@@ -165,7 +165,7 @@ void meditation_time(object body)
 
    alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("force_healing", (alignment * (alignment < 0 ? 25 : 10)) + this_body->call_hooks("force_focus", HOOK_SUM)))
+   if (this_body->test_skill("force healing", (alignment * (alignment < 0 ? 25 : 10)) + this_body->call_hooks("force_focus", HOOK_SUM)))
    {
       perform_healing(body);
    }

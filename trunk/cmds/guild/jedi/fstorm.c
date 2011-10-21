@@ -85,11 +85,11 @@ void concentration(object room)
 
    alignment = this_body->query_jedi_alignment();
 
-   if (this_body->test_skill("force_storm", alignment * (alignment < 0 ? -5 : -20)))
+   if (this_body->test_skill("force storm", alignment * (alignment < 0 ? -5 : -20)))
    {
       int level = this_body->query_guild_level("jedi");
       int force = this_body->query_for();
-      int rank = this_body->query_skill("force_storm") / 100;
+      int rank = this_body->query_skill("force storm") / 100;
       int spec = this_body->query_guild_specialization_rank("jedi", "destruction");
       int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
       int floor = level * force * rank_spec / 500;

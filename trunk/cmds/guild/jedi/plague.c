@@ -106,7 +106,7 @@ void perform_plague(object living)
    object this_body = this_body();
    float force = this_body->query_for();
    float level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("force_plague") / 100;
+   int rank = this_body->query_skill("force plague") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "affliction");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int amount = (level * force * (rank_spec * 3)) / 5000;
@@ -130,7 +130,7 @@ void concentrate(object living)
 
    if (!this_body) { return; }
 
-   if (this_body->test_skill("force_plague", this_body->query_jedi_alignment() * -10))
+   if (this_body->test_skill("force plague", this_body->query_jedi_alignment() * -10))
    {
       perform_plague(living);
 

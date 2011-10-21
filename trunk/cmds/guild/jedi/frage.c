@@ -11,7 +11,7 @@ void do_frage()
 
    this_body->add_skill_delay(8);
 
-   if (this_body->test_skill("force_rage", alignment * (alignment < 0 ? -8 : -10)))
+   if (this_body->test_skill("force rage", alignment * (alignment < 0 ? -8 : -10)))
    {
       write("You focus on your anger, letting the Force fuel your rage.\n");
       this_body->other_action("$N focuses on $p anger, letting the Force fuel $p rage.\n");
@@ -56,7 +56,7 @@ void perform_rage()
    object this_body = this_body();
    int force = this_body->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("force_rage") / 100;
+   int rank = this_body->query_skill("force rage") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "control");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int rank_mod = (rank + spec) < 0 ? 0 : ((rank + spec) > 10 ? 10 : (rank + spec));
