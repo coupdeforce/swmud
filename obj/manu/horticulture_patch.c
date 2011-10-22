@@ -46,6 +46,7 @@ private void manufacture_patch(string type)
    product->set_mass(mass);
 //   product->set_slot(type + " patch");
    product->set_customize_record("manufactured", this_body->short());
+   product->set_autoload();
    product->move(this_body);
 
    this_body->add_experience((this_body->query_primary_level() > 0) ? (sizeof(usable_herbs[type]) * array_sum(this_body->query_guild_levels())) : 10);

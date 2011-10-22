@@ -1,4 +1,5 @@
-// On repair, clear the damaged flag and set new class/durability if necessary
+#include <toolbox.h>
+
 int test_flag(int);
 void clear_flag(int);
 void assign_flag(int, int);
@@ -7,6 +8,7 @@ private int durability = 1;
 private int max_durability = 1;
 private int chance_to_be_damaged = 2;
 private nosave string repair_skill = "melee repair";
+private nosave string learn_requirement = "";
 private nosave string array repair_guilds = ({ "engineer" });
 private nosave string parts_type = "weapon";
 
@@ -99,6 +101,26 @@ void set_repair_skill(string new_repair_skill)
    repair_skill = new_repair_skill;
 }
 
+string query_repair_learn_requirement()
+{
+   return learn_requirement;
+}
+
+void set_repair_learn_requirement(string new_learn_requirement)
+{
+   learn_requirement = new_learn_requirement;
+}
+
+string array query_repair_guilds()
+{
+   return repair_guilds;
+}
+
+void set_repair_guilds(string array new_repair_guilds)
+{
+   repair_guilds = new_repair_guilds;
+}
+
 string query_parts_type()
 {
    return parts_type;
@@ -122,65 +144,129 @@ void do_adjust_durability(int amount)
 void do_repair()
 {
    object body = this_body();
+   int required_parts = ((member_array(body->query_primary_guild(), repair_guilds) > -1) ? 1 : 3) * (max_durability - durability);
+   int found_parts = check_toolboxes_for_parts(parts_type, required_parts);
+   int guild_levels = 0;
 
-   if (!test_flag(F_BROKEN))
+   if (test_flag(F_BROKEN))
    {
-      if (durability < max_durability)
+      tell(body, capitalize(this_object()->the_short()) + " is broken and cannot be repaired.\n");
+
+      return;
+   }
+
+   if (durability >= max_durability)
+   {
+      tell(body, capitalize(this_object()->the_short()) + " does not need to be repaired.\n");
+
+      return;
+   }
+
+   if (body->has_skill_delay())
+   {
+      tell(body, "You are too busy to repair something.\n");
+
+      return;
+   }
+
+   if (strlen(learn_requirement) && !body->has_learned_skill(learn_requirement))
+   {
+      tell(body, "You have not learned how to repair " + this_object()->the_short() + ".\n");
+
+      return;
+   }
+
+   if (found_parts < required_parts)
+   {
+      write("You need " + (required_parts - found_parts) + " more " + parts_type + " parts to repair " + this_object()->the_short() + ".\n");
+
+      return;
+   }
+
+   body->add_skill_delay(4);
+
+   foreach (string guild in repair_guilds)
+   {
+      if (guild == body->query_primary_guild())
       {
-         if (!body->has_skill_delay())
-         {
-            int guild_levels = 0;
+         guild_levels += body->query_guild_level(guild) * 2;
 
-            body->add_skill_delay(4);
-
-            foreach (string guild in repair_guilds)
-            {
-               if (guild == body->query_primary_guild())
-               {
-                  guild_levels += body->query_guild_level(guild) * 2;
-
-                  body->test_skill(repair_skill, 1000);
-               }
-               else
-               {
-                  guild_levels += body->query_guild_level(guild);
-               }
-            }
-
-            if (body->test_skill(repair_skill, guild_levels * 10))
-            {
-               int max_repair = (body->query_skill(repair_skill) / 100) + 1;
-
-               if ((max_repair < 11) && ((max_durability - durability) > max_repair))
-               {
-                  this_object()->set_value(this_object()->query_value_pure() * (durability + max_repair) / max_durability);
-
-                  max_durability = durability + max_repair;
-               }
-
-               durability = max_durability;
-
-               clear_flag(F_DAMAGED);
-
-               body->simple_action("$N $vrepair $o.", this_object());
-            }
-            else
-            {
-               body->simple_action("$N $vfail to repair $o.", this_object());
-            }
-         }
-         else
-         {
-            tell(body, "You are too busy to repair something.\n");
-         }
+         body->add_skill_training_points(repair_skill, 2);
       }
       else
       {
-         tell(body, capitalize(this_object()->the_short()) + " does not need to be repaired.\n");
+         guild_levels += body->query_guild_level(guild);
+      }
+   }
+
+   if (body->test_skill(repair_skill, guild_levels * 10))
+   {
+      int max_repair = (body->query_skill(repair_skill) / 100) + 1;
+
+      if ((max_repair < 11) && ((max_durability - durability) > max_repair))
+      {
+         int new_durability = durability + max_repair;
+         this_object()->set_value(this_object()->query_value_pure() * new_durability / max_durability);
+
+         if (this_object()->is_weapon())
+         {
+            mapping damage_types = this_object()->query_damage_types_pure();
+
+            foreach (string type in keys(damage_types))
+            {
+               if (damage_types[type] >= max_durability)
+               {
+                  damage_types[type] = damage_types[type] * new_durability / max_durability;
+               }
+               else
+               {
+                  damage_types[type] = to_int(ceil(damage_types[type] * 1.0 * durability / max_durability));
+               }
+
+               if (damage_types[type] < 1)
+               {
+                  map_delete(damage_types, type);
+               }
+            }
+
+            this_object()->set_damage_types(damage_types);
+         }
+
+         if (this_object()->is_armor())
+         {
+            int armor_class = this_object()->query_max_armor_class();
+
+            if (armor_class >= new_durability)
+            {
+               armor_class = armor_class * new_durability / max_durability;
+            }
+            else
+            {
+               armor_class = to_int(ceil(armor_class * 1.0 * new_durability / max_durability));
+            }
+
+            this_object()->set_armor_class(armor_class);
+         }
+
+         max_durability = new_durability;
+      }
+
+      if (remove_parts_from_toolboxes(parts_type, required_parts) == required_parts)
+      {
+         durability = max_durability;
+
+         clear_flag(F_DAMAGED);
+
+         body->simple_action("$N $vrepair $o.", this_object());
       }
    }
    else
    {
-      tell(body, capitalize(this_object()->the_short()) + " is broken and cannot be repaired.\n");
+      if ((100 - body->query_int()) > body->query_skill(repair_skill))
+      {
+         remove_parts_from_toolboxes(parts_type, random(required_parts) + 1);
+      }
+
+      body->simple_action("$N $vfail to repair $o.", this_object());
    }
 }

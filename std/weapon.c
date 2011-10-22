@@ -16,7 +16,7 @@ void mudlib_setup()
    m_valuable::mudlib_setup();
    m_wieldable::mudlib_setup();
    add_id("weapon");
-   add_save( ({ "cortosis_weave", "persist_flags" }) );
+   add_save( ({ "cortosis_weave" }) );
 }
 
 mixed ob_state()

@@ -45,7 +45,7 @@ void adjust_ammo(int amount)
 {
    if ((ammo > 0) && ((ammo + amount) < 1))
    {
-      tell(owner(this_object()), "%^BOLD%^%^RED%^You used the last of your ammo in your " + this_object()->short() + this_object()->wielded_attributes() + ".%^RESET%^\n");
+      tell(owner(this_object()), "%^BOLD%^%^RED%^You used the last of the " + ammo_desc + " for your " + this_object()->short() + this_object()->wielded_attributes() + ".%^RESET%^\n");
    }
 
    ammo += amount;

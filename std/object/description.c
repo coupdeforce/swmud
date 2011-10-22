@@ -94,6 +94,11 @@ string get_desc_properties()
       {
          output += "\n" + customize_description(type, customize_record[type]);
       }
+
+      if (this_object()->is_autoload())
+      {
+         output += "\nIt is autoloading.";
+      }
    }
 
    if (this_user() && wizardp(this_user()))

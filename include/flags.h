@@ -48,6 +48,7 @@
 #define F_DESTROYABLE           MakeFlag(STD_FLAGS, 5)
 #define F_ATTACHED              MakeFlag(STD_FLAGS, 14)
 #define F_TRANSPARENT           MakeFlag(STD_FLAGS, 16)
+#define F_AUTOLOAD              MakeFlag(STD_FLAGS, 17)
 
 /// MODULE_FLAGS
 #define F_OPEN                  MakeFlag(MODULE_FLAGS, 0)

@@ -284,6 +284,16 @@ int test_skill(string skill, int adjustment)
    return (destination_value > roll);
 }
 
+void add_skill_training_points(string skill, int amount)
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("add " + amount + " to skill training points to " + this_object()->short() + "'s " + skill + " skill", previous_object(-1)); }
+
+   if (skills[skill])
+   {
+      skills[skill][1] += amount;
+   }
+}
+
 //:FUNCTION query_skill_evaluation
 //Returns the player's overall evaluation (0 to 100 percent) of their skill point total.
 //This evaluation corresponds to how they are doing with respect to the maximum possible skill level.

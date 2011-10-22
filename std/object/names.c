@@ -18,7 +18,6 @@ int test_flag(mixed);
 
 varargs mixed call_hooks(string, mixed, mixed);
 private void resync();
-varargs string get_attributes(object ob);
 
 void create()
 {
@@ -27,7 +26,12 @@ void create()
    plurals = ({});
    adjs = ({});
    resync();
-   this_object()->add_save(({ "ids", "plurals", "adjs", "primary_id", "primary_adj", "internal_short", "long", "mass", "customize_record", "customize_times" }));
+   this_object()->add_save(({ "ids", "plurals", "adjs", "primary_id", "primary_adj", "internal_short", "long", "persist_flags", "psets" }));
+
+   if (!this_object()->is_living())
+   {
+      this_object()->add_save(({ "mass", "customize_record", "customize_times" }));
+   }
 }
 
 //:FUNCTION set_proper_name

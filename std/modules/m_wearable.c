@@ -36,7 +36,7 @@ private string wear_relation = "over";
 
 void mudlib_setup()
 {
-   this_object()->add_save(({ "body_size", "slots", "required_learned_skills", "required_skills", "required_guilds", "wear_message", "remove_message", "resize_count", "attribute_modifiers", "attribute_bonuses", "skill_bonuses", "to_hit_bonus", "heal_bonus", "body_armor_bonus", "wear_relation", "persist_flags" }));
+   this_object()->add_save(({ "body_size", "slots", "required_learned_skills", "required_skills", "required_guilds", "wear_message", "remove_message", "resize_count", "attribute_modifiers", "attribute_bonuses", "skill_bonuses", "to_hit_bonus", "heal_bonus", "body_armor_bonus", "wear_relation" }));
 }
 
 mixed ob_state()

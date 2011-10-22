@@ -9,6 +9,7 @@ void mudlib_setup()
    set_combat_messages("combat-blaster");
    set_skill_used("blaster combat");
    set_repair_skill("blaster repair");
+   set_repair_learn_requirement("blaster repair");
    set_repair_guilds(({"engineer", "mercenary", "smuggler", "bounty hunter"}));
    set_parts_type("blaster");
 }

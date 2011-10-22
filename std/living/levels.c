@@ -4,7 +4,6 @@ int query_experience();
 mapping guild_levels = ([ ]);
 mapping guild_ranks = ([ ]);
 string primary_guild = "";
-int primary_level = 0;
 
 //:FUNCTION query_primary_guild
 //Returns string with primary guild (ex., "jedi", "diplomat")
@@ -23,7 +22,6 @@ void set_primary_guild(string value)
    {
       value = lower_case(value);
       primary_guild = value;
-      primary_level = guild_levels[value];
    }
 }
 
@@ -34,35 +32,47 @@ void reset_primary_guild()
    if (this_object()->is_body()) { this_object()->check_wizard_set("reset " + this_object()->short() + "'s primary guild", previous_object(-1)); }
 
    primary_guild = "";
-   primary_level = 0;
 }
 
 //:FUNCTION query_primary_level
 //Returns primary level (ex., 1, 50)
 int query_primary_level()
 {
-   return primary_level;
+   if (strlen(primary_guild) && guild_levels[primary_guild])
+   {
+      return guild_levels[primary_guild];
+   }
+
+   return 0;
 }
 
 //:FUNCTION set_primary_level
 //Parameter is from 0 to 50
 void set_primary_level(int value)
 {
-   if (this_object()->is_body()) { this_object()->check_wizard_set("set " + this_object()->short() + "'s primary level from " + primary_level + " to " + value, previous_object(-1)); }
+   if (this_object()->is_body()) { this_object()->check_wizard_set("set " + this_object()->short() + "'s primary level to " + value, previous_object(-1)); }
 
    if ((value >= 0) && (value <= 50))
    {
-      primary_level = value;
+      int primary_level = 0;
 
-      if ((value > 0) && strlen(primary_guild) && guild_levels[primary_guild])
+      if (strlen(primary_guild) && guild_levels[primary_guild])
       {
-         guild_levels[primary_guild] = value;
+         primary_level = guild_levels[primary_guild];
       }
-      else if ((value < 1) && strlen(primary_guild) && guild_levels[primary_guild])
+
+      if (primary_level > 0)
       {
-         foreach (string guild_name in keys(guild_levels))
+         if (value > 0)
          {
-            remove_guild(guild_name);
+            guild_levels[primary_guild] = value;
+         }
+         else if (value < 1)
+         {
+            foreach (string guild_name in keys(guild_levels))
+            {
+               remove_guild(guild_name);
+            }
          }
       }
    }
@@ -139,11 +149,6 @@ void set_guild_level(string guild_name, int guild_level)
    {
       guild_name = lower_case(guild_name);
       guild_levels[guild_name] = guild_level;
-
-      if (guild_name == primary_guild)
-      {
-         primary_level = guild_level;
-      }
    }
 }
 
@@ -164,12 +169,18 @@ void set_guild_rank(string guild_name, int guild_rank)
 int can_advance_guild_level(string guild_name)
 {
    int level_total = 0;
+   int primary_level = 0;
    int secondary_level_total = 0;
    int guild_level = 0;
 
    if (guild_levels[guild_name])
    {
       guild_level = guild_levels[guild_name];
+   }
+
+   if (strlen(primary_guild) && guild_levels[primary_guild])
+   {
+      primary_level = guild_levels[primary_guild];
    }
 
    foreach (string name in keys(guild_levels))
@@ -182,7 +193,8 @@ int can_advance_guild_level(string guild_name)
    if (!strlen(guild_name)) { return 0; }
    else if (!strlen(primary_guild) && (guild_level >= 5)) { return 0; }
    else if ((member_array(guild_name, keys(guild_levels)) == -1) && (sizeof(guild_levels) >= 4)) { return 0; }
-   else if (guild_name == primary_guild)
+
+   if (guild_name == primary_guild)
    {
       if (primary_level < 50)
       {
@@ -210,9 +222,10 @@ int can_advance_guild_level(string guild_name)
    }
    else if ((guild_name == "jedi") && (guild_name != primary_guild))
    {
+      // Jedi sponsor check goes here
       return 0;
    }
-   else if (strlen(primary_guild) && (primary_level <= guild_level) || (guild_level >= 30))
+   else if ((primary_level <= guild_level) || (guild_level >= 30))
    {
       return 0;
    }
@@ -258,9 +271,24 @@ int can_advance_guild_level(string guild_name)
          return 0;
       }
    }
-   else if (guild_level == 30)
+   else if (guild_level >= 30)
    {
       return 0;
+   }
+   else
+   {
+      int next_level = guild_level + 1;
+      string experience_type = "secondary";
+      int required_experience;
+
+      if (guild_name == "jedi") { experience_type = "jedi"; }
+
+      required_experience = EXP_D->get_required_exp(experience_type, next_level);
+
+      if (query_experience() < required_experience)
+      {
+         return 0;
+      }
    }
 
    return 1;
@@ -272,12 +300,18 @@ int can_advance_guild_level(string guild_name)
 int get_experience_to_advance_guild(string guild_name)
 {
    int level_total = 0;
+   int primary_level = 0;
    int secondary_level_total = 0;
    int guild_level = 0;
 
    if (guild_levels[guild_name])
    {
       guild_level = guild_levels[guild_name];
+   }
+
+   if (strlen(primary_guild) && guild_levels[primary_guild])
+   {
+      primary_level = guild_levels[primary_guild];
    }
 
    foreach (string name in keys(guild_levels))
@@ -387,11 +421,6 @@ void advance_guild_level(string guild_name)
       {
          guild_levels[guild_name] = 1;
       }
-
-      if (primary_guild == guild_name)
-      {
-         primary_level = guild_levels[guild_name];
-      }
    }
 }
 
@@ -410,16 +439,13 @@ void remove_guild(string guild_name)
       if (primary_guild == guild_name)
       {
          primary_guild = "";
-         primary_level = 0;
-         
       }
 
       foreach (string secondary_guild in keys(guild_levels))
       {
-         if (guild_levels[secondary_guild] > primary_level)
+         if (guild_levels[secondary_guild] > guild_levels[primary_guild])
          {
             primary_guild = secondary_guild;
-            primary_level = guild_levels[secondary_guild];
          }
       }
    }
@@ -431,5 +457,4 @@ void reset_guilds()
    guild_levels = ([ ]);
    guild_ranks = ([ ]);
    primary_guild = "";
-   primary_level = 0;
 }
