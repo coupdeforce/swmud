@@ -15,6 +15,7 @@ void mudlib_setup()
    set_combat_messages("combat-blade");
    set_skill_used("saber_combat");
    set_repair_skill("saber repair");
+   set_repair_learn_requirement("lightsaber repair");
    set_repair_guilds(({"jedi"}));
    set_parts_type("lightsaber");
    add_save(({ "color", "deflection_bonus", "alignment", "name_crystal" }));

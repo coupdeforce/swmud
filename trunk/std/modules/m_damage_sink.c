@@ -15,7 +15,7 @@ private int armor_bonus = 0;
 
 void mudlib_setup()
 {
-   this_object()->add_save( ({ "armor_class", "armor_bonus", "resistances", "resistance_bonuses", "weaknesses", "weakness_bonuses", "persist_flags" }) );
+   this_object()->add_save( ({ "armor_class", "armor_bonus", "resistances", "resistance_bonuses", "weaknesses", "weakness_bonuses" }) );
 }
 
 //:FUNCTION set_armor_class

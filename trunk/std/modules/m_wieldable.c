@@ -37,7 +37,7 @@ private nosave function parry_hook;
 
 void mudlib_setup()
 {
-   this_object()->add_save(({ "wielding_limbs", "required_learned_skills", "required_skills", "required_guilds", "wield_message", "unwield_message", "attribute_modifiers", "attribute_bonuses", "skill_bonuses", "heal_bonus", "armor_bonus", "parry_bonus", "persist_flags" }));
+   this_object()->add_save(({ "wielding_limbs", "required_learned_skills", "required_skills", "required_guilds", "wield_message", "unwield_message", "attribute_modifiers", "attribute_bonuses", "skill_bonuses", "heal_bonus", "armor_bonus", "parry_bonus" }));
 }
 
 int valid_wield() // Return 1 if they can wield this.

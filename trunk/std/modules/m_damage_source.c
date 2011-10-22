@@ -32,7 +32,7 @@ private mapping combat_messages = ([]);
 
 void mudlib_setup()
 {
-   this_object()->add_save( ({ "damage_types", "damage_bonuses", "critical_chance_bonus", "critical_multiplier_bonus", "weapon_speed", "to_hit_base", "to_hit_bonus", "stun_bonus", "slow_bonus", "tear_bonus", "persist_flags" }) );
+   this_object()->add_save( ({ "damage_types", "damage_bonuses", "critical_chance_bonus", "critical_multiplier_bonus", "weapon_speed", "to_hit_base", "to_hit_bonus", "stun_bonus", "slow_bonus", "tear_bonus" }) );
 }
 
 int can_swing()
@@ -260,6 +260,13 @@ void set_damage_type(string type, int amount)
    damage_types[type] = amount;
 }
 
+//:FUNCTION set_damage_types
+// Set damage types for the weapon
+void set_damage_types(mapping types)
+{
+   damage_types = types;
+}
+
 mapping query_damage_types()
 {
    if (sizeof(damage_types))
@@ -294,6 +301,11 @@ mapping query_damage_types()
    return ([ "striking" : 1 ]);
 }
 
+mapping query_damage_types_pure()
+{
+   return damage_types;
+}
+
 //:FUNCTION set_damage_bonus
 // Set an overall modifier of weapon class on the object.  The bonus
 // does not get saved, so should only be used for temporary bonuses. (i.e. buffs)
@@ -319,22 +331,11 @@ mapping query_damage_bonuses()
 
 int query_weapon_class()
 {
-   if (sizeof(damage_types))
+   mapping types = query_damage_types();
+
+   if (sizeof(types))
    {
-      mapping types = ([ ]);
-      int durability = this_object()->query_durability();
-      int max_durability = this_object()->query_max_durability();
-      int total = 0;
-
-      foreach (string type in keys(damage_types) - keys(damage_bonuses) + keys(damage_bonuses))
-      {
-         if (floor((damage_types[type] + damage_bonuses[type]) * durability / max_durability) > 0)
-         {
-            total += to_int(floor((damage_types[type] + damage_bonuses[type]) * durability / max_durability));
-         }
-      }
-
-      return total;
+      return array_sum(values(types));
    }
 
    return 0;

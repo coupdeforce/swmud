@@ -45,6 +45,7 @@ void construct_object(object body)
    product->set_value(value);
    product->set_cortosis_weave(cortosis_weave);
    product->set_customize_record("constructed", body->short());
+   product->set_autoload();
    product->move(body);
 
    body->simple_action("$N carefully $vconstruct " + add_article(blade_desc) + " axe with " + add_article(hilt_desc) + " handle.");

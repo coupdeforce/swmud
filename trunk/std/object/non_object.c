@@ -1,4 +1,3 @@
-// Last edited by deforce on 07-05-2008
 #include <move.h>
 #include <hooks.h>
 #include <setbit.h>
@@ -66,4 +65,23 @@ varargs void set_attached(int a)
 int is_attached()
 {
    return test_flag(ATTACHED);
+}
+
+//:FUNCTION set_autoload
+//set_autoload(1) or set_autoload() sets the F_AUTOLOAD flag for this object, and set_autoload(0) removes it.
+varargs void set_autoload(int a)
+{
+   if (undefinedp(a))
+   {
+      a = 1;
+   }
+
+   assign_flag(AUTOLOAD, a);
+}
+
+//:FUNCTION is_autoload
+//returns 1 if the AUTOLOAD flag is set for this object.
+int is_autoload()
+{
+   return test_flag(AUTOLOAD);
 }

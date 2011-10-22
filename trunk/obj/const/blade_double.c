@@ -71,6 +71,7 @@ void construct_object(object body)
    product->set_value(value);
    product->set_cortosis_weave(cortosis_weave);
    product->set_customize_record("constructed", body->short());
+   product->set_autoload();
    product->move(body);
 
    if (blade1_desc == blade2_desc)
