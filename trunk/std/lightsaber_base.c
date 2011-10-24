@@ -1,5 +1,5 @@
 inherit WEAPON;
-//inherit M_LIGHT_SOURCE;
+inherit M_LIGHT_SOURCE;
 
 #include <lightsaber.h>
 
@@ -13,7 +13,7 @@ void mudlib_setup()
    add_id("lightsaber", "saber");
    weapon::mudlib_setup();
    set_combat_messages("combat-blade");
-   set_skill_used("saber_combat");
+   set_skill_used("saber combat");
    set_repair_skill("saber repair");
    set_repair_learn_requirement("lightsaber repair");
    set_repair_guilds(({"jedi"}));
@@ -25,17 +25,17 @@ int is_lightsaber() { return 1; }
 
 string query_wield_message()
 {
-//   light();
+   call_out("activate_light_source", 1);
 
    clear_adj();
-   call_out("add_adj", 1, get_lightsaber_color_code(color) + "%^RESET%^");
+   call_out("add_adj", 2, get_lightsaber_color_code(color) + "%^RESET%^");
 
    return "$N $vactivate $p $o, which produces a glowing " + get_lightsaber_color_code(color) + "%^RESET%^ blade.";
 }
 
 string query_unwield_message()
 {
-//   extinguish();
+   deactivate_light_source();
 
    remove_adj(get_lightsaber_color_code(color) + "%^RESET%^");
 
@@ -116,7 +116,7 @@ class event_info source_modify_event(class event_info evt)
 
    if ((level > 0) && this_body->has_learned_skill("lightsaber combat") && this_body->can_feel_force())
    {
-      int rank = this_body->query_skill("saber_combat") / 100;
+      int rank = this_body->query_skill("saber combat") / 100;
       int spec = this_body->query_guild_specialization_rank("jedi", "lightsaber");
       int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
       int min_damage = 0 + (level / (15 - rank)) + rank_spec;

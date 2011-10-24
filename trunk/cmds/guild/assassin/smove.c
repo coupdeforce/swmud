@@ -47,7 +47,7 @@ void main(string arg)
             {
                this_body->add_skill_delay(4);
 
-               if (this_body->test_skill("silent_move", (this_body->query_guild_level("assassin") * 10)))
+               if (this_body->test_skill("silent move", (this_body->query_guild_level("assassin") * 10)))
                {
                   load_object("/d/buffs/silent_movement");
                   this_body->add_buff(new("/d/buffs/silent_movement", get_duration()));
@@ -72,7 +72,7 @@ int get_duration()
 {
    object this_body = this_body();
    int level = this_body->query_guild_level("assassin");
-   int rank = this_body->query_skill("silent_movement") / 100;
+   int rank = this_body->query_skill("silent move") / 100;
 
    return 10 + ((level / 5) * 4) + (rank * 6);
 }

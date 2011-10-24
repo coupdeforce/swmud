@@ -1,39 +1,15 @@
-// Last edited by deforce on 07-03-2008
-inherit WEAPON;
-inherit M_LIGHT_SOURCE;
+inherit LIGHTSABER_BASE;
 
 string color = choice(({ "%^YELLOW%^yellow", "%^BOLD%^%^BLUE%^bright blue", "%^BOLD%^%^GREEN%^bright green" }));
 
 void setup()
 {
-   set_id("practice lightsaber", "lightsaber", "practice saber", "saber");
+   set_id("practice lightsaber", "practice saber");
    set_long("The case is made of polished silver metal covered in black rubber grips, with a single activation button.  The energy focus of this practice lightsaber is designed to make it as non-lethal as possible, although it is still possible to cause injury.");
-   set_combat_messages("combat-blade");
    set_damage_type("energy", 10);
-   set_durability(10);
-   set_skill_used("saber_combat");
+   set_durability(50);
    set_mass(3000);
    set_value(1500);
-}
-
-int is_lightsaber() { return 1; }
-
-string query_wield_message()
-{
-   light();
-
-   add_adj(color + "%^RESET%^");
-
-   return "$N $vactivate $p $o.";
-}
-
-string query_unwield_message()
-{
-   extinguish();
-
-   remove_adj(color + "%^RESET%^");
-
-   return "$N $vshut down $p $o.";
 }
 
 class event_info source_modify_event(class event_info evt)

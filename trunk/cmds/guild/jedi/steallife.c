@@ -98,7 +98,7 @@ int get_floor(object living)
    int force = this_body->query_for();
    int living_force = living->query_for();
    int level = this_body->query_guild_level("jedi");
-   int rank = this_body->query_skill("steal_life") / 100;
+   int rank = this_body->query_skill("steal life") / 100;
    int spec = this_body->query_guild_specialization_rank("jedi", "affliction");
    int amount = to_int((rank * 0.2) * ((force / 5) + (level / 5) + spec));
 

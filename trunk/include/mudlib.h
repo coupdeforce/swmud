@@ -228,6 +228,7 @@
 #define M_ITEMS                 "/std/modules/m_items"
 #define M_LIGHTSABER_COMPONENT  "/std/modules/m_lightsaber_component"
 #define M_PARSING               "/std/modules/m_parsing"
+#define M_POWER_CELL            "/std/modules/m_power_cell"
 #define M_RECONNECT             "/std/modules/m_reconnect"
 #define M_REGEX                 "/std/modules/m_regex"
 #define M_SAVE                  "/secure/modules/m_save"

@@ -8,7 +8,7 @@ void setup()
    set_combat_messages("combat-blade");
    set_damage_type("slashing", 16);
    set_durability(16);
-   set_skill_used("slash_2h");
+   set_skill_used("slash 2h");
    set("two_hands", 1);
    set_weapon_speed(2);
    set_to_hit_base(-25);

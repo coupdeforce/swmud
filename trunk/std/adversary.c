@@ -49,16 +49,16 @@ void mudlib_setup(mixed array args...)
 // take a swing at them.
 int start_fight(object who)
 {
-   if (!(who->attackable())) { return 0; }
+   if (!(who->is_attackable())) { return 0; }
 
    attacked_by(who, 1);
 
    return 1;
 }
 
-//:FUNCTION attackable
+//:FUNCTION is_attackable
 // return 1 if we can be attacked.
-int attackable()
+int is_attackable()
 {
    return 1;
 }

@@ -79,6 +79,7 @@ string holstered_attributes()
 string lighted_attributes()
 {
    if (this_object()->is_lightsaber()) { return ""; }
+   else if (this_object()->is_flashlight()) { return " (on)"; }
 
    return " (lit)";
 }

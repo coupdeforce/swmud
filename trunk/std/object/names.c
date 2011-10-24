@@ -179,7 +179,7 @@ string a_short()
 /****** the id() functions ******/
 int id(string arg)
 {
-   if (!arrayp(ids))
+   if (!arrayp(ids) || !sizeof(ids))
    {
       return 0;
    }
