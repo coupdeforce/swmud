@@ -161,6 +161,16 @@ private nomask void init_stuff()
       {
          inv->do_wear();
       }
+
+      if (inv->test_flag(F_LIGHTED))
+      {
+         inv->set_light(inv->query_light_class());
+
+         if (inv->is_flashlight())
+         {
+            inv->start_charge_drain();
+         }
+      }
    }
 
    update_container(this_object());

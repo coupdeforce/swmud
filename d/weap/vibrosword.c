@@ -8,7 +8,7 @@ void setup()
    set_combat_messages("combat-blade");
    set_damage_type("slashing", 20);
    set_durability(20);
-   set_skill_used("slash_1h");
+   set_skill_used("slash 1h");
    set_weapon_speed(1);
    set_mass(6000);
    set_value(2000);

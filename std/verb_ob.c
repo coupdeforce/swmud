@@ -1,4 +1,3 @@
-// Last edited by deforce on 10-08-2009
 // This is a standard verb handler.  It handles adding and removing verb rules (to/from the parser efuns)
 #include <verbs.h>
 
@@ -80,22 +79,49 @@ mixed check_ghost()
    return 1;
 }
 
-mixed check_vision()
+varargs mixed check_vision(object ob)
 {
-   if (environment(this_body())->query_light())
+   int light = environment(this_body())->query_light();
+
+   if (ob && ob->is_light_source())
+   {
+      return 1;
+   }
+
+   if (light >= 10000)
+   {
+      return "It's impossible to see in the ultra-violet light.\n";
+   }
+   else if (light >= 1000)
+   {
+      return "It's too bright to see.\n";
+   }
+
+   if (light > 0)
    {
       return 1;
    }
 
    if (environment(this_body())->parent_environment_accessible())
    {
-      if (environment(environment(this_body()))->query_light())
+      light = environment(environment(this_body()))->query_light();
+
+      if (light >= 10000)
+      {
+         return "It's impossible to see in the ultra-violet light.\n";
+      }
+      else if (light >= 1000)
+      {
+         return "It's too bright to see.\n";
+      }
+
+      if (light > 0)
       {
          return 1;
       }
    }
 
-   return "You can't see a thing!\n";
+   return "It's too dark to see.\n";
 }
 
 mixed check_condition()
@@ -111,11 +137,11 @@ mixed check_condition()
 }
 
 // All (most) can_* functions should call this
-mixed default_checks()
+varargs mixed default_checks(object ob)
 {
    mixed tmp;
 
-   if ((flags & NEED_TO_SEE) && (tmp = check_vision()) != 1)
+   if ((flags & NEED_TO_SEE) && (tmp = check_vision(ob)) != 1)
    {
       return tmp;
    }

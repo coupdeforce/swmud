@@ -1,37 +1,40 @@
-// Last edited by deforce on 07-03-2008
 // An object that provides light to its environment.
 // Iizuka seperated from m_lightable on 06-26-1998
 
 #include <hooks.h>
 #include <flags.h>
 
-string lighting_extra_short();
 void set_light(int);
 mixed call_hooks(string, int);
-string the_short();
 void set_flag(int);
 int test_flag(int);
 void clear_flag(int);
 
-private int is_lit = 0;
-private int light_level = 1;
+private int light_class = 1;
 
 int query_is_lit()
 {
-   return is_lit;
+   if (test_flag(F_LIGHTED))
+   {
+      return 1;
+   }
+
+   return 0;
 }
 
-void set_light_level(int x)
+int query_light_class()
 {
-   light_level = x;
+   return light_class;
 }
 
-protected void set_lit(int x)
+void set_light_class(int x)
 {
-   is_lit = x;
+   light_class = x;
 }
 
-mixed extinguish()
+int is_light_source() { return 1; }
+
+mixed deactivate_light_source()
 {
    string tmp;
 
@@ -44,7 +47,6 @@ mixed extinguish()
       return tmp;
    }
 
-   set_lit(0);
    clear_flag(F_LIGHTED);
    set_light(0);
 
@@ -55,7 +57,7 @@ mixed extinguish()
    return 1;
 }
 
-varargs mixed light(object with)
+varargs mixed activate_light_source(object with)
 {
    string tmp;
 
@@ -68,9 +70,8 @@ varargs mixed light(object with)
       return tmp;
    }
 
-   set_lit(1);
    set_flag(F_LIGHTED);
-   set_light(light_level);
+   set_light(light_class);
 
    //:HOOK light
    //called when an object is lit.  The return value is ignored.

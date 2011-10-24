@@ -23,7 +23,7 @@ void setup()
 
    set_combat_messages("combat-inject");
    set_damage_type("slashing", 5);
-   set_skill_used("slash_1h");
+   set_skill_used("slash 1h");
    set_durability(1);
    set_chance_to_be_damaged(100);
    set_weapon_speed(2);

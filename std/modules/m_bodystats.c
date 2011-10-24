@@ -189,27 +189,6 @@ void refresh_stats()
    if (cur_luc < this_object()->query_race_luc_min()) { cur_luc = this_object()->query_race_luc_min(); }
    if (cur_for < this_object()->query_race_for_min()) { cur_for = this_object()->query_race_for_min(); }
 
-//   this_object()->set_max_capacity(cur_str * 3);
-   this_object()->set_max_capacity(to_int(floor((cur_str + 100) * (1.25 * (cur_str / 100.0)))) + 50);
-
-   if (this_object()->query_max_capacity() < this_object()->query_capacity())
-   {
-      this_object()->simple_action("$N $vbecome overburdened with the weight of $p equipment.");
-
-      foreach (object thing in all_inventory(this_object()))
-      {
-         if (!thing->test_flag(F_WORN) && !thing->test_flag(F_WIELDED))
-         {
-            drop_object(thing);
-         }
-
-         if (this_object()->query_max_capacity() >= this_object()->query_capacity())
-         {
-            break;
-         }
-      }
-   }
-
 //   Now handled with m_damage_source_body
 //   this_object()->set_weapon_class(6 + to_int(floor((this_object()->query_primary_level() / 10.0) + (pow(cur_str / 100.0, 2) * (this_object()->query_primary_level() / 2.0)))));
 //   this_object()->set_to_hit_base(to_int(ceil(cur_agi / 2)) - 35);  // Unarmed to-hit penalty or bonus
@@ -239,6 +218,27 @@ void refresh_stats()
       }
 
       this_object()->set_max_fatigue_amount((max_health / 10) + this_object()->query_primary_level() + (this_object()->query_body_size() * cur_con / 5));
+
+//      this_object()->set_max_capacity(cur_str * 3);
+      this_object()->set_max_capacity(to_int(floor((cur_str + 100) * (1.25 * (cur_str / 100.0)))) + 50);
+
+      if (this_object()->query_max_capacity() < this_object()->query_capacity())
+      {
+         this_object()->simple_action("$N $vbecome overburdened with the weight of $p equipment.");
+
+         foreach (object thing in all_inventory(this_object()))
+         {
+            if (!thing->test_flag(F_WORN) && !thing->test_flag(F_WIELDED))
+            {
+               drop_object(thing);
+            }
+
+            if (this_object()->query_max_capacity() >= this_object()->query_capacity())
+            {
+               break;
+            }
+         }
+      }
    }
 }
 

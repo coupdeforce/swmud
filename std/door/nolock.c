@@ -1,7 +1,6 @@
-// Last edited by deforce on 08-07-2007
 inherit HIDDEN_DOOR;
 
-void setup(string name, string dir, string room, string locked, string desc)
+varargs void setup(string name, string dir, string room, string locked, string desc)
 {
    set_id("door");
    add_adj(dir);
@@ -13,6 +12,8 @@ void setup(string name, string dir, string room, string locked, string desc)
       set_closed(1);
       set_locked(locked);
    }
+
+   set_attached(1);
 
    setup_door(name, dir, room);
 }

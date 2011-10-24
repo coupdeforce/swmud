@@ -9,7 +9,7 @@ void setup()
    set_damage_type("slashing", 14);
    set_damage_type("striking", 14);
    set_durability(14);
-   set_skill_used("slash_2h");
+   set_skill_used("slash 2h");
    set("two_hands", 1);
    set_weapon_speed(1);
    set_mass(9250);

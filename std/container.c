@@ -31,6 +31,7 @@ class relation_data
 private mapping relations = ([ ]);
 private mapping relation_aliases=([]);  // Sometimes "in" and "on" etc mean the same thing, for example on the bed.
 private string default_relation;  // The default relation used for this container if none is specified.  It should usually be "in" but not necessarily */
+private mixed array doors = ({});  // Array allows the same door file name to be used for more than one door in the same room.
 
 int contained_light;
 int contained_light_added;
@@ -723,61 +724,81 @@ mixed array make_unique_objects_if_needed()
          {
             num = parameters;
          }
-         else
+         else if (arrayp(parameters)) 
          {
-            if (arrayp(parameters)) 
+            // Check the first argument for an integer value, if it is then it is the quantity for the object to be in the relation
+            if (intp(parameters[0]))
             {
-               // Check the first argument for an integer value, if it is then it is the quantity for the object to be in the relation
-               if (intp(parameters[0]))
-               {
-                  num = parameters[0];
-                  rest = parameters[1..];
-               }
-               // Everything else is parameters passed to create() */
-               else
-               {
-                  rest = parameters;
-               }
+               num = parameters[0];
+               rest = parameters[1..];
             }
+            // Everything else is parameters passed to create() */
             else
-            { 
-               continue;
-            }
-
-            matches = children(file);
-            matches = filter(matches, (: clonep($1) :));
-
-            // Clone x of the object to catch it up to the number of objects requested by the mapping */
-            while(sizeof(matches)<num)
             {
-               int ret;
-               object ob = new(absolute_path(file), rest...);
+               rest = parameters;
+            }
+         }
+         else
+         { 
+            continue;
+         }
 
-               if (!ob)
-               {
-                  error("Couldn't find file '" + file + "' to clone!\n");
-               }
+         matches = children(file);
+         matches = filter(matches, (: clonep($1) :));
 
-               // Test for uniqueness in the object by calling test_unique()
-               if (ob->test_unique()) { break; }
+         // Clone x of the object to catch it up to the number of objects requested by the mapping */
+         while (sizeof(matches) < num)
+         {
+            int ret;
+            object ob = new(absolute_path(file), rest...);
 
-               ret = ob->move(this_object(), "#CLONE#");
-
-               if (ret != MOVE_OK)
-               {
-                  error("Initial clone failed for '" + file +"': " + ret + "\n");
-               }
-
-               ob->on_clone(rest...);
-               matches += ({ ob });
+            if (!ob)
+            {
+               error("Couldn't find file '" + file + "' to clone!\n");
             }
 
-            objs += matches;
+            // Test for uniqueness in the object by calling test_unique()
+            if (ob->test_unique()) { break; }
+
+            ret = ob->move(this_object(), "#CLONE#");
+
+            if (ret != MOVE_OK)
+            {
+               error("Initial clone failed for '" + file +"': " + ret + "\n");
+            }
+
+            ob->on_clone(rest...);
+            matches += ({ ob });
          }
+
+         objs += matches;
       }
    }
 
    return objs;
+}
+
+void make_doors()
+{
+   foreach (mixed array door in doors)
+   {
+      if (sizeof(door[1]) == 3)
+      {
+         clone_object(door[0], door[1][0], door[1][1], door[1][2])->move(this_object());
+      }
+      else if (sizeof(door[1]) == 4)
+      {
+         clone_object(door[0], door[1][0], door[1][1], door[1][2], door[1][3])->move(this_object());
+      }
+      else if (sizeof(door[1]) == 5)
+      {
+         clone_object(door[0], door[1][0], door[1][1], door[1][2], door[1][3], door[1][4])->move(this_object());
+      }
+      else if (sizeof(door[1]) == 6)
+      {
+         clone_object(door[0], door[1][0], door[1][1], door[1][2], door[1][3], door[1][4], door[1][5])->move(this_object());
+      }
+   }
 }
 
 //:FUNCTION set_objects
@@ -826,6 +847,25 @@ varargs mixed array set_unique_objects(mapping m,string relation)
    relation = PREPOSITION_D->translate_preposition(relation);
    relations[relation]->create_unique_on_reset = m;
    return make_unique_objects_if_needed();
+}
+
+//:FUNCTION add_door
+//Provide a door object to be loaded now and at every reset.
+//The first string should be the filename of the door object, 
+//and the array should be the parameters passed to create() when the door object is cloned.
+varargs mixed array add_door(string file_name, string array params)
+{
+   if (strlen(file_name) && (sizeof(params) >= 3))
+   {
+      doors += ({ ({ file_name, params }) });
+   }
+
+   make_doors();
+}
+
+string array query_doors()
+{
+   return doors;
 }
 
 // Hrm, are the following two functions really necessary?  Should the relation themselves have more say in this?

@@ -177,10 +177,10 @@ string query_backstab_message()
    switch (skill_used)
    {
       case "unarmed": return "$N $vdeliver a surprising blow to the back of $p1 neck!";
-      case "slash_1h":
-      case "slash_2h": return "$N $vbury $p $o into $p1 back!";
-      case "strike_1h":
-      case "strike_2h": return "$N viciously $vclub $t in the back of the head with $p $o!";
+      case "slash 1h":
+      case "slash 2h": return "$N $vbury $p $o into $p1 back!";
+      case "strike 1h":
+      case "strike 2h": return "$N viciously $vclub $t in the back of the head with $p $o!";
    }
 
    return "$N $vbackstab $t with $p $o2!";
