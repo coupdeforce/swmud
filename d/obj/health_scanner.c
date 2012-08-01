@@ -1,4 +1,3 @@
-// Last edited by deforce on 05-06-2010
 inherit WEAPON;
 inherit M_GETTABLE;
 inherit M_VALUABLE;
@@ -16,7 +15,7 @@ void setup()
 
    set_combat_messages("combat-blunt");
    set_damage_type("striking", 5);
-   set_skill_used("strike_1h");
+   set_skill_used("strike 1h");
    set_durability(1);
    set_weapon_speed(1);
 }

@@ -129,7 +129,7 @@ mixed query_combat_messages()
       return def_combat_messages;
    }
 
-   return MESSAGES_D->get_messages("combat-blunt");
+   return MESSAGES_D->get_messages("combat-unarmed");
 }
 
 private mixed merge_lists(mixed list, mixed item, mixed def)

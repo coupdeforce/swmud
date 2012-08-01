@@ -1,4 +1,3 @@
-// Last edited by deforce on 10-06-2009
 // A smarter movement system for some objects.  It handles movement from room to room.
 #include <move.h>
 #include <playerflags.h>
@@ -140,15 +139,6 @@ private nomask int move_me_there(class move_data data)
       other_action(txt);
    }
 
-   foreach (object foe in this_object()->query_unfinished_business())
-   {
-      if (foe && (environment(foe) == env))
-      {
-         this_object()->attacked_by(foe);
-         foe->attacked_by(this_object());
-      }
-   }
-
    return r == MOVE_OK;
 }
 
@@ -188,7 +178,33 @@ varargs int move_to(class move_data data)
 
    if (where != environment())
    {
+      object env = environment();
+
       this_object()->notify_move();
+
+      foreach (object foe in this_object()->query_unfinished_business())
+      {
+         if (foe && (environment(foe) == env))
+         {
+            this_object()->attacked_by(foe);
+            foe->attacked_by(this_object());
+         }
+      }
+
+      foreach (object adversary in filter_array(all_inventory(env), (: $1->is_adversary() :)))
+      {
+         adversary->check_aggressive(this_object());
+         this_object()->check_aggressive(adversary);
+      }
+
+      if (this_object()->is_body())
+      {
+         foreach (object npc in filter_array(filter_array(all_inventory(env), (: $1->is_adversary() :)), (: !$1->is_body() :)))
+         {
+            npc->start_wandering();
+         }
+      }
+
       return 1;
    }
 

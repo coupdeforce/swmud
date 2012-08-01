@@ -21,8 +21,7 @@ void fire_at(object liv)
       {
          write("You are attempting to fire at \"" + liv->short() + "\".\n");
 
-//         this_body->initiate_combat(liv);
-         this_body->take_a_ranged_swing(liv);
+         this_body->initiate_combat(liv);
       }
       else
       {
@@ -105,7 +104,7 @@ void find_living(string liv, string dir)
 
          if (max_range <= dir_count)
          {
-            write("You're not able to aim any farther.\n");
+            write("You're not able to aim that far with any equiped weapon.\n");
          }
       }
 
@@ -117,7 +116,7 @@ void find_living(string liv, string dir)
       }
       else
       {
-         write("You didn't find a \"" + liv + "\".\n");
+         write("You didn't find a \"" + liv + "\" you can aim at.\n");
       }
 
 //      this_body->initiate_combat(liv);

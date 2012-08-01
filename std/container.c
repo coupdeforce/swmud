@@ -451,7 +451,7 @@ string long()
 
    res = simple_long();
 
-   if (!inventory_visible()) { return res; }
+   if (!inventory_visible() || !sizeof(relations)) { return res; }
 
    foreach (string rel, class relation_data data in relations)
    {

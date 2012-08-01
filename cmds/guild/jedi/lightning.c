@@ -17,6 +17,10 @@ void do_lightning_obj(object thing)
       {
          write("You are too busy to concentrate on manipulating the Force.\n");
       }
+      else if (!this_body->query_limb_health("left hand") && !this_body->query_limb_health("right hand"))
+      {
+         write("You are unable to channel Force lightning through your hands in their current condition.\n");
+      }
       else
       {
          if (thing->is_adversary())
@@ -73,6 +77,11 @@ void zap_target(object thing)
    int floor = level * force * rank_spec / 1000;
    int ceiling = (level + rank_spec) * rank_spec * force * force / 40000;
    int amount = (floor < ceiling ? floor + random(ceiling - floor + 1) : floor);
+
+   if (!this_body->query_limb_health("left hand") || !this_body->query_limb_health("right hand"))
+   {
+      amount /= 2;
+   }
 
    if (amount < (level / 2)) { amount = level / 2; }
 

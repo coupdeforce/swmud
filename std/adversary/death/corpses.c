@@ -10,6 +10,7 @@ varargs void stop_fight(object);
 void stop_attacking();
 void clear_flag(int);
 object query_last_weapon_used();
+varargs string *action(object *who, mixed msg, array obs...);
 
 private nosave string corpse_long;
 private nosave string corpse_filename = CORPSE;
@@ -64,18 +65,19 @@ protected void die()
 {
    object this_object = this_object();
    object killer = previous_object();
-   string weapon = this_object->query_last_weapon_used()->is_adversary() ? "bare hands" : this_object->query_last_weapon_used()->short();
+   object weapon = query_last_weapon_used();
+   string weapon_name = weapon->is_adversary() ? "bare hands" : weapon->short();
    string killer_name = killer->short();
-   string location = environment(this_object())->short();
-   string death_message;
+   object location = environment(this_object());
+   string death_message = weapon->query_death_message();
 
    if (killer && (killer != this_object()) && (environment(killer) != this_object()))
    {
-      death_message = capitalize(this_object->short()) + " was killed by " + killer_name + " with " + killer->query_possessive() + " " + weapon + " at " + location + ".";
+      death_message = replace_string(action(({ this_object(), killer }), death_message, weapon, location)[2], "\n", "");
    }
    else
    {
-      death_message = capitalize(this_object()->short()) + " inadvertently killed " + this_object()->query_reflexive() + " in a moment of carelessness with " + this_object()->query_possessive() + " " + weapon + " at " + location + ".";
+      death_message = capitalize(this_object()->short()) + " inadvertently killed " + this_object()->query_reflexive() + " in a moment of carelessness with " + this_object()->query_possessive() + " " + weapon_name + " at " + location->short() + ".";
    }
 
    stop_fight(0);
@@ -109,6 +111,6 @@ protected void die()
    }
 
    on_death();
-   drop_corpse(killer->short(), weapon); // subtle pun
+   drop_corpse(killer->short(), weapon_name); // subtle pun
    call_out("remove", 1);
 }

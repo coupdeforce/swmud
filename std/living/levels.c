@@ -4,6 +4,7 @@ int query_experience();
 mapping guild_levels = ([ ]);
 mapping guild_ranks = ([ ]);
 string primary_guild = "";
+int primary_level = 0;
 
 //:FUNCTION query_primary_guild
 //Returns string with primary guild (ex., "jedi", "diplomat")
@@ -22,6 +23,7 @@ void set_primary_guild(string value)
    {
       value = lower_case(value);
       primary_guild = value;
+      primary_level = guild_levels[primary_guild];
    }
 }
 
@@ -32,6 +34,7 @@ void reset_primary_guild()
    if (this_object()->is_body()) { this_object()->check_wizard_set("reset " + this_object()->short() + "'s primary guild", previous_object(-1)); }
 
    primary_guild = "";
+   primary_level = 0;
 }
 
 //:FUNCTION query_primary_level
@@ -149,6 +152,11 @@ void set_guild_level(string guild_name, int guild_level)
    {
       guild_name = lower_case(guild_name);
       guild_levels[guild_name] = guild_level;
+
+      if (guild_name == primary_guild)
+      {
+         primary_level = guild_level;
+      }
    }
 }
 
@@ -446,6 +454,7 @@ void remove_guild(string guild_name)
          if (guild_levels[secondary_guild] > guild_levels[primary_guild])
          {
             primary_guild = secondary_guild;
+            primary_level = guild_levels[secondary_guild];
          }
       }
    }

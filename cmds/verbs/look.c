@@ -3,8 +3,6 @@
 inherit VERB_OB;
 inherit M_GRAMMAR;
 
-string inspect_corpse(object ob);
-
 void do_look()
 {
    this_body()->force_look(1);
@@ -25,7 +23,7 @@ void do_look_at_obj(object ob, string name)
       if (this_body()->query_guild_level("bounty hunter")
          && this_body()->has_learned_skill("inspect corpse") && !ob->has_inspection_failure())
       {
-         str += inspect_corpse(ob);
+         str += ob->inspect_corpse(this_body());
       }
       else
       {
@@ -194,74 +192,9 @@ void do_look_for_obs(array info)
    write(res + ".\n");
 }
 
-string inspect_corpse(object ob)
-{
-   object this_body = this_body();
-   string text = "";
-
-   if (ob->query_killer() == this_body->query_name())
-   {
-      text += "You killed them with ";
-
-      if (ob->query_killer_weapon() == "bare hands")
-      {
-         text += "your bare hands";
-      }
-      else
-      {
-         text += add_article(ob->query_killer_weapon());
-      }
-
-      text += " " + convert_time(time() - ob->query_death_time()) + " ago.\n";
-   }
-   else if (ob->has_been_inspected_by(this_body->query_name()) || this_body->test_skill("inspect corpse", this_body->query_guild_level("bounty hunter") * 12))
-   {
-      ob->set_inspected_by(this_body->query_name(), 1);
-
-      text += "It looks like they were killed " + convert_time(time() - ob->query_death_time()) + " ago.\n";
-
-      if ((ob->has_been_inspected_by(this_body->query_name()) > 1) || this_body->test_skill("inspect corpse", this_body->query_guild_level("bounty hunter") * 8))
-      {
-         ob->set_inspected_by(this_body->query_name(), 2);
-
-         if (ob->query_killer_weapon() == "bare hands")
-         {
-            text += "It looks like the killer used their bare hands.\n";
-         }
-         else
-         {
-            text += "It looks like they were killed with " + add_article(ob->query_killer_weapon()) + ".\n";
-         }
-
-         if ((ob->has_been_inspected_by(this_body->query_name()) > 2) || this_body->test_skill("inspect corpse", this_body->query_guild_level("bounty hunter") * 4))
-         {
-            ob->set_inspected_by(this_body->query_name(), 3);
-
-            text += "This murder looks like the work of " +  ob->query_killer() + ".\n";
-         }
-         else
-         {
-            text += "This murder doesn't seem to match anyone's modus operandi.\n";
-         }
-      }
-   }
-   else if (random(this_body->query_skill("inspect corpse")) < (110 - this_body->query_per()))
-   {
-      ob->set_inspected_by(this_body->query_name());
-
-      text += "You gain nothing from inspection, and the evidence is ruined.\n";
-   }
-   else
-   {
-      text += "Upon inspection, you discover nothing related to the murder.\n";
-   }
-
-   return text;
-}
-
 void create()
 {
-   clear_flag(NEED_TO_BE_ALIVE);
+//   clear_flag(NEED_TO_BE_ALIVE);
 
    add_rules( ({ "", "in OBJ", "on OBJ", "at OBJ", "for OBS", "at OBS with OBJ" }) );
    add_rules( ({ "OBS", "OBS with OBJ" }) );

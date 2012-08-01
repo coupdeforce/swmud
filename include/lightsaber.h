@@ -1,4 +1,3 @@
-// Last edited by deforce on 04-30-2010
 mapping lightsaber_color_list = ([
    "blue" : "%^BLUE%^blue",
    "bright blue" : "%^BOLD%^%^BLUE%^bright blue",
@@ -7,6 +6,7 @@ mapping lightsaber_color_list = ([
    "green" : "%^GREEN%^green",
    "bright green" : "%^BOLD%^%^GREEN%^bright green",
    "magenta" : "%^MAGENTA%^magenta",
+   "violet" : "%^MAGENTA%^violet",
    "orange" : "%^ORANGE%^orange",
    "pink" : "%^BOLD%^%^MAGENTA%^pink",
    "red" : "%^RED%^red",

@@ -50,7 +50,7 @@ void do_kill()
    }
    else
    {
-      write("Attack whom?");
+      write("Attack whom?\n");
    }
 }
 
