@@ -71,7 +71,10 @@ void add_option_block(string option, string player)
          option_blocks[option] = ({ });
       }
 
-      option_blocks[option] += ({ player });
+      if (!has_option_block(option, player))
+      {
+         option_blocks[option] += ({ player });
+      }
    }
 }
 

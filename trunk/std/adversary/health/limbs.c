@@ -287,22 +287,23 @@ void disable_limb(string limb)
    }
    else if (((class limb)health[limb])->flags & LIMB_WIELDING)
    {
-      simple_action("$P $o is severed and falls to the ground.", limb);
+      simple_action("$P $o is now broken.", limb);
+//      simple_action("$P $o is severed and falls to the ground.", limb);
+
+//      new("/std/severed_limb", this_object()->query_primary_id(), limb)->move(environment(this_object()));
 
       do_unwield(limb);
    }
    else if (member_array(limb, ({ "head", "torso" })) == -1)
    {
-      simple_action("$P $o is severed and falls to the ground.", limb);
+      simple_action("$P $o is now broken.", limb);
    }
 
-   new("/std/severed_limb", this_object()->query_primary_id(), limb)->move(environment(this_object()));
-
-   // This is hard-coded, but better than nothing for now
-   if (limb == "left arm") { disable_limb("left hand"); }
-   else if (limb == "right arm") { disable_limb("right hand"); }
-   else if (limb == "left leg") { disable_limb("left foot"); }
-   else if (limb == "right leg") { disable_limb("right foot"); }
+   // This is hard-coded, and should check based on body hierarchy, but better than nothing for now
+   if ((limb == "left arm") && (((class limb)health["left hand"])->health > 0)) { disable_limb("left hand"); }
+   else if ((limb == "right arm") && (((class limb)health["right hand"])->health > 0)) { disable_limb("right hand"); }
+   else if ((limb == "left leg") && (((class limb)health["left foot"])->health > 0)) { disable_limb("left foot"); }
+   else if ((limb == "right leg") && (((class limb)health["right foot"])->health > 0)) { disable_limb("right foot"); }
 }
 
 //:FUNCTION enable_limb
@@ -642,8 +643,17 @@ void reincarnate()
       set_health(1);
       enable_limb("head");
       enable_limb("torso");
+      enable_limb("left leg");
+      enable_limb("left foot");
+      enable_limb("right leg");
+      enable_limb("right foot");
 
-      dead = 0;
+      if (this_object()->has_effect("poison"))
+      {
+         this_object()->has_effect("poison")->add_poison_strength(-1000000);
+      }
+
+      hit_points = max_hit_points;
       health_time = time();
       limb_health_time = health_time;
       fatigue_time = health_time;
@@ -653,7 +663,9 @@ void reincarnate()
          this_object()->stop_fight(target);
       }
 
-      environment(this_object())->do_looking(1, this_object());
+      dead = 0;
+
+      this_object()->force_look();
    }
 }
 

@@ -336,6 +336,20 @@ string title_capitalize(string instring)
    return implode(out, " ");
 }
 
+//:FUNCTION lower_case_array
+//Return the lower case version of every string in the array.
+string array lower_case_array(string array input)
+{
+   string array output = ({ });
+
+   foreach (string text in input)
+   {
+      output += ({ lower_case(text) });
+   }
+
+   return output;
+}
+
 string add_article(string str)
 {
    switch (terminal_colour(str, ANSI_D->query_translations()[1], strlen(str))[0])

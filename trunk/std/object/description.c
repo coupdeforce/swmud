@@ -3,6 +3,8 @@
 
 inherit M_GRAMMAR;
 
+string get_extra_description();
+
 // Our descriptions:
 // long:   should be a complete sentence or a closure.
 // in_room_desc: A longer string for rooms.  Titles for players.
@@ -28,8 +30,7 @@ string plural_short();
 string a_short();
 string query_title();
 string sex_race();
-string team_health();
-private string health();
+string get_health_description();
 string team_description(int alignment);
 string health_description(int percent);
 string size_description(int size);
@@ -45,7 +46,7 @@ void set_long(mixed str)
 {
    long = str;
    if (functionp(long)) { return; }
-   if ((long == "") || (long[<1] != '\n')) { long += "\n"; }
+//   if ((long == "") || (long[<1] != '\n')) { long += "\n"; }
 }
 
 //:FUNCTION get_base_long
@@ -60,7 +61,7 @@ string get_base_long()
    res = evaluate(long);
    if (!res) { return "You see nothing special about " + the_short() + ".\n"; }
 
-   return res;
+   return res + "  " + get_extra_description() + "\n";
 }
 
 string get_extra_long()
@@ -112,11 +113,17 @@ string get_desc_properties()
    return output;
 }
 
+// This can be overloaded in an object, and is added directly after the long description.
+string get_extra_description()
+{
+   return "";
+}
+
 //:FUNCTION long
 //Return the verbose description of an object that you see when you look at it.
 string long()
 {
-   return get_base_long() + team_health() + get_extra_long() + get_desc_properties();
+   return get_base_long() + get_health_description() + get_extra_long() + get_desc_properties();
 }
 
 protected string array discarded_message, plural_discarded_message;
@@ -294,7 +301,7 @@ string team_health()
    return "";
 }
 
-private string health()
+private string get_health_description()
 {
    object this_object = this_object();
 

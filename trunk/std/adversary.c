@@ -3,6 +3,7 @@
 // Lots of work done by Iizuka to get this working.
 inherit LIVING;
 inherit M_ACTIONS;
+inherit M_SMARTMOVE;
 inherit "/std/modules/m_damage_source_body";
 inherit "/std/modules/m_damage_sink_body";
 inherit M_BODY_STATS;
@@ -30,6 +31,8 @@ inherit MODULE("blows", BLOW_MODULE);
 //inherit MODULE("formula", FORMULA_MODULE);
 inherit MODULE("advancement", ADVANCEMENT_MODULE);
 
+void set_follow(object who);
+
 void mudlib_setup(mixed array args...)
 {
    living::mudlib_setup(args...);
@@ -52,6 +55,7 @@ int start_fight(object who)
    if (!(who->is_attackable())) { return 0; }
 
    attacked_by(who, 1);
+   this_object()->set_follow(who);
 
    return 1;
 }

@@ -35,7 +35,7 @@ void do_minor_liv(object living)
       }
       else
       {
-         if (this_body->test_skill("surgery_minor", (this_body->query_guild_level("physician") * 16)))
+         if (this_body->test_skill("surgery minor", (this_body->query_guild_level("physician") * 16)))
          {
             if (remove_bacta_from_medpacs(2) == 2)
             {
@@ -46,7 +46,7 @@ void do_minor_liv(object living)
          {
             string waste = "";
 
-            if ((200 - (this_body->query_int() * 2)) > this_body->query_skill("surgery_minor"))
+            if ((200 - (this_body->query_int() * 2)) > this_body->query_skill("surgery minor"))
             {
                remove_bacta_from_medpacs(2);
 
@@ -80,7 +80,7 @@ void heal(object body)
 {
    object this_body = this_body();
    int level = this_body->query_guild_level("physician");
-   int rank = this_body->query_skill("surgery_minor") / 100;
+   int rank = this_body->query_skill("surgery minor") / 100;
    int spec = body->query_guild_specialization_rank("physician", "healing");
    int rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
    int heal_amount = to_int(ceil((level + rank_spec + this_body->query_int()) * this_body->query_int() / 100.0));

@@ -1,23 +1,18 @@
 #include <daemons.h>
 
 int query_max_health();
-int array query_guild_levels();
 int query_experience();
 void set_experience(int value);
 void set_primary_level(int value);
 int query_primary_level();
-int get_experience_to_advance_guild(string guild_name);
 string query_primary_guild();
-string array query_guild_names();
-int query_guild_level(string guild_name);
-void set_guild_level(string guild_name, int guild_level);
-void remove_guild(string guild_name);
 string query_name();
 string query_race();
 void receive_private_msg(string message);
 void refresh_stats();
 
 int deaths;
+int pk_deaths;
 mapping killed_by = ([ ]);
 mapping killed_where = ([ ]);
 
@@ -44,6 +39,7 @@ protected void death_penalty()
       int killer_level = killer->query_primary_level();
       string killer_message = "You have killed " + query_name() + ", who is ";
       killed_message += "You were killed by " + killer->query_name() + ", who is ";
+      pk_deaths++;
 
       if (killer_level > level)
       {
@@ -200,86 +196,33 @@ protected void death_penalty()
    else if (killer && (killer != this_object()) && (environment(killer) != this_object()))
    {
       killed_message += "You were killed by " + killer->in_room_desc() + ".\n";
+   }
 
-      if (level > 1)
+   if (new_exp != experience)
+   {
+      set_experience(new_exp);
+
+      killed_message += "You had " + experience + " experience points and are left with " + new_exp + ", losing " + (experience - new_exp) + ".\n\n";
+   }
+
+   receive_private_msg(killed_message);
+
+   foreach (object thing in deep_inventory(this_object()))
+   {
+      if (thing->query_durability() > 1)
       {
-         int needed_exp;
-         int exp_penalty = 50;
-         int kept_exp;
-         int max_health = query_max_health();
-         float level_count = 0.0;
-         new_exp = experience;
-
-         set_primary_level(level - 1);
-
-         killed_message += "Your primary guild, " + title_capitalize(query_primary_guild()) + ", has been decreased to level " + (level - 1) + ".\n";
-
-         foreach (int value in query_guild_levels())
-         {
-            level_count += value;
-         }
-
-         foreach (string guild in query_guild_names())
-         {
-            int secondary_level = query_guild_level(guild);
-
-            if (secondary_level >= level)
-            {
-               set_guild_level(guild, level - 1);
-
-               killed_message += "Your " + title_capitalize(guild) + " level has been decreased to " + (level - 1) + ".\n";
-            }
-         }
-
-         if ((sizeof(query_guild_names()) == 4) && (level <= 30))
-         {
-            foreach (string guild in query_guild_names())
-            {
-               int fourth_guild_level = query_guild_level(guild);
-
-               if (fourth_guild_level <= 10)
-               {
-                  remove_guild(guild);
-
-                  killed_message += "Your membership in the " + capitalize(guild) + " guild has been lost.\n";
-               }
-            }
-         }
-
-         refresh_stats();
-
-         killed_message += "You lose " + (max_health - query_max_health()) + " hit points.\n";
-
-         needed_exp = get_experience_to_advance_guild(query_primary_guild());
-
-         if (level >= 20)
-         {
-            exp_penalty += level;
-         }
-
-         kept_exp = floor(needed_exp * ((100.0 - exp_penalty) / 100.0));
-
-         if (new_exp > kept_exp)
-         {
-            new_exp = kept_exp;
-         }
-      }
-      else
-      {
-         new_exp = experience;
-
-         if (new_exp > 500)
-         {
-            new_exp = 500;
-         }
+         thing->decrease_durability(1);
       }
    }
 
-   set_experience(new_exp);
+   if (level > 1)
+   {
+      load_object("/d/buffs/bacta_immersion");
+      this_object()->add_buff(new("/d/buffs/bacta_immersion", 10 + (level * 2)));
 
-   killed_message += "You had " + experience + " experience points and are left with " + new_exp + ", losing " + (experience - new_exp) + ".\n\n";
-
-   receive_private_msg(killed_message);
+      load_object("/std/effect/bacta_immersion");
+      new("/std/effect/bacta_immersion", 10 + (level * 2), level * 60)->move(this_object());
+   }
 }
 
 int query_deaths()
@@ -298,11 +241,28 @@ void set_deaths(int new_deaths)
    }
 }
 
+int query_pk_deaths()
+{
+   return pk_deaths;
+}
+
+void set_pk_deaths(int new_pk_deaths)
+{
+   if (this_object()->is_body()) { this_object()->check_wizard_set("set " + this_object()->short() + "'s pk deaths to " + new_pk_deaths, previous_object(-1)); }
+
+   if (new_pk_deaths >= 1)
+   {
+      pk_deaths = new_pk_deaths;
+      save_me();
+   }
+}
+
 void reset_deaths()
 {
    if (this_object()->is_body()) { this_object()->check_wizard_set("reset " + this_object()->short() + "'s deaths", previous_object(-1)); }
 
    deaths = 0;
+   pk_deaths = 0;
    save_me();
 }
 

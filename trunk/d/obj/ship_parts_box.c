@@ -12,7 +12,6 @@ void setup()
 
 void do_search()
 {
-   object player = previous_object(1);
    object guard = present("ship parts box guard");
 
    if (guard)
@@ -21,15 +20,19 @@ void do_search()
    }
    else
    {
+      object player = previous_object(1);
+
       if ((time() - last_search_time) > 3600)
       {
          last_search_time = time();
 
-         player->simple_action("$N $vsearch through the box and $vfind some ship parts.\n");
+         player->simple_action("$N $vsearch through the box and $vfind some ship parts.");
+
+         new("/d/obj/toolbox", ([ "ship" : 10 + random(11) ]))->move(player);
       }
       else
       {
-         player->simple_action("$N $vsearch through the box and $vfind nothing but packing materials.\n");
+         player->simple_action("$N $vsearch through the box and $vfind nothing but packing materials.");
       }
    }
 }

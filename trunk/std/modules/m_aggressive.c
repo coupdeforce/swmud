@@ -1,106 +1,129 @@
 // Inheritable for aggressive monsters
-// Onyx@Red Dragon
-// NOTE: Someone who understands Lima vanilla combat should edit the
-// line I indicated to make this compat.
-//
 // 12 May, 1998: Iizuka updated to support the new adversary code.
-
-void add_hook(string tag, function hook);
-void remove_hook(string tag, function hook);
+int is_aggressive_to(object who);
 void start_fight(object who);
-void process_agro(object who);
-void process_move();
 
-function agro_func;
-function move_func;
-private object my_loc;
 private int aggression_chance = 100;
+private mapping jedi_aggression_chance = ([ "light" : 0, "neutral" : 0, "dark" : 0 ]);
 
-//:FUNCTION handle_attack
-// By default, this compares a random number to aggression_chance
-// and starts attacking based upon them. This function might be
-// overloaded to perform racial checks or something though.
-protected void handle_attack(object who)
+//:FUNCTION is_aggressive_to
+// This function can be overloaded in the monster file.  Lower priority than is_friendly_to()
+int is_aggressive_to(object who)
 {
-   if (random(100) < aggression_chance)
-   {
-      start_fight(who);
-   }
+   return 0;
+}
+
+//:FUNCTION is_friendly_to
+// This function can be overloaded in the monster file.  Higher priority than is_aggressive_to()
+int is_friendly_to(object who)
+{
+   return 0;
 }
 
 // It checks to see which objects in the room are players and attacks them.
-void process_agro(object who)
+// By default, this compares a random number to aggression_chance. 
+void check_aggressive(object who)
 {
-   if (who == this_object())
+   if (wizardp(who) && (who->query_shell_ob()->get_variable("god mode") == "on"))
    {
-      foreach(object thing in all_inventory(environment()))
+      return;
+   }
+
+   if (this_object()->is_friendly_to(who))
+   {
+      return;
+   }
+
+   if (this_object()->is_aggressive_to(who))
+   {
+      start_fight(who);
+
+      return;
+   }
+
+   if (random(100) < aggression_chance)
+   {
+      start_fight(who);
+
+      return;
+   }
+
+   if (who->query_guild_level("jedi"))
+   {
+      int alignment = who->query_jedi_alignment();
+      int chance = 0;
+
+      if ((alignment > 0) && (jedi_aggression_chance["light"] > 0))
       {
-         if (thing->is_attackable() && (thing != this_object()))
-         {
-            handle_attack(thing);
-         }
+         chance = jedi_aggression_chance["light"];
+      }
+      else if ((alignment < 0) && (jedi_aggression_chance["dark"] > 0))
+      {
+         chance = jedi_aggression_chance["dark"];
+      }
+
+      if (random(100) < chance)
+      {
+         start_fight(who);
+
+         return;
       }
    }
-   else
-   {
-      handle_attack(who);
-   }
 }
 
-// It moves the "object_arrived" hook (which is associated with a room) when the aggressive monster moves
-void process_move()
-{
-   if (my_loc)
-   {
-      my_loc->remove_hook("object_arrived", agro_func);
-   }
-
-   my_loc = environment();
-   agro_func = (: process_agro :);
-   my_loc->add_hook("object_arrived", agro_func);
-}
-
-//:FUNCTION set_aggressive
+//:FUNCTION set_aggressive_chance
 // This function is used to set the aggression chance of a monster in the
-// range 0 (never aggressive) to 100 (completely aggressive).
-void set_aggressive(int a)
+// range of 0 (never aggressive) to 100 (completely aggressive).
+void set_aggressive_chance(int percent_chance)
 {
-   if (!a)
+   aggression_chance = percent_chance;
+
+   if (aggression_chance < 0)
    {
-      if (my_loc)
-      {
-         my_loc->remove_hook("object_arrived", agro_func);
-      }
-
-      if (aggression_chance)
-      {
-         remove_hook("move", move_func);
-      }
+      aggression_chance = 0;
    }
-   else
+   else if (aggression_chance > 100)
    {
-      my_loc = environment();
-
-      if (my_loc)
-      {
-         agro_func = (: process_agro :);
-         my_loc->add_hook("object_arrived", agro_func);
-      }
-
-      if (!aggression_chance)
-      {
-         move_func = (: process_move :);
-         add_hook("move", move_func);
-      }
+      aggression_chance = 100;
    }
-
-   aggression_chance = a;
 }
 
-//:FUNCTION query_aggressive
+//:FUNCTION query_aggressive_chance
 // This function returns 0 for unaggressive monsters, or the chance of
 // aggression for aggressive monsters.
-int query_aggressive()
+int query_aggressive_chance()
 {
    return aggression_chance;
+}
+
+//:FUNCTION set_jedi_aggressive_chance
+// This function is used to set the aggression chance of a monster in the
+// range of 0 (never aggressive) to 100 (completely aggressive) for jedi alignments.
+void set_jedi_aggressive_chance(string alignment, int percent_chance)
+{
+   jedi_aggression_chance[alignment] = percent_chance;
+
+   if (jedi_aggression_chance[alignment] < 0)
+   {
+      jedi_aggression_chance[alignment] = 0;
+   }
+   else if (jedi_aggression_chance[alignment] > 100)
+   {
+      jedi_aggression_chance[alignment] = 100;
+   }
+}
+
+//:FUNCTION query_jedi_aggressive_chance
+// This function returns 0 for unaggressive monsters, or the chance of
+// aggression for aggressive monsters, for the specified jedi alignment.
+int query_jedi_aggressive_chance(string alignment)
+{
+   return jedi_aggression_chance[alignment];
+}
+
+//:FUNCTION query_jedi_aggressive_chance_alignments
+// This function returns the mapping of jedi alignments and aggressiveness.
+mapping query_jedi_aggressive_chance_alignments()
+{
+   return jedi_aggression_chance;
 }

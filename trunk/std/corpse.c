@@ -2,6 +2,10 @@ inherit CONTAINER;
 inherit M_DECAY;
 inherit M_MESSAGES;
 
+string inspect_corpse(object inspector);
+void set_inspected_by(string name, int value);
+void set_inspection_failure();
+
 string the_name;
 string killed_by;
 string killed_with;
@@ -100,6 +104,71 @@ int query_death_time() { return death_time; }
 int query_hide_contents()
 {
    return 1;
+}
+
+string inspect_corpse(object inspector)
+{
+   object this_body = this_body();
+   string text = "";
+
+   if (killed_by == inspector->query_name())
+   {
+      text += "You killed them with ";
+
+      if (killed_with == "bare hands")
+      {
+         text += "your bare hands";
+      }
+      else
+      {
+         text += add_article(killed_with);
+      }
+
+      text += " " + convert_time(time() - death_time) + " ago.\n";
+   }
+   else if (inspection_log[inspector->query_name()] || inspector->test_skill("inspect corpse", inspector->query_guild_level("bounty hunter") * 12))
+   {
+      set_inspected_by(inspector->query_name(), 1);
+
+      text += "It looks like they were killed " + convert_time(time() - death_time) + " ago.\n";
+
+      if ((inspection_log[inspector->query_name()] > 1) || inspector->test_skill("inspect corpse", inspector->query_guild_level("bounty hunter") * 8))
+      {
+         set_inspected_by(inspector->query_name(), 2);
+
+         if (killed_with == "bare hands")
+         {
+            text += "It looks like the killer used their bare hands.\n";
+         }
+         else
+         {
+            text += "It looks like they were killed with " + add_article(killed_with) + ".\n";
+         }
+
+         if ((inspection_log[inspector->query_name()] > 2) || inspector->test_skill("inspect corpse", inspector->query_guild_level("bounty hunter") * 4))
+         {
+            set_inspected_by(inspector->query_name(), 3);
+
+            text += "This murder looks like the work of " +  killed_by + ".\n";
+         }
+         else
+         {
+            text += "This murder doesn't seem to match anyone's modus operandi.\n";
+         }
+      }
+   }
+   else if (random(inspector->query_skill("inspect corpse")) < (110 - inspector->query_per()))
+   {
+      set_inspection_failure();
+
+      text += "You gain nothing from inspection, and the evidence is ruined.\n";
+   }
+   else
+   {
+      text += "Upon inspection, you discover nothing related to the murder.\n";
+   }
+
+   return text;
 }
 
 void set_inspection_failure()

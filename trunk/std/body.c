@@ -21,9 +21,9 @@
 // Files we need to inherit --
 inherit ADVERSARY;
 inherit M_ACCESS;
-inherit M_SMARTMOVE;
+//inherit M_SMARTMOVE;
 inherit M_FOLLOW;
-inherit M_ACTIONS;
+//inherit M_ACTIONS;
 
 //#ifndef EVERYTHING_SAVES
 //private inherit M_SAVE; // don't want people calling load_from_string() externally
@@ -374,9 +374,15 @@ protected void die()
 {
    object killer = previous_object();
    object weapon = query_last_weapon_used();
-   string weapon_name = weapon->is_adversary() ? "bare hands" : weapon->short();
-   object location = environment(this_object());
-   string death_message = weapon->query_death_message();
+   string weapon_name;
+   object location;
+   string death_message;
+
+   if (!weapon) { return; }
+
+   weapon_name = weapon->is_adversary() ? "bare hands" : weapon->short();
+   location = environment(this_object());
+   death_message = weapon->query_death_message();
 
    if (killer && (killer != this_object()) && (environment(killer) != this_object()))
    {
@@ -422,7 +428,7 @@ protected void die()
    }
 
    add_a_death();
-   drop_corpse(killer->short(), weapon_name);
+//   drop_corpse(killer->short(), weapon_name);
    move(MORGUE_D->query_morgue(file_name(environment(killer))));
    this_object()->reset_unjustified_ithorian_targets();
    death_penalty();

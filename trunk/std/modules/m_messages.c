@@ -18,7 +18,7 @@ nosave private string vowels = "aeiouAEIOU";
 #define SHORT(x) (objectp(x) ? x->short() : x)
 #define THE_SHORT(x) (objectp(x) ? x->the_short() : "the " + x)
 mapping messages = ([]);
-string def_message_type;
+string def_message_type = "living-default";
 
 void set_def_msgs(string type) {
     def_message_type=type;

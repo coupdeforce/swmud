@@ -184,7 +184,7 @@ int id(string arg)
       return 0;
    }
 
-   return member_array(arg, ({ lower_case(ids[0]) }) + ids) != -1;
+   return member_array(lower_case(arg), lower_case_array(ids)) != -1;
 }
 
 int plural_id(mixed arg)
@@ -194,7 +194,7 @@ int plural_id(mixed arg)
       return 0;
    }
 
-   return member_array(arg, ({ lower_case(plurals[0]) }) + plurals) != -1;
+   return member_array(lower_case(arg), lower_case_array(plurals)) != -1;
 }
 
 // In the following, id handles _both_ id and plural, except in the _no_plural cases.

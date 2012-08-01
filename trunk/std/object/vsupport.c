@@ -443,6 +443,16 @@ mixed direct_listen_to_obj(object obj)
    return "You hear nothing special.";
 }
 
+mixed direct_extract_wrd_from_obj(string word, object ob)
+{
+   return "There is nothing you can extract from " + ob->the_short() + ".\n";
+}
+
+mixed direct_smash_obj(object ob)
+{
+   return "There is no reason to smash " + ob->the_short() + ".\n";
+}
+
 //:FUNCTION direct_repair_obj
 //Handle parser checks for "repair OBJ"
 mixed direct_repair_obj(object ob)

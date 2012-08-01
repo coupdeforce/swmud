@@ -7,7 +7,7 @@ void setup(string name)
       name = "mysterious";
    }
 
-   set_id(capitalize(name) + " crystal", name, "crystal");
+   set_id(capitalize(name) + " crystal", lower_case(name) + " crystal", "crystal");
    set_long("This gray crystal is opaque.");
    set_component_name(lower_case(name));
    set_component_type("focusing");
