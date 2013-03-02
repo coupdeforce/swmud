@@ -2,7 +2,7 @@ inherit M_LIGHTSABER_COMPONENT;
 
 void setup()
 {
-   set_id("mephite lens", "mephite", "lens");
+   set_id("mephite lens", "mephite", "lens", "lightsaber_lens");
    set_long("Though typically used as a focusing crystal, adegan is one of several crystals that can also be used to create suitable lightsaber lenses.  Mephite is the second-highest quality type of adegan crystal.");
    set_component_name("mephite");
    set_component_type("lens");

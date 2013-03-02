@@ -2,7 +2,7 @@ inherit M_LIGHTSABER_COMPONENT;
 
 void setup()
 {
-   set_id("relacite lens", "relacite", "lens");
+   set_id("relacite lens", "relacite", "lens", "lightsaber_lens");
    set_long("Though typically used as a focusing crystal, adegan is one of several crystals that can also be used to create suitable lightsaber lenses.  Relacite is the second-lowest quality type of adegan crystal.");
    set_component_name("relacite");
    set_component_type("lens");
