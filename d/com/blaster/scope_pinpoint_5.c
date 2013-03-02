@@ -2,7 +2,8 @@ inherit M_BLASTER_COMPONENT;
 
 void setup()
 {
-   set_id("pinpoint scope (V)", "pinpoint scope", "scope");
+   set_id("pinpoint scope", "scope", "blaster_scope");
+   set_adj("superior");
    set_long("Pinpoint scopes increase the chance of slowing a target's attacks.");
    set_component_name("pinpoint");
    set_component_type("scope");
