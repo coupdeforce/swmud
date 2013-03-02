@@ -8,6 +8,12 @@ private void main(mixed *arg)
    object ob, env;
    string file;
 
+   if (!wizardp(this_body()))
+   {
+      out("This command is for wizard use only.\n");
+      return;
+   }
+
    ob = arg[0];
 
    file = base_name(ob);

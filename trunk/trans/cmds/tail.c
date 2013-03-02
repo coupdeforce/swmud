@@ -23,6 +23,12 @@ private void main(mixed *arg, mapping flags, string stdin)
    int i;
    int n = 10;
 
+   if (!wizardp(this_body()))
+   {
+      out("This command is for wizard use only.\n");
+      return;
+   }
+
    if (flags["n"])
    {
       n = to_int(flags["n"]) || 10;

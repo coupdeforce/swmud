@@ -31,6 +31,12 @@ private void main(mixed *arg, mapping flags)
    string original_file;
    object shell_ob = this_user()->query_shell_ob();
 
+   if (!wizardp(this_body()))
+   {
+      out("This command is for wizard use only.\n");
+      return;
+   }
+
    // This is a quick hack to make update accept cfile*
    if (arg[0] && !stringp(arg[0]))
    {

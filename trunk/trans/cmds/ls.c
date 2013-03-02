@@ -169,6 +169,12 @@ nomask int valid_resend(string ob)
 
 private void main(mixed argv, mapping flags)
 {
+   if (!wizardp(this_body()))
+   {
+      out("This command is for wizard use only.\n");
+      return;
+   }
+
    do_ls(argv, flags);
 }
 
