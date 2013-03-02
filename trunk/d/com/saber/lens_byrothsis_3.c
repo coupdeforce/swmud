@@ -2,7 +2,8 @@ inherit M_LIGHTSABER_COMPONENT;
 
 void setup()
 {
-   set_id("byrothsis lens (III)", "byrothsis lens", "byrothsis", "lens");
+   set_id("byrothsis lens", "byrothsis", "lens", "lightsaber_lens");
+   set_adj("standard");
    set_long("Byrothsis was originally used to create infrared camera lenses, but has since found use in other applications including lightsaber lenses.");
    set_component_name("byrothsis");
    set_component_type("lens");

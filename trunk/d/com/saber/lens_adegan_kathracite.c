@@ -2,7 +2,7 @@ inherit M_LIGHTSABER_COMPONENT;
 
 void setup()
 {
-   set_id("kathracite lens", "kathracite", "lens");
+   set_id("kathracite lens", "kathracite", "lens", "lightsaber_lens");
    set_long("Though typically used as a focusing crystal, adegan is one of several crystals that can also be used to create suitable lightsaber lenses.  Kathracite is the lowest quality type of adegan crystal.");
    set_component_name("kathracite");
    set_component_type("lens");
