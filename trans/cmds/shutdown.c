@@ -59,9 +59,15 @@ private void main(mixed *args, mapping flags)
    int num;
    string s;
 
+   if (!wizardp(this_body()))
+   {
+      out("This command is for wizard use only.\n");
+      return;
+   }
+
    if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 3))
    {
-      out("A moff is needed for shutdown.\n");
+      out("A Wizard Master or Teacher is needed for shutdown.\n");
 
       return;
    }

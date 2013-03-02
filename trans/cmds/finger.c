@@ -1,4 +1,3 @@
-// Last modified by deforce on 11-04-2006
 #include <mudlib.h>
 #include <commands.h>
 
@@ -8,6 +7,7 @@ inherit M_GRAMMAR;
 inherit CLASS_FINGER;
 
 #include <guild_plurals.h>
+#include <wizards.h>
 
 private nomask string format_idle_time(int time);
 private nomask string format_age(int time);
@@ -90,17 +90,12 @@ private void main(string who)
    else
    {
       int wizard_level = SECURE_D->query_is_wizard(who);
-      string wizard_title = "";
-
-      if (wizard_level > 3) { wizard_title = "Grand Moff"; }
-      else if (wizard_level > 2) { wizard_title = "Moff"; }
-      else if (wizard_level > 1) { wizard_title = "Officer"; }
-      else if (wizard_level > 0) { wizard_title = "Cadet"; }
+      string wizard_title = title_capitalize(get_wizard_title(wizard_level));
 
       output += sprintf("%-45s Level: %s\n", sprintf("%s %s of the %s", sex, title_capitalize(info->race), "Wizards"), wizard_title);
    }
 //   output += sprintf("Team: %s %s\n", team, info->position);
-   if (!wizardp(who)) { output += sprintf("Team: %s\n", team); }
+//   if (!wizardp(who)) { output += sprintf("Team: %s\n", team); }
    output += sprintf("In real life: %-31s %s\n", info->real_name[0..31], info->spouse);
    if (strlen(info->home_page)) { output += info->home_page[0..70]; }
    if (strlen(info->email)) { output += sprintf("E-mail: %s\n", info->email[0..71]); }
