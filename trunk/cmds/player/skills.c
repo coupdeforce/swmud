@@ -39,7 +39,17 @@ private void main(string arg)
       int rank;
       mixed data = SKILL_D->query_skill(name);
 
-      if (!data) { capname = name + " (invalid)"; }
+      if (!data)
+      {
+         if (wizardp(this_body()))
+         {
+            capname = name + " (invalid)";
+         }
+         else
+         {
+            continue;
+         }
+      }
       else
       {
          capname = data[0];

@@ -5,6 +5,7 @@ mixed call_hooks(string, int);
 object query_weapons();
 object query_target();
 object get_target();
+object get_ranged_target();
 void add_event(object target, object weapon, mixed target_extra, mixed data, object attacker);
 int badly_wounded();
 int panic();
@@ -40,8 +41,16 @@ void take_a_swing(object target)
    int slowed = this_body()->query_slowed() && (this_body()->query_agi() * 100 / 200 < random(100)) ? 1 : 0;
    int speed_bonus = 0;
 
-   if ((environment() != environment(target)) || check_wimpy() || this_object()->query_stunned())
+tell(this_object(), "Taking a swing at " + target->short() + ".\n");
+
+//   if ((environment() != environment(target)) || check_wimpy() || this_object()->query_stunned())
+   if (check_wimpy())
    {
+      return;
+   }
+   else if (this_object()->query_stunned())
+   {
+      tell(this_object(), "You are stunned and unable to attack.\n");
       return;
    }
 
@@ -65,6 +74,11 @@ void take_a_swing(object target)
 
          if (weapon->requires_ammo() && (weapon->query_ammo() < 1) && !sizeof(weapon->query_out_of_ammo_damage_types()))
          {
+            /*
+            add_event(target, weapon, target->query_random_limb(), randomize_damage(([ "striking" : 1 ])), this_object());
+            handle_events();
+            start_fight(target);
+            */
             continue;
          }
 

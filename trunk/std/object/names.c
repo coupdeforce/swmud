@@ -30,7 +30,7 @@ void create()
 
    if (!this_object()->is_living())
    {
-      this_object()->add_save(({ "mass", "customize_record", "customize_times" }));
+      this_object()->add_save(({ "mass", "customize_record", "customize_times", "object_creation_time" }));
    }
 }
 
@@ -103,6 +103,11 @@ private void resync()
    else
    {
       internal_short = proper_name;
+   }
+
+   if (sizeof(ids) && (member_array(lower_case(ids[0]), ids) == -1))
+   {
+      ids += ({ lower_case(ids[0]) });
    }
 
    parse_refresh();
@@ -184,7 +189,12 @@ int id(string arg)
       return 0;
    }
 
-   return member_array(lower_case(arg), lower_case_array(ids)) != -1;
+   if (strlen(arg))
+   {
+      return member_array(lower_case(arg), lower_case_array(ids)) != -1;
+   }
+
+   return 0;
 }
 
 int plural_id(mixed arg)

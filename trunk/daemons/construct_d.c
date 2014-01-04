@@ -7,13 +7,15 @@ inherit M_DAEMON_DATA;
 private mapping products = ([ ]); // Internal name : product name
 private mapping file_names = ([ ]); // Internal name : file name
 private mapping has_unique_constructor = ([ ]); // Internal name : 1 or 0 for unique constructor
-private mapping guild_requirements = ([ ]); // Internal name : ({ ({ guild_name, guild_level, rank }) })
-private mapping skill_requirements = ([ ]); // Internal name : ({ ({ skill_name, skill_level }) })
+private mapping guild_requirements = ([ ]); // Internal name : ({ ({ ({ guild_name, guild_level, rank }) }) })
+private mapping skill_requirements = ([ ]); // Internal name : ({ ({ ({ skill_name, skill_level }) }) })
 private mapping learn_requirements = ([ ]); // Internal name : ({ learn_name })
+private mapping race_requirements = ([ ]); // Internal name : ({ race_name })
 private mapping item_list = ([ ]); // Internal name : ({ ({ internal_name, item_name, number_required, number_destroyed }) })
 private mapping tool_list = ([ ]); // Internal name : ({ ({ internal_name, tool_name, location }) location is either 0 (anywhere), 1 (only inventory), 2 (only environment)
+private mapping trained_skills = ([ ]); // Internal name : ({ skill_name })
 
-int add_product(string internal_name, string product_name, string product_filename, int is_unique_constructor, mixed array product_guild_requirements, mixed array product_skill_requirements, string array product_learn_requirements, mixed array product_item_list, mixed array product_tool_list)
+int add_product(string internal_name, string product_name, string product_filename, int is_unique_constructor, mixed array product_guild_requirements, mixed array product_skill_requirements, string array product_learn_requirements, string array product_race_requirements, mixed array product_item_list, mixed array product_tool_list, string array skills)
 {
    if ((products[internal_name] != product_name) && (member_array(product_name, values(products)) > -1))
    {
@@ -26,8 +28,10 @@ int add_product(string internal_name, string product_name, string product_filena
    guild_requirements[internal_name] = product_guild_requirements;
    skill_requirements[internal_name] = product_skill_requirements;
    learn_requirements[internal_name] = product_learn_requirements;
+   race_requirements[internal_name] = product_race_requirements;
    item_list[internal_name] = product_item_list;
    tool_list[internal_name] = product_tool_list;
+   trained_skills[internal_name] = skills;
 
    save_me();
 
@@ -47,8 +51,10 @@ int remove_product(string name)
    map_delete(guild_requirements, name);
    map_delete(skill_requirements, name);
    map_delete(learn_requirements, name);
+   map_delete(race_requirements, name);
    map_delete(item_list, name);
    map_delete(tool_list, name);
+   map_delete(trained_skills, name);
 
    save_me();
 
@@ -98,6 +104,11 @@ string array query_learn_requirements(string name)
    return learn_requirements[name];
 }
 
+string array query_race_requirements(string name)
+{
+   return race_requirements[name];
+}
+
 mixed array query_item_list(string name)
 {
    return item_list[name];
@@ -106,6 +117,11 @@ mixed array query_item_list(string name)
 mixed array query_tool_list(string name)
 {
    return tool_list[name];
+}
+
+string array query_trained_skills(string name)
+{
+   return trained_skills[name];
 }
 
 string array query_product_internal_names()

@@ -7,6 +7,7 @@ void continue_conversation(object, string);
 void simple_action(string);
 string query_name();
 string get_current_player_name();
+void set_greeting(mixed arg);
 void set_goodbye(mixed arg);
 void set_options(mapping m);
 void add_options(mapping m);
@@ -26,10 +27,17 @@ mapping option_blocks = ([ ]);
 mapping current = ([ ]);
 mapping start = ([ ]);
 array default_start = ({ });
+mixed greeting_action;
 mixed goodbye_action;
 int is_busy = 0;
+int allow_quit = 1;
 int last_response_time = 0;
 object current_player;
+
+void set_greeting(mixed arg)
+{
+   greeting_action = arg;
+}
 
 void set_goodbye(mixed arg)
 {
@@ -39,6 +47,12 @@ void set_goodbye(mixed arg)
 void set_options(mapping m)
 {
    options = m;
+}
+
+void set_allow_quit(int allow)
+{
+   if (allow) { allow_quit = 1; }
+   else { allow_quit = 0; }
 }
 
 void add_options(mapping m)
@@ -143,6 +157,8 @@ object get_current_player()
    return 0;
 }
 
+int is_in_conversation() { return is_busy; }
+
 mixed direct_talk_to_liv() { return 1; }
 mixed direct_talk_with_liv() { return 1; }
 
@@ -159,7 +175,10 @@ void show_menu(object ob)
          printf("   %%^MENU_CHOICE%%^%2d%%^RESET%%^: %s\n", n++, options[option]);
       }
 
-      printf("    %%^MENU_CHOICE%%^q%%^RESET%%^: Quit talking to " + query_name() + ".\n");
+      if (allow_quit)
+      {
+         printf("    %%^MENU_CHOICE%%^q%%^RESET%%^: Quit talking to " + query_name() + ".\n");
+      }
 
       modal_simple( (: continue_conversation, ob :), "[choice] :> ");
    }
@@ -241,7 +260,7 @@ void continue_conversation(object ob, string input)
 
    last_response_time = time();
 
-   if (input == "q") { return bye(ob); }
+   if ((input == "q") && allow_quit) { return bye(ob); }
 
    if (sscanf(input, "%d%s", num, tmp) != 2 || tmp != "")
    {
@@ -284,7 +303,15 @@ void begin_conversation()
       call_other(this_object(), "generate_options");
       call_other(this_object(), "generate_training_options");
 
+      if (!sizeof(options))
+      {
+         tell(this_body(), "%^TELL%^" + capitalize(query_name()) + " tells you:%^RESET%^ I don't have anything to say to you.\n");
+         return;
+      }
+
       current[current_player] = start[current_player] || default_start;
+
+      if (greeting_action) { do_action(current_player, greeting_action); }
 
       show_menu(current_player);
    }
@@ -300,7 +327,7 @@ void begin_conversation()
       {
          if (current_player)
          {
-            continue_conversation(current_player, "q");
+            return bye(current_player);
          }
 
          is_busy = 1;
@@ -313,7 +340,15 @@ void begin_conversation()
          call_other(this_object(), "generate_options");
          call_other(this_object(), "generate_training_options");
 
+         if (!sizeof(options))
+         {
+            tell(this_body(), "%^TELL%^" + capitalize(query_name()) + " tells you:%^RESET%^ I don't have anything to say to you.\n");
+            return;
+         }
+
          current[current_player] = start[current_player] || default_start;
+
+         if (greeting_action) { do_action(current_player, greeting_action); }
 
          show_menu(current_player);
       }

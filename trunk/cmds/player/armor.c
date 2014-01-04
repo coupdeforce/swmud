@@ -1,4 +1,3 @@
-// Last modified by deforce on 02-25-2007
 inherit CMD;
 inherit M_ANSI;
 inherit ADVERSARY;
@@ -15,7 +14,7 @@ private void main(string arg)
    else { body = this_body(); }
 
    output += "Vital:\n" + format_slot("head") + format_slot("torso");
-   output += "Accessory:\n" + format_slot("neck") + format_slot("waist");
+//   output += "Accessory:\n" + format_slot("neck") + format_slot("waist");
    output += "Arms:\n" + format_slot("left arm") + format_slot("right arm");
    output += "Hands:\n" + format_slot("left hand") + format_slot("right hand");
    output += "Legs:\n" + format_slot("left leg") + format_slot("right leg");

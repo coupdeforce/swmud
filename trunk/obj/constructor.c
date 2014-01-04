@@ -1,3 +1,5 @@
+#include <toolbox.h>
+
 void destroy_quantity(object body, string ingredient, int amount)
 {
    int count = 0;
@@ -21,7 +23,14 @@ void destroy_ingredients(mixed ingredients)
    {
       if (ingredient[2] > 0)
       {
-         destroy_quantity(this_body(), ingredient[0], ingredient[2]);
+         if (ingredient[0][0..8] == "::parts::")
+         {
+            remove_parts_from_toolboxes(ingredient[0][9..], ingredient[2]);
+         }
+         else
+         {
+            destroy_quantity(this_body(), ingredient[0], ingredient[2]);
+         }
       }
    }
 }
@@ -48,7 +57,14 @@ mapping check_items(mixed items)
 
    foreach (mixed item in items)
    {
-      number_needed = item[2] - count_quantity(this_body(), item[0]);
+      if (item[0][0..8] == "::parts::")
+      {
+         number_needed = item[2] - check_toolboxes_for_parts(item[0][9..], item[2]);
+      }
+      else
+      {
+         number_needed = item[2] - count_quantity(this_body(), item[0]);
+      }
 
       if (number_needed > 0)
       {
@@ -82,42 +98,90 @@ mapping check_tools(mixed tools)
    return missing;
 }
 
-void generate_list(object player)
+int meets_guild_requirements(object player, mixed array requirements)
+{
+   foreach (mixed requirement in requirements)
+   {
+      if (player->query_guild_level(requirement[0]) < requirement[1])
+      {
+         return 0;
+      }
+      else if (player->query_guild_rank(requirement[0]) < requirement[2])
+      {
+         return 0;
+      }
+   }
+
+   return 1;
+}
+
+int meets_skill_requirements(object player, mixed array requirements)
+{
+   foreach (mixed requirement in requirements)
+   {
+      if (player->query_skill(requirement[0]) < requirement[1])
+      {
+         return 0;
+      }
+   }
+
+   return 1;
+}
+
+int test_trained_skills(object player, string array skills)
+{
+   int passed = 0;
+
+   foreach (string skill in skills)
+   {
+      if (player->test_skill(skill, 0))
+      {
+         passed = 1;
+      }
+   }
+
+   return passed;
+}
+
+void generate_list(object player, string product_name)
 {
    string array all_products = CONSTRUCT_D->query_product_internal_names();
-   string array product_list = ({ });
+   mapping product_list = ([ ]);
    mixed array guild_requirements;
    mixed array skill_requirements;
    string array learn_requirements;
    int has_required;
+   int set_count;
 
    foreach (string name in all_products)
    {
+      if (strlen(product_name) && (strsrch(CONSTRUCT_D->query_product_name(name), product_name) == -1))
+      {
+         continue;
+      }
+
       guild_requirements = CONSTRUCT_D->query_guild_requirements(name);
       skill_requirements = CONSTRUCT_D->query_skill_requirements(name);
       learn_requirements = CONSTRUCT_D->query_learn_requirements(name);
       has_required = 1;
 
-      foreach (mixed requirement in guild_requirements)
+      if (has_required && arrayp(guild_requirements) && sizeof(guild_requirements) && arrayp(guild_requirements[0]) && sizeof(guild_requirements[0][0]))
       {
-         if (player->query_guild_level(requirement[0]) < requirement[1])
+         has_required = 0;
+
+         for (set_count = 0; !has_required && (set_count < sizeof(guild_requirements)); set_count++)
          {
-            has_required = 0;
-            break;
-         }
-         else if (player->query_guild_rank(requirement[0]) < requirement[2])
-         {
-            has_required = 0;
-            break;
+            has_required = meets_guild_requirements(player, guild_requirements[set_count]);
          }
       }
 
-      foreach (mixed requirement in skill_requirements)
+      if (has_required && arrayp(skill_requirements) && sizeof(skill_requirements) && arrayp(skill_requirements[0]) && sizeof(skill_requirements[0][0]))
       {
-         if (player->query_skill(requirement[0]) < requirement[1])
+         has_required = 0;
+
+         for (set_count = 0; !has_required && (set_count < sizeof(skill_requirements)); set_count++)
          {
-            has_required = 0;
-            break;
+            has_required = meets_skill_requirements(player, skill_requirements[set_count]);
          }
       }
 
@@ -132,21 +196,28 @@ void generate_list(object player)
 
       if (!has_required) { continue; }
 
-      product_list += ({ CONSTRUCT_D->query_product_name(name) });
+      product_list[name] = CONSTRUCT_D->query_product_name(name);
    }
 
    if (sizeof(product_list))
    {
       write("You know how to construct the following products:\n");
 
-      foreach (string name in sort_array(product_list, 1))
+      foreach (string name in sort_array(keys(product_list), 1))
       {
-         write("  " + name + "\n");
+         write("  " + product_list[name] + "\n");
       }
    }
    else
    {
-      write("You don't seem to know how to construct anything yet.\n");
+      if (strlen(product_name))
+      {
+         write("You don't seem to know how to construct anything that contains \"" + product_name + "\".\n");
+      }
+      else
+      {
+         write("You don't seem to know how to construct anything yet.\n");
+      }
    }
 }
 
@@ -161,14 +232,12 @@ int construct_object(object player, string product_name, string verb_used)
    mixed array tool_list;
    mapping items_missing;
    mapping tools_missing;
-   int number_needed;
-   int number_destroyed;
    object array inventory;
    object product;
 
-   if (product_name == "list")
+   if ((product_name == "list") || ((strlen(product_name) > 5) && (product_name[0..4] == "list ")))
    {
-      generate_list(player);
+      generate_list(player, product_name[5..]);
 
       return 0;
    }
@@ -187,39 +256,72 @@ int construct_object(object player, string product_name, string verb_used)
    tool_list = CONSTRUCT_D->query_tool_list(internal_name);
    inventory = all_inventory(player);
 
+   foreach (string requirement in learn_requirements)
+   {
+      if (!player->has_learned_construction(requirement))
+      {
+         write("You have not learned how to construct " + add_article(product_name) + ".\n");
+         return 0;
+      }
+   }
+
    // Required guild name: requirement[0]
    // Required level in guild name: requirement[1]
    // Required rank in guild name: requirement[2]
-   foreach (mixed requirement in guild_requirements)
+   if (arrayp(guild_requirements) && sizeof(guild_requirements) && arrayp(guild_requirements[0]) && sizeof(guild_requirements[0][0]))
    {
-      if (player->query_guild_level(requirement[0]) < requirement[1])
+      int has_required = 0;
+      int set_count;
+
+      for (set_count = 0; !has_required && (set_count < sizeof(guild_requirements)); set_count++)
       {
-         write("You need more experience as a " + title_capitalize(requirement[0]) + " to construct " + add_article(product_name) + ".\n");
-         return 0;
+         has_required = meets_guild_requirements(player, guild_requirements[set_count]);
       }
-      else if (player->query_guild_rank(requirement[0]) < requirement[2])
+
+      if (!has_required)
       {
-         write("You require greater status as a " + title_capitalize(requirement[0]) + " to construct " + add_article(product_name) + ".\n");
+         write("\nYou need more experience in the following guilds to construct " + add_article(product_name) + ":\n");
+
+         for (set_count = 0; !has_required && (set_count < sizeof(guild_requirements)); set_count++)
+         {
+            if (set_count > 0) { write("    or\n"); }
+
+            foreach (mixed requirement in guild_requirements[set_count])
+            {
+               write("  " + title_capitalize(requirement[0]) + ": level " + requirement[1] + ", rank " + requirement[2] + "\n");
+            }
+         }
+
          return 0;
       }
    }
 
    // Required skill name: requirement[0]
    // Amount required in skills name: requirement[1]
-   foreach (mixed requirement in skill_requirements)
+   if (arrayp(skill_requirements) && sizeof(skill_requirements) && arrayp(skill_requirements[0]) && sizeof(skill_requirements[0][0]))
    {
-      if (player->query_skill(requirement[0]) < requirement[1])
-      {
-         write("You require greater skill in " + SKILL_D->query_skill(requirement[0])[0] + " to construct " + add_article(product_name) + ".\n");
-         return 0;
-      }
-   }
+      int has_required = 0;
+      int set_count;
 
-   foreach (string requirement in learn_requirements)
-   {
-      if (!player->has_learned_construction(requirement))
+      for (set_count = 0; !has_required && (set_count < sizeof(skill_requirements)); set_count++)
       {
-         write("You have not learned how to construct " + add_article(product_name) + ".\n");
+         has_required = meets_skill_requirements(player, skill_requirements[set_count]);
+      }
+
+      if (!has_required)
+      {
+         write("\nYou require greater skill in the following areas to construct " + add_article(product_name) + ":\n");
+
+         for (set_count = 0; !has_required && (set_count < sizeof(skill_requirements)); set_count++)
+         {
+            if (set_count > 0) { write("    or\n"); }
+
+            foreach (mixed requirement in skill_requirements[set_count])
+            {
+               write("  " + SKILL_D->query_skill(requirement[0])[0] + "\n");
+            }
+         }
+
          return 0;
       }
    }
@@ -261,6 +363,14 @@ int construct_object(object player, string product_name, string verb_used)
       }
 
       write("\n");
+
+      return 0;
+   }
+
+   if (sizeof(CONSTRUCT_D->query_trained_skills(internal_name))
+      && !test_trained_skills(player, CONSTRUCT_D->query_trained_skills(internal_name)))
+   {
+      player->simple_action("$N $vfail to construct a " + CONSTRUCT_D->query_product_name(internal_name) + ".");
 
       return 0;
    }

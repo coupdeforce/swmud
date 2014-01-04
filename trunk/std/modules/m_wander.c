@@ -219,6 +219,8 @@ private void move_me(string direction)
    }
 
    call = call_out( (: do_wander :), query_wander_time());
+
+   moving();
 }
 
 private void do_wander()
@@ -230,6 +232,13 @@ private void do_wander()
 
    // Don't move if in combat
    if (this_object()->query_target())
+   {
+      call = call_out( (: do_wander :), query_wander_time());
+      return;
+   }
+
+   // Don't move if in a conversation
+   if (this_object()->is_in_conversation())
    {
       call = call_out( (: do_wander :), query_wander_time());
       return;

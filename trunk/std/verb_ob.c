@@ -83,18 +83,34 @@ varargs mixed check_vision(object ob)
 {
    int light = environment(this_body())->query_light();
 
+   if (environment(this_body())->query_uv_light() && !this_body()->can_see_in_uv_light())
+   {
+      if (!wizardp(this_body()))
+      {
+         return "You are blinded by ultraviolet light.\n";
+      }
+   }
+
    if (ob && ob->is_light_source())
    {
       return 1;
    }
 
-   if (light >= 10000)
+   if ((light < 1) && (!environment(this_body())->query_uv_light()
+      || (environment(this_body())->query_uv_light() && !this_body()->can_see_in_uv_light())))
    {
-      return "It's impossible to see in the ultra-violet light.\n";
+      if (!wizardp(this_body()))
+      {
+         return "It is too dark to see anything.\n";
+      }
    }
-   else if (light >= 1000)
+
+   if (light > 999)
    {
-      return "It's too bright to see.\n";
+      if (!wizardp(this_body()))
+      {
+         return "It is too bright to see anything.\n";
+      }
    }
 
    if (light > 0)
@@ -106,13 +122,29 @@ varargs mixed check_vision(object ob)
    {
       light = environment(environment(this_body()))->query_light();
 
-      if (light >= 10000)
+      if (environment(environment(this_body()))->query_uv_light() && !this_body()->can_see_in_uv_light())
       {
-         return "It's impossible to see in the ultra-violet light.\n";
+         if (!wizardp(this_body()))
+         {
+            return "You are blinded by ultraviolet light.\n";
+         }
       }
-      else if (light >= 1000)
+
+      if ((light < 1) && (!environment(environment(this_body()))->query_uv_light()
+         || (environment(environment(this_body()))->query_uv_light() && !this_body()->can_see_in_uv_light())))
       {
-         return "It's too bright to see.\n";
+         if (!wizardp(this_body()))
+         {
+            return "It is too dark to see anything.\n";
+         }
+      }
+
+      if (light > 999)
+      {
+         if (!wizardp(this_body()))
+         {
+            return "It is too bright to see anything.\n";
+         }
       }
 
       if (light > 0)
@@ -121,7 +153,9 @@ varargs mixed check_vision(object ob)
       }
    }
 
-   return "It's too dark to see.\n";
+   if (wizardp(this_body())) { return 1; }
+
+   return "It is too dark to see anything.\n";
 }
 
 mixed check_condition()

@@ -13,6 +13,7 @@ string get_extra_description();
 private mixed long;
 private mapping customize_record = ([ ]);
 private mapping customize_times = ([ ]);
+private int object_creation_time = 0;
 private nosave mixed in_room_desc;
 private nosave string plural_in_room_desc;
 private nosave string listen_desc;
@@ -82,6 +83,18 @@ string get_desc_properties()
          output += "\nIt is " + size_description(this_object()->query_body_size()) + " sized.";
       }
 
+      if (test_flag(F_ACID_EXPOSURE))
+      {
+         if (this_object()->is_damaged_by_acid())
+         {
+            output += "\n%^YELLOW%^It is weakened by acid.%^RESET%^";
+         }
+         else
+         {
+            output += "\n%^YELLOW%^It has been exposed to acid.%^RESET%^";
+         }
+      }
+
       if (test_flag(F_BROKEN))
       {
          output += "\nIt is broken.";
@@ -108,6 +121,12 @@ string get_desc_properties()
       {
          output += "\n%^YELLOW%^There is a 'discuss' note.\n%^RESET%^";
       }
+/*
+      if (!this_object()->is_body() && object_creation_time)
+      {
+         output += "\nIt was created " + convert_time(time() - object_creation_time) + " ago.";
+      }
+*/
    }
 
    return output;
@@ -161,6 +180,23 @@ void remove_customize_record(string record)
 {
    map_delete(customize_record, record);
    map_delete(customize_times, record);
+}
+
+varargs void set_object_creation_time(int time)
+{
+   if (time)
+   {
+      object_creation_time = time;
+   }
+   else
+   {
+      object_creation_time = time();
+   }
+}
+
+int query_object_creation_time()
+{
+   return object_creation_time;
 }
 
 void set_listen(string str) { listen_desc = str; }
@@ -307,7 +343,7 @@ private string get_health_description()
 
    if (this_object->is_living() && this_object->is_adversary())
    {
-      return capitalize(this_object->query_pronoun()) + " is " + health_description((this_object->query_health() * 100) / this_object->query_max_health()) + ".\n";
+      return capitalize(this_object->query_pronoun()) + " is " + health_description((this_object->query_health() * 100) / this_object->query_max_health()) + ".";
    }
 
    return "";

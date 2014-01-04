@@ -732,10 +732,12 @@ string implode_by_arr(string array arr1, string array arr2)
  */
 string convert_time(int sec, int type)
 {
-   int weeks, days, hours, minutes, seconds;
+   int years, weeks, days, hours, minutes, seconds;
    string ret;
 
-   minutes = sec/60;
+   years = sec / 31536000;
+   sec -= (years * 31536000);
+   minutes = sec / 60;
    seconds = sec - (minutes * 60);
    hours = minutes / 60;
    minutes = minutes - (hours * 60);
@@ -749,34 +751,38 @@ string convert_time(int sec, int type)
    switch (type)
    {
       case 0:
-         if(weeks) ret += M_GRAMMAR->number_of(weeks, "week") + " ";
-         if(days) ret += M_GRAMMAR->number_of(days, "day") + " ";
-         if(hours) ret += M_GRAMMAR->number_of(hours, "hour") + " ";
-         if(minutes) ret += M_GRAMMAR->number_of(minutes, "minute") + " ";
+         if (years) ret += M_GRAMMAR->number_of(years, "year") + " ";
+         if (weeks) ret += M_GRAMMAR->number_of(weeks, "week") + " ";
+         if (days) ret += M_GRAMMAR->number_of(days, "day") + " ";
+         if (hours) ret += M_GRAMMAR->number_of(hours, "hour") + " ";
+         if (minutes) ret += M_GRAMMAR->number_of(minutes, "minute") + " ";
          if (seconds && ret != "") ret += "and ";
          if (seconds) ret += M_GRAMMAR->number_of(seconds, "second") + " ";
          ret = ret[0..<2];
          break;
       case 1:
-         if (weeks) ret += weeks+"w";
-         if (days) ret += days+"d";
-         if (hours) ret += hours+"h";
-         if (minutes) ret += minutes+"m";
-         if (seconds) ret += seconds+"s";
+         if (years) ret += years + "y";
+         if (weeks) ret += weeks + "w";
+         if (days) ret += days + "d";
+         if (hours) ret += hours + "h";
+         if (minutes) ret += minutes + "m";
+         if (seconds) ret += seconds + "s";
          break;
       case 2:
-         if (weeks) { ret += weeks+"w"; break; }
-         if (days) { ret += days+"d"; break; }
-         if (hours) { ret += hours+"h"; break; }
-         if (minutes) { ret += minutes+"m"; break; }
-         if (seconds) { ret += seconds+"s"; break; }
+         if (years) { ret += years + "y"; break; }
+         if (weeks) { ret += weeks + "w"; break; }
+         if (days) { ret += days + "d"; break; }
+         if (hours) { ret += hours + "h"; break; }
+         if (minutes) { ret += minutes + "m"; break; }
+         if (seconds) { ret += seconds + "s"; break; }
          break;
       case 3:
-         if (weeks) ret += weeks+"w ";
-         if (days) ret += days+"d ";
-         if (hours) ret += hours+"h ";
-         if (minutes) ret += minutes+"m ";
-         if (seconds) ret += seconds+"s ";
+         if (years) ret += years + "y ";
+         if (weeks) ret += weeks + "w ";
+         if (days) ret += days + "d ";
+         if (hours) ret += hours + "h ";
+         if (minutes) ret += minutes + "m ";
+         if (seconds) ret += seconds + "s ";
          ret = ret[0..<2];
          break;
    }

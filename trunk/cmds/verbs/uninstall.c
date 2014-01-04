@@ -53,5 +53,5 @@ void do_uninstall()
 
 void create()
 {
-   add_rules( ({ "", "OBJ", "OBJ from OBJ", "OBS from OBJ" }) );
+   add_rules( ({ "", "OBJ", "OBJ from OBJ", "OBS from OBJ" }), ({ "deinstall" }) );
 }

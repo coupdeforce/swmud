@@ -455,11 +455,46 @@ string long()
 
    foreach (string rel, class relation_data data in relations)
    {
-      contents = inv_list(data->contents, 1);
+      object array wielded = ({ });
+      object array worn = ({ });
+      object array carrying = ({ });
 
-      if (contents)
+      foreach (object thing in data->contents)
       {
-         res += introduce_contents(rel) + contents;
+         if (thing->is_attached()) { continue; }
+
+         if (thing->test_flag(F_WIELDED))
+         {
+            wielded += ({ thing });
+         }
+         else if (thing->test_flag(F_WORN))
+         {
+            worn += ({ thing });
+         }
+         else
+         {
+            carrying += ({ thing });
+         }
+      }
+
+      if (sizeof(wielded) || sizeof(worn) || sizeof(carrying))
+      {
+         res += introduce_contents(rel) + "\n";
+
+         if (sizeof(wielded))
+         {
+            res += inv_list(wielded, 1);
+         }
+
+         if (sizeof(worn))
+         {
+            res += inv_list(worn, 1);
+         }
+
+         if (sizeof(carrying))
+         {
+            res += inv_list(carrying, 1);
+         }
       }
    }
 

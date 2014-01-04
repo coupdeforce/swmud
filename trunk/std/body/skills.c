@@ -103,7 +103,7 @@ void learn_skill(string skill, int value)
    int array my_skill;
    int skill_value;
    mixed skill_data;
-   float chance;
+//   float chance;
    string array guilds = this_body()->query_guild_names();
    string array guild_requirements = SKILL_D->query_skill_advance_guild_requirements(skill);
    string array learn_requirements = SKILL_D->query_skill_advance_learn_requirements(skill);
@@ -156,13 +156,33 @@ void learn_skill(string skill, int value)
    if (skill_value < 1000)
    {
       int advrate = skill_data[1];
-      int roll = random(advrate + ((skill_value + (advrate * 10)) / 100));
+      int guild_levels = 0;
+      int roll;
+
+      if (sizeof(guild_requirements))
+      {
+         int guild_level;
+
+         foreach (string requirement in guild_requirements)
+         {
+            guild_level = this_body()->query_guild_level(requirement);
+
+            if (guild_level > 0)
+            {
+               guild_levels += guild_level + (this_body()->query_primary_guild() == requirement ? guild_level : 0);
+            }
+         }
+      }
+
+//tell(this_object(), sprintf("Range: 0 to %i [%i + ((%i - (%i * 10) + (%i * 10)) / 100)]\n", advrate + ((skill_value - (guild_levels * 10) + (advrate * 10)) / 100), advrate, skill_value, guild_levels, advrate));
+      roll = random(advrate + ((skill_value - (guild_levels * 10) + (advrate * 10)) / 100));
+//tell(this_object(), sprintf("Roll: %i\n", roll));
 
       // Debug code for advance roll
 //      tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " advance roll for " + skill + ": Is " + roll + " (" + (skill_value * 10) + ") less than " + to_int(ceil(chance)) + "?\n");
 //      tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill points for " + skill + ": Is " + my_skill[1] + " >= " + get_skill_point_minimum(advrate) + "?\n");
 
-      if ((roll == 0) || (my_skill[1] >= advrate) || (my_skill[1] >= get_skill_point_minimum(advrate)))
+      if ((roll <= 0) || (my_skill[1] >= advrate) || (my_skill[1] >= get_skill_point_minimum(advrate)))
       {
          // Advance
          my_skill[0] += 1;
@@ -192,8 +212,7 @@ int test_skill(string skill, int adjustment)
    int skill_value;
    int destination_value;
    int stat_bonus = get_stat_bonus(skill);
-   float stat_weight = get_stat_weight(skill);
-   string array guilds = this_body()->query_guild_names();
+   int stat_weight = get_stat_weight(skill);
    string array guild_requirements = SKILL_D->query_skill_advance_guild_requirements(skill);
    string array learn_requirements = SKILL_D->query_skill_advance_learn_requirements(skill);
 
@@ -204,35 +223,33 @@ int test_skill(string skill, int adjustment)
       my_skill = ({ 0, 0 });
    }
 
-   skill_value = my_skill[0] + call_hooks("all_skill_bonus", HOOK_SUM) + call_hooks(skill + "_skill_bonus", HOOK_SUM);
+   skill_value = (my_skill[0] / 100 * 100) + call_hooks("all_skill_bonus", HOOK_SUM) + call_hooks(skill + "_skill_bonus", HOOK_SUM);
 
 //   tell(this_object(), skill + " - bonus: " + stat_bonus + " weight: " + to_int(stat_weight));
    if (stat_weight > 0)
    {
-      destination_value = (stat_bonus / stat_weight * 500) + (skill_value / 2) + adjustment;
+//tell(this_object(), sprintf("%i * 500 / %i\n", stat_bonus, stat_weight));
+      destination_value = (stat_bonus * (500 + random(500)) / stat_weight) + skill_value + adjustment;
    }
    else
    {
-      destination_value = skill_value + adjustment;
+      destination_value = random(1000) + skill_value + adjustment;
    }
-
-   if (destination_value > 950) { destination_value = 950; }
-   else if (destination_value < 50) { destination_value = 50; }
-
-   // Debug code for skillrolls
-//   tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill roll for " + skill + ": Is " + destination_value + " more than " + roll + "?\n");
-
-   // semi-hack.. return 1 if roll == 0, 1 in 1000 chance of success
-   if (roll == 0) { return 1; }
+//tell(this_object(), sprintf("Destination value: %i\n", destination_value));
+   skill_value = my_skill[0];
 
    if (sizeof(guild_requirements))
    {
       int found_one = 0;
+      int guild_level;
 
       foreach (string requirement in guild_requirements)
       {
-         if (member_array(requirement, guilds) > -1)
+         guild_level = this_body()->query_guild_level(requirement);
+
+         if (guild_level > 0)
          {
+            destination_value += (guild_level * (this_body()->query_primary_guild() == requirement ? 10 : 5));
             found_one = 1;
          }
       }
@@ -242,6 +259,12 @@ int test_skill(string skill, int adjustment)
          skill_value = 1000;
       }
    }
+//tell(this_object(), sprintf("Destination value: %i\n", destination_value));
+   if (destination_value > 980) { destination_value = 980; }
+   else if (destination_value < 20) { destination_value = 20; }
+//tell(this_object(), sprintf("Destination value: %i\n", destination_value));
+   // Debug code for skillrolls
+//   tell(filter_array(all_inventory(environment(this_object())), (: wizardp($1) :)), this_object()->short() + " skill roll for " + skill + ": Is " + destination_value + " more than " + roll + "?\n");
 
    foreach (string requirement in learn_requirements)
    {
@@ -278,7 +301,7 @@ int test_skill(string skill, int adjustment)
 
       skills[skill] = my_skill;
 
-      learn_skill(skill, stat_weight > 0 ? (stat_bonus / stat_weight * adjustment) : adjustment);
+      learn_skill(skill, stat_weight > 0 ? (stat_bonus * adjustment / stat_weight) : adjustment);
    }
 
    return (destination_value > roll);

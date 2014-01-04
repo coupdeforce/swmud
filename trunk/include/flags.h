@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-23-2010
 #ifndef __FLAGS_H__
 #define __FLAGS_H__
 
@@ -69,6 +68,7 @@
 #define F_ALTERED_CAPACITY      MakeFlag(MODULE_FLAGS, 15)
 #define F_RESIZED               MakeFlag(MODULE_FLAGS, 16)
 #define F_STOLEN                MakeFlag(MODULE_FLAGS, 17)
+#define F_ACID_EXPOSURE         MakeFlag(MODULE_FLAGS, 18)
 
 // MAILBASE_FLAGS
 #define F_BIFF          MakeFlag(MAILBASE_FLAGS, 0)

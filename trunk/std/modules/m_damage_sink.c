@@ -158,9 +158,15 @@ class event_info sink_modify_event(class event_info evt)
       }
 
       // X in 100 chance of the armor getting damaged
-      if ((damage_chance > random(100)) || evt->data["acid"])
+      if ((damage_chance > random(100)) || this_object()->is_damaged_by_acid())
       {
          this_object()->decrease_durability(1);
+      }
+
+      if ((evt->data["acid"] && !this_object()->test_flag(F_ACID_EXPOSURE))
+         || this_object()->test_flag(F_ACID_EXPOSURE))
+      {
+         this_object()->do_acid_exposure();
       }
    }
 /*

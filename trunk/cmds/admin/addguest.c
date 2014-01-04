@@ -1,4 +1,3 @@
-// Last edited by deforce on 03-08-2008
 // Add Guest Command for Admins
 // Vette 04-04-1997
 
@@ -25,11 +24,11 @@ private void main(string arg)
 
    if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 3))
    {
-      out("You need to be a moff in order to add guests.\n");
+      out("You need to be a Wizard Master or Teacher in order to add guests.\n");
 
       return;
    }
 
    GUEST_D->add_guest(arg);
-   write(capitalize(arg) + " added as a guest.\n");
+   write(capitalize(arg) + " has been added as a guest.\n");
 }

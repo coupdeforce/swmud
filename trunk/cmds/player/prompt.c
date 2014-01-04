@@ -32,9 +32,16 @@ private void main(string arg)
          this_user()->query_shell_ob()->set_variable("PROMPT", prompt);
       }
    }
-   else if (wizardp(this_body()) && arg)
+   else if (wizardp(this_body()))
    {
-      this_user()->query_shell_ob()->set_variable("PROMPT", arg);
+      if (arg)
+      {
+         this_user()->query_shell_ob()->set_variable("PROMPT", arg);
+      }
+      else
+      {
+         out("For help with the wizard prompt, please type \"?\".");
+      }
    }
    else if (!wizardp(this_body()))
    {

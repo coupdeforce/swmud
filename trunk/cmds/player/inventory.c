@@ -28,6 +28,11 @@ private void main(string arg)
    {
       out(format_capacity(to_int(floor((this_body->query_capacity() * 100) / this_body->query_max_capacity()))));
    }
+
+   if (wizardp(this_body))
+   {
+      out(" (" + this_body->query_capacity() + " / " + this_body->query_max_capacity() + ", " + to_int(floor((this_body->query_capacity() * 100) / this_body->query_max_capacity())) + "%)");
+   }
 }
 
 string format_capacity(int percent)

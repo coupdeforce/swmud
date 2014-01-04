@@ -7,26 +7,27 @@ class slot
 {
    string name;
    int non_armor;
+   int max_items;
    object item;
 }
 
 private mapping body_slots = ([
-   "torso" : new(class slot, name: "torso", non_armor: 0, item: 0),
-   "head" : new(class slot, name: "head", non_armor: 0, item: 0),
-   "left arm" : new(class slot, name: "left arm", non_armor: 0, item: 0),
-   "right arm" : new(class slot, name: "right arm", non_armor: 0, item: 0),
-   "left leg" : new(class slot, name: "left leg", non_armor: 0, item: 0),
-   "right leg" : new(class slot, name: "right leg", non_armor: 0, item: 0),
-   "left hand" : new(class slot, name: "left hand", non_armor: 0, item: 0),
-   "right hand" : new(class slot, name: "right hand", non_armor: 0, item: 0),
-   "left foot" : new(class slot, name: "left foot", non_armor: 0, item: 0),
-   "right foot" : new(class slot, name: "right foot", non_armor: 0, item: 0),
-   "neck" : new(class slot, name : "neck", non_armor : 1, item: 0),
-   "waist" : new(class slot, name : "waist", non_armor : 1, item: 0),
-   "back" : new(class slot, name : "back", non_armor : 1, item: 0),
-   "chest" : new(class slot, name : "chest", non_armor : 1, item: 0),
-   "healing patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, item: 0),
-   "antidote patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, item: 0),
+   "torso" : new(class slot, name: "torso", non_armor: 0, max_items: 1, item: 0),
+   "head" : new(class slot, name: "head", non_armor: 0, max_items: 1, item: 0),
+   "left arm" : new(class slot, name: "left arm", non_armor: 0, max_items: 1, item: 0),
+   "right arm" : new(class slot, name: "right arm", non_armor: 0, max_items: 1, item: 0),
+   "left leg" : new(class slot, name: "left leg", non_armor: 0, max_items: 1, item: 0),
+   "right leg" : new(class slot, name: "right leg", non_armor: 0, max_items: 1, item: 0),
+   "left hand" : new(class slot, name: "left hand", non_armor: 0, max_items: 1, item: 0),
+   "right hand" : new(class slot, name: "right hand", non_armor: 0, max_items: 1, item: 0),
+   "left foot" : new(class slot, name: "left foot", non_armor: 0, max_items: 1, item: 0),
+   "right foot" : new(class slot, name: "right foot", non_armor: 0, max_items: 1, item: 0),
+   "neck" : new(class slot, name : "neck", non_armor : 1, max_items: 3, item: 0),
+   "waist" : new(class slot, name : "waist", non_armor : 1, max_items: 3, item: 0),
+   "back" : new(class slot, name : "back", non_armor : 1, max_items: 1, item: 0),
+   "chest" : new(class slot, name : "chest", non_armor : 1, max_items: 3, item: 0),
+   "healing patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, max_items: 1, item: 0),
+   "antidote patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, max_items: 1, item: 0),
 ]);
 
 protected nomask void set_body_slots(mapping what)
@@ -48,7 +49,7 @@ nomask int wear_item(object what)
    foreach (string slot in slot_names)
    {
       if (!body_slots[slot]) { return 0; }
-      if (BODY_SLOT(slot)->item) { return 0; }
+      if (BODY_SLOT(slot)->item && !BODY_SLOT(slot)->non_armor) { return 0; }
    }
 
    if ((((size + 1) - body_size) > 1) && ((body_size - (size - 1)) > 1)) { return 0; }
@@ -107,22 +108,22 @@ nomask string query_random_clothing_slot()
 nomask void reset_body_slots()
 {
    body_slots = ([
-      "torso" : new(class slot, name: "torso", non_armor: 0, item: 0),
-      "head" : new(class slot, name: "head", non_armor: 0, item: 0),
-      "left arm" : new(class slot, name: "left arm", non_armor: 0, item: 0),
-      "right arm" : new(class slot, name: "right arm", non_armor: 0, item: 0),
-      "left leg" : new(class slot, name: "left leg", non_armor: 0, item: 0),
-      "right leg" : new(class slot, name: "right leg", non_armor: 0, item: 0),
-      "left hand" : new(class slot, name: "left hand", non_armor: 0, item: 0),
-      "right hand" : new(class slot, name: "right hand", non_armor: 0, item: 0),
-      "left foot" : new(class slot, name: "left foot", non_armor: 0, item: 0),
-      "right foot" : new(class slot, name: "right foot", non_armor: 0, item: 0),
-      "neck" : new(class slot, name : "neck", non_armor : 1, item: 0),
-      "waist" : new(class slot, name : "waist", non_armor : 1, item: 0),
-      "back" : new(class slot, name : "back", non_armor : 1, item: 0),
-      "chest" : new(class slot, name : "chest", non_armor : 1, item: 0),
-      "healing patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, item: 0),
-      "antidote patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, item: 0),
+      "torso" : new(class slot, name: "torso", non_armor: 0, max_items: 1, item: 0),
+      "head" : new(class slot, name: "head", non_armor: 0, max_items: 1, item: 0),
+      "left arm" : new(class slot, name: "left arm", non_armor: 0, max_items: 1, item: 0),
+      "right arm" : new(class slot, name: "right arm", non_armor: 0, max_items: 1, item: 0),
+      "left leg" : new(class slot, name: "left leg", non_armor: 0, max_items: 1, item: 0),
+      "right leg" : new(class slot, name: "right leg", non_armor: 0, max_items: 1, item: 0),
+      "left hand" : new(class slot, name: "left hand", non_armor: 0, max_items: 1, item: 0),
+      "right hand" : new(class slot, name: "right hand", non_armor: 0, max_items: 1, item: 0),
+      "left foot" : new(class slot, name: "left foot", non_armor: 0, max_items: 1, item: 0),
+      "right foot" : new(class slot, name: "right foot", non_armor: 0, max_items: 1, item: 0),
+      "neck" : new(class slot, name : "neck", non_armor : 1, max_items: 3, item: 0),
+      "waist" : new(class slot, name : "waist", non_armor : 1, max_items: 3, item: 0),
+      "back" : new(class slot, name : "back", non_armor : 1, max_items: 1, item: 0),
+      "chest" : new(class slot, name : "chest", non_armor : 1, max_items: 3, item: 0),
+      "healing patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, max_items: 1, item: 0),
+      "antidote patch" : new(class slot, name : this_object()->query_other_hand() + " arm", non_armor : 1, max_items: 1, item: 0),
    ]);
 }
 

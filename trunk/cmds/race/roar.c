@@ -19,7 +19,7 @@ void do_roar_liv(object living)
    {
       this_body->add_skill_delay(8);
 
-      if (this_body->test_skill("roar", (this_body->query_primary_level() * 10) - (living->query_primary_level() * 6)))
+      if (this_body->test_skill("roar", this_body->query_primary_level() * 10))
       {
          roar(living);
       }

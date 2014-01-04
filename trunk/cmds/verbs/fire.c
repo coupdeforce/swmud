@@ -9,7 +9,7 @@ void fire_at(object liv)
       write("You could find more important things to fire at.\n");
       return;
    }
-   else if (this_body->get_target())
+   else if (this_body->get_target() && (this_body->get_target() != liv))
    {
       write("You are already in combat.\n");
       return;
@@ -21,7 +21,7 @@ void fire_at(object liv)
       {
          write("You are attempting to fire at \"" + liv->short() + "\".\n");
 
-         this_body->initiate_combat(liv);
+         this_body->start_fight(liv);
       }
       else
       {

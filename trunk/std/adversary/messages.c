@@ -63,6 +63,13 @@ void handle_message(string mess, object target, object weapon, object limb)
 
    if (strlen(mess))
    {
-      inform(({ this_object(), target }), action(({ this_object(), target }), mess, weapon, target->query_weapon(), limb), environment());
+      if (environment() == environment(target))
+      {
+         inform(({ this_object(), target }), action(({ this_object(), target }), mess, weapon, target->query_weapon(), limb), environment());
+      }
+      else
+      {
+         inform(({ this_object(), target }), action(({ this_object(), target }), mess, weapon, target->query_weapon(), limb), (mixed)filter_array(all_inventory(environment()) + all_inventory(environment(target)), (: $1 != this_object() :)));
+      }
    }
 }
