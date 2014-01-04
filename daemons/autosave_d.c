@@ -1,13 +1,14 @@
-// Last modifed by deforce on 03-19-2007
 #define CHECK_TIME  30
 #define IDLE_TIME   3599
-#define SAVE_TIME   719
+#define NOTIFY_TIME 299
+#define SAVE_TIME   599
 
 void check_users();
 string list();
 string format_idle_time(int time);
 
 private mapping last_time = ([ ]);
+private mapping last_notify_time = ([ ]);
 
 void check_users()
 {
@@ -41,16 +42,25 @@ void check_users()
          {
             if (idle_time > 120)
             {
-               tell(body, "Autosaving." + (idle_time > 1200 ? format_idle_time(idle_time) : "") + "\n");
+               tell(body, "Autosaving." + (idle_time > NOTIFY_TIME ? " (idle " + convert_time(idle_time) + ")" : "") + "\n");
+
+               last_notify_time[user] = current_time;
             }
 
             body->save_me();
             last_time[user] = current_time;
          }
+         else if ((idle_time > NOTIFY_TIME) && last_notify_time[user] && ((current_time - last_notify_time[user]) > NOTIFY_TIME))
+         {
+            tell(body, "(idle " + convert_time(idle_time) + ")\n");
+
+            last_notify_time[user] = current_time;
+         }
       }
       else
       {
          map_delete(last_time, user);
+         map_delete(last_notify_time, user);
       }
    }
 
@@ -68,36 +78,6 @@ string list()
    }
 
    return output;
-}
-
-string format_idle_time(int time)
-{
-   string output = "";
-
-   if (time > 59)
-   {
-      if (time > 3599)
-      {
-         if (time > 86399)
-         {
-            output += (time / 86400) + "d, ";
-
-            time = time % 86400;
-         }
-
-         output += (time / 3600) + "h, ";
-
-         time = time % 3600;
-      }
-
-      output += (time / 60) + "m";
-
-      time = time % 60;
-   }
-
-   if (time > 0) { output += ", " + (time % 60) + "s"; }
-
-   return " (idle " + output + ")";
 }
 
 void create()

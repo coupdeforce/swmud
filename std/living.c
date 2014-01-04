@@ -88,7 +88,7 @@ string inventory_header()
    {
       if (thing->is_visible())
       {
-         return capitalize(query_subjective()) + " is carrying:\n";
+         return "\n" + capitalize(query_subjective()) + " is carrying:";
       }
    }
 

@@ -13,6 +13,7 @@ void refresh_stats();
 
 int deaths;
 int pk_deaths;
+int last_pk_death;
 mapping killed_by = ([ ]);
 mapping killed_where = ([ ]);
 
@@ -39,6 +40,7 @@ protected void death_penalty()
       int killer_level = killer->query_primary_level();
       string killer_message = "You have killed " + query_name() + ", who is ";
       killed_message += "You were killed by " + killer->query_name() + ", who is ";
+      last_pk_death = time();
       pk_deaths++;
 
       if (killer_level > level)
@@ -86,7 +88,7 @@ protected void death_penalty()
          else if (this_object()->is_unjustified_ithorian_target(killer))
          {
             new_exp = 0;
-            killer->add_experience(experience - new_exp);
+            killer->add_experience(experience);
          }
       }
       else if (killer_level < level)
@@ -138,7 +140,7 @@ protected void death_penalty()
          else if (this_object()->is_unjustified_ithorian_target(killer))
          {
             new_exp = 0;
-            killer->add_experience(experience - new_exp);
+            killer->add_experience(experience);
          }
       }
       else
@@ -186,7 +188,7 @@ protected void death_penalty()
          else if (this_object()->is_unjustified_ithorian_target(killer))
          {
             new_exp = 0;
-            killer->add_experience(experience - new_exp);
+            killer->add_experience(experience);
          }
       }
 
@@ -196,6 +198,16 @@ protected void death_penalty()
    else if (killer && (killer != this_object()) && (environment(killer) != this_object()))
    {
       killed_message += "You were killed by " + killer->in_room_desc() + ".\n";
+
+      foreach (object thing in deep_inventory(this_object()))
+      {
+         if (thing->query_durability() > 1)
+         {
+            thing->decrease_durability(1);
+         }
+      }
+
+      killed_message += "The durability of your items has been decreased.\n";
    }
 
    if (new_exp != experience)
@@ -206,14 +218,6 @@ protected void death_penalty()
    }
 
    receive_private_msg(killed_message);
-
-   foreach (object thing in deep_inventory(this_object()))
-   {
-      if (thing->query_durability() > 1)
-      {
-         thing->decrease_durability(1);
-      }
-   }
 
    if (level > 1)
    {
@@ -255,6 +259,16 @@ void set_pk_deaths(int new_pk_deaths)
       pk_deaths = new_pk_deaths;
       save_me();
    }
+}
+
+void set_last_pk_death(int time)
+{
+   last_pk_death = time;
+}
+
+int query_last_pk_death()
+{
+   return last_pk_death;
 }
 
 void reset_deaths()

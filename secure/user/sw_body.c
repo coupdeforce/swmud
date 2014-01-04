@@ -303,7 +303,7 @@ void got_entry(function when_done, string line)
       string format;
       int width = 0;
 
-      foreach (string name in races)
+      foreach (string name in keys(races))
       {
          if (strlen(name) > width) { width = strlen(name); }
       }

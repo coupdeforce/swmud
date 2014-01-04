@@ -14,7 +14,14 @@ void do_kill_liv(object thing)
 
    if (thing != this_body)
    {
-      this_body->initiate_combat(thing);
+      if (!this_body->query_stunned())
+      {
+         this_body->initiate_combat(thing);
+      }
+      else
+      {
+         write("You are stunned and cannot attack.\n");
+      }
    }
    else
    {

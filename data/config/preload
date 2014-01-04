@@ -4,7 +4,7 @@
 /std/body/cmd
 /std/body/bodyshell
 /std/body
-/daemons/autosave_d
+#/daemons/autosave_d
 /daemons/help_d
 /daemons/channel_d
 /daemons/verb_d

@@ -13,7 +13,6 @@ void setup(string name, string id)
    }
 
    set_combat_messages("none");
-   set_chance_to_be_damaged(0);
    set_attached(1);
    hook_state("prevent_drop", "", 1);
 }

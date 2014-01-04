@@ -3,6 +3,9 @@ void process_component(object thing);
 void assemble()
 {
    object this_ob = this_object();
+   string chamber = "";
+   string pcell = "";
+   string scope = "";
    string array chamber_names = ({ });
    string array pcell_names = ({ });
    string array scope_names = ({ });
@@ -35,6 +38,7 @@ void assemble()
             continue;
          }
 
+         chamber = thing->query_component_name();
          chamber_names += ({ thing->query_component_name() });
 
          process_component(thing);
@@ -50,6 +54,7 @@ void assemble()
             continue;
          }
 
+         pcell = thing->query_component_name();
          pcell_names += ({ thing->query_component_name() });
 
          process_component(thing);
@@ -65,11 +70,16 @@ void assemble()
             continue;
          }
 
+         scope = thing->query_component_name();
          scope_names += ({ thing->query_component_name() });
 
          process_component(thing);
       }
    }
+
+   this_ob->set_blaster_scope(scope);
+   this_ob->set_blaster_chamber(chamber);
+   this_ob->set_blaster_pcell(pcell);
 }
 
 void process_component(object thing)
@@ -133,52 +143,33 @@ mixed receive_object(object target, string relation)
 
 void do_check_obj()
 {
-   if (sizeof(all_inventory()))
+   string array chambers = ({ "" });
+   string array pcells = ({ "" });
+   string array scopes = ({ "" });
+
+   foreach (object thing in all_inventory())
    {
-      string array chambers = ({ "" });
-      string array pcells = ({ "" });
-      string array scopes = ({ "" });
-
-      foreach (object thing in all_inventory())
+      switch (thing->query_component_type())
       {
-         switch (thing->query_component_type())
-         {
-            case "blaster chamber":
-               chambers = ({ thing->query_component_name() }) + chambers; break;
-            case "blaster power cell":
-               pcells = ({ thing->query_component_name() }) + pcells; break;
-            case "blaster scope":
-               scopes = ({ thing->query_component_name() }) + scopes; break;
-         }
-      }
-
-      write("You check " + this_object()->the_short() + " and discover that it has the following components:\n\n");
-
-      if (this_object()->can_use_blaster_chamber())
-      {
-         write(sprintf("   Chamber: %s\n", chambers[0]));
-      }
-
-      if (this_object()->can_use_blaster_power_cell())
-      {
-         write(sprintf("Power Cell: %s\n", pcells[0]));
-      }
-
-      if (this_object()->can_use_blaster_scope())
-      {
-         write(sprintf("     Scope: %s\n\n", scopes[0]));
+         case "blaster chamber":
+            chambers = ({ (sizeof(thing->query_adj()) ? thing->query_adj()[0] + " " : "") + thing->query_component_name() }) + chambers; break;
+         case "blaster power cell":
+            pcells = ({ (sizeof(thing->query_adj()) ? thing->query_adj()[0] + " " : "") + thing->query_component_name() }) + pcells; break;
+         case "blaster scope":
+            scopes = ({ (sizeof(thing->query_adj()) ? thing->query_adj()[0] + " " : "") + thing->query_component_name() }) + scopes; break;
       }
    }
-   else
-   {
-      write("You check " + this_object()->the_short() + " and discover that it has no modifications beyond the basic components.\n");
-   }
+
+   write("You check the components of " + this_object()->the_short() + ":\n\n");
+
+   write(sprintf("     Chamber: %-20s%%^RESET%%^       Scope: %-20s%%^RESET%%^\n", (strlen(chambers[0]) ? chambers[0] : "%^BOLD%^%^RED%^missing             "), scopes[0]));
+   write(sprintf("  Power Cell: %-20s\n", (strlen(pcells[0]) ? pcells[0] : "%^BOLD%^%^RED%^missing")));
 
    if (this_object()->requires_ammo())
    {
       int last_recharged = time() - this_object()->query_last_recharge_time();
 
-      write("It was last recharged " + convert_time(last_recharged) + " ago and has " + this_object()->query_ammo() + " " + this_object()->query_ammo_desc() + " remaining.\n");
+      write("\nIt was last recharged " + convert_time(last_recharged) + " ago and has " + this_object()->query_ammo() + " " + this_object()->query_ammo_desc() + " remaining.\n");
 
       if ((this_object()->query_max_ammo_recharge_time() - last_recharged) > 0)
       {

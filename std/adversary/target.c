@@ -56,12 +56,66 @@ int has_been_backstabbed_by(object assassin)
    return 0;
 }
 
+object get_ranged_target()
+{
+   if (target && (environment(this_object()) != environment(target))
+      && sizeof(filter_array(this_object()->query_weapons(), (: $1->query_range() :))))
+   {
+      object dir_room;
+      int dir_count = 0;
+
+      foreach (string dir in environment(this_object())->query_exit_directions(wizardp(this_object())))
+      {
+         dir_room = find_object(environment(this_object())->query_exit_destination(dir));
+         dir_count = 0;
+
+         while (dir_room)
+         {
+            dir_count++;
+
+            if (member_array(target, all_inventory(dir_room)) > -1)
+            {
+               foreach (object weapon in this_object()->query_weapons())
+               {
+                  if (weapon->query_range() >= dir_count)
+                  {
+                     if (weapon->requires_ammo() && (weapon->query_ammo() > 0))
+                     {
+//                        tell(this_object(), "Your " + weapon->short() + " can fire from " + dir_count + " rooms away.");
+                        return target;
+                     }
+                  }
+               }
+
+               return 0;
+            }
+
+            if (dir_room->query_exit_destination(dir))
+            {
+               dir_room = find_object(dir_room->query_exit_destination(dir));
+            }
+            else
+            {
+               dir_room = 0;
+            }
+         }
+      }
+   }
+
+   return 0;
+}
+
 // Find someone to attack.  Return zero if we're dead or asleep or have no one to attack.
 //:FUNCTION get_target
 //Get someone to attack from our attackers list
 object get_target()
 {
    int count = sizeof(other_targets);
+
+   if (get_ranged_target())
+   {
+      return target;
+   }
 
    if (member_array(target, all_inventory(environment(this_object()))) == -1)
    {
@@ -142,6 +196,7 @@ void switch_to(object who)
 
    other_targets -= ({ who });
    target = who;
+   this_object()->set_follow(target);
 }
 
 //:FUNCTION stop_hitting_me

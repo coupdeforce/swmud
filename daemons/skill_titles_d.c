@@ -1,4 +1,4 @@
-mapping skill titles =
+mapping skill_titles =
 ([
    "slash 1h" : ({ "$N the Slasher",
 //       ({ "$N the Master of Slashing", "$N the Mistress of Slashing" }), }),
@@ -47,7 +47,7 @@ mapping skill titles =
       "$N the Master Tracker", }),
 ]);
 
-mixed get title(string skill)
+mixed get_title(string skill)
 {
-   return skill titles[skill];
+   return skill_titles[skill];
 }

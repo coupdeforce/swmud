@@ -6,6 +6,9 @@ void assemble()
    int alignment = 0;
    string name = "";
    string color = "";
+   string lens = "";
+   string emitter = "";
+   string ecell = "";
    string array crystal_names = ({ });
    string array ecell_names = ({ });
    string array emitter_names = ({ });
@@ -92,6 +95,7 @@ void assemble()
             continue;
          }
 
+         ecell = thing->query_component_name();
          ecell_names += ({ thing->query_component_name() });
 
          process_component(thing);
@@ -108,6 +112,7 @@ void assemble()
             continue;
          }
 
+         emitter = thing->query_component_name();
          emitter_names += ({ thing->query_component_name() });
 
          process_component(thing);
@@ -124,6 +129,7 @@ void assemble()
             continue;
          }
 
+         lens = thing->query_component_name();
          lens_names += ({ thing->query_component_name() });
 
          process_component(thing);
@@ -131,6 +137,9 @@ void assemble()
    }
 
    this_ob->set_lightsaber_color(color);
+   this_ob->set_lightsaber_lens(lens);
+   this_ob->set_lightsaber_emitter(emitter);
+   this_ob->set_lightsaber_ecell(ecell);
    this_ob->set_lightsaber_alignment(alignment);
    this_ob->set_lightsaber_name_crystal(name);
 }
@@ -190,39 +199,34 @@ mixed receive_object(object target, string relation)
 
 void do_check_obj()
 {
-   if (sizeof(all_inventory()))
+   string array color_crystals = ({ "" });
+   string array focusing_crystals = ({ "", "" });
+   string array lenses = ({ "" });
+   string array emitters = ({ "" });
+   string array ecells = ({ "" });
+
+   foreach (object thing in all_inventory())
    {
-      string array color_crystals = ({ "" });
-      string array focusing_crystals = ({ "", "" });
-      string array lenses = ({ "" });
-      string array emitters = ({ "" });
-      string array ecells = ({ "" });
-
-      foreach (object thing in all_inventory())
+      switch (thing->query_component_type())
       {
-         switch (thing->query_component_type())
-         {
-         case "lightsaber color":
-            color_crystals = ({ thing->query_component_name() }) + color_crystals; break;
-         case "lightsaber focusing":
-            focusing_crystals = ({ thing->query_component_name() }) + focusing_crystals; break;
-         case "lightsaber lens":
-            lenses = ({ thing->query_component_name() }) + lenses; break;
-         case "lightsaber emitter":
-            emitters = ({ thing->query_component_name() }) + emitters; break;
-         case "lightsaber energy cell":
-            ecells = ({ thing->query_component_name() }) + ecells; break;
-         }
+      case "lightsaber color":
+         color_crystals = ({ thing->query_component_name() }) + color_crystals; break;
+      case "lightsaber focusing":
+         focusing_crystals = ({ thing->query_component_name() }) + focusing_crystals; break;
+      case "lightsaber lens":
+         lenses = ({ (sizeof(thing->query_adj()) ? thing->query_adj()[0] + " " : "") + thing->query_component_name() }) + lenses; break;
+      case "lightsaber emitter":
+         emitters = ({ (sizeof(thing->query_adj()) ? thing->query_adj()[0] + " " : "") + thing->query_component_name() }) + emitters; break;
+      case "lightsaber energy cell":
+         ecells = ({ (sizeof(thing->query_adj()) ? thing->query_adj()[0] + " " : "") + thing->query_component_name() }) + ecells; break;
       }
-
-      write("You check " + this_object()->the_short() + " and discover that it has the following components:\n\n");
-
-      write(sprintf("    Color Crystal: %-20s        Lens: %-20s\n", color_crystals[0], lenses[0]));
-      write(sprintf("Focusing Crystals: %-20s     Emitter: %-20s\n", focusing_crystals[0], emitters[0]));
-      write(sprintf("                   %-20s Energy Cell: %-20s\n\n", focusing_crystals[1], ecells[0]));
-
-      return;
    }
 
-   write("You check " + this_object()->the_short() + " and discover that it has no modifications beyond the basic components.\n");
+   write("You check the components of " + this_object()->the_short() + ":\n\n");
+
+   write(sprintf("      Color Crystal: %-20s%%^RESET%%^        Lens: %-20s%%^RESET%%^\n", (strlen(color_crystals[0]) ? color_crystals[0] : "%^BOLD%^%^RED%^missing             "), (strlen(lenses[0]) ? lenses[0] : "%^BOLD%^%^RED%^missing")));
+   write(sprintf("  Focusing Crystals: %-20s     Emitter: %-20s%%^RESET%%^\n", focusing_crystals[0], (strlen(emitters[0]) ? emitters[0] : "%^BOLD%^%^RED%^missing")));
+   write(sprintf("                     %-20s Energy Cell: %-20s%%^RESET%%^\n\n", focusing_crystals[1], (strlen(ecells[0]) ? ecells[0] : "%^BOLD%^%^RED%^missing")));
+
+   return;
 }

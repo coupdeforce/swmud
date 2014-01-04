@@ -32,6 +32,7 @@ class slot
 {
    string name;
    int non_armor;
+   int max_items;
    object item;
 }
 

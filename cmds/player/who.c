@@ -5,6 +5,7 @@ inherit M_ANSI;
 inherit CLASS_FINGER;
 
 #include <guild_colors.h>
+#include <wizards.h>
 
 #define WIDTH this_user()->query_screen_width()
 #define DELIM (repeat_string("=", (WIDTH - 1)) + "\n")
@@ -52,14 +53,7 @@ string get_who_string()
       if (body && (body->is_visible() || wizardp(this_body())))
       {
          int wizard_level = SECURE_D->query_is_wizard(user);
-         string line = "%^BOLD%^[";
-
-         if (wizard_level > 3) { line += "Grand Moff"; }
-         else if (wizard_level > 2) { line += "Moff"; }
-         else if (wizard_level > 1) { line += "Officer"; }
-         else if (wizard_level > 0) { line += "Cadet"; }
-
-         line += "] " + format_status(user);
+         string line = "%^BOLD%^[" + title_capitalize(get_wizard_title(wizard_level)) + "] " + format_status(user);
 
          output += show_location(line, body) + "\n";
       }

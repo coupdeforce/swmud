@@ -118,27 +118,24 @@ int test_skill(string skill, int adjustment)
    int skill_value = 0;
    int destination_value;
    int stat_bonus = get_stat_bonus(skill);
-   float stat_weight = get_stat_weight(skill);
+   int stat_weight = get_stat_weight(skill);
 
    if (skills[skill])
    {
-      skill_value = skills[skill] + call_hooks("all_skill_bonus", HOOK_SUM) + call_hooks(skill + "_skill_bonus", HOOK_SUM);
+      skill_value = (skills[skill] / 100 * 100) + call_hooks("all_skill_bonus", HOOK_SUM) + call_hooks(skill + "_skill_bonus", HOOK_SUM);
    }
 
    if (stat_weight > 0)
    {
-      destination_value = skill_value + adjustment + (stat_bonus / stat_weight * (1000.0 - skill_value));
+      destination_value = (stat_bonus * 800 / stat_weight) + skill_value + adjustment;
    }
    else
    {
       destination_value = skill_value + adjustment;
    }
 
-   if (destination_value > 950) { destination_value = 950; }
-   else if (destination_value < 50) { destination_value = 50; }
-
-   // semi-hack.. return 1 if roll == 0, 1 in 1000 chance of success
-   if (roll == 0) { return 1; }
+   if (destination_value > 980) { destination_value = 980; }
+   else if (destination_value < 20) { destination_value = 20; }
 
    return (destination_value > roll);
 }

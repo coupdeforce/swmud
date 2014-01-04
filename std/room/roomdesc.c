@@ -1,4 +1,3 @@
-// Last edited by deforce on 07-04-2008
 #include <flags.h>
 #include <playerflags.h>
 
@@ -79,26 +78,55 @@ protected int dont_show_long()
 //print out the description of the current room
 varargs void do_looking(int force_long_desc, object who)
 {
-   if (query_light() < 1)
+   if (this_object()->query_uv_light() && !who->can_see_in_uv_light())
    {
-      tell(who, "It is too dark to see anything.\n");
-   }
-   else if (query_light() > 9)
-   {
-      tell(who, "It is too bright to see anything.\n");
-   }
-   else
-   {
-      if (force_long_desc || !who->test_flag(F_BRIEF))
+      if (!wizardp(who))
       {
-         this_look_is_forced = force_long_desc;
-         tell(who, long());
-         this_look_is_forced = 0;
+         tell(who, "You are blinded by ultraviolet light.\n");
+         return;
       }
       else
       {
-         tell(who, sprintf("%%^ROOM_SHORT%%^%s%%^RESET%%^\n[%%^ROOM_EXIT%%^%s%%^RESET%%^]\n", short(), show_exits()));
+         tell(who, "You would be blinded by ultraviolet light as a player.\n");
       }
+   }
+
+   if ((query_light() < 1) && (!this_object()->query_uv_light()
+      || (this_object()->query_uv_light() && !who->can_see_in_uv_light())))
+   {
+      if (!wizardp(who))
+      {
+         tell(who, "It is too dark to see anything.\n");
+         return;
+      }
+      else
+      {
+         tell(who, "It would be too dark to see as a player.\n");
+      }
+   }
+
+   if (query_light() > 999)
+   {
+      if (!wizardp(who))
+      {
+         tell(who, "It is too bright to see anything.\n");
+         return;
+      }
+      else
+      {
+         tell(who, "It would be too bright to see as a player.\n");
+      }
+   }
+
+   if (force_long_desc || !who->test_flag(F_BRIEF))
+   {
+      this_look_is_forced = force_long_desc;
+      tell(who, long());
+      this_look_is_forced = 0;
+   }
+   else
+   {
+      tell(who, sprintf("%%^ROOM_SHORT%%^%s%%^RESET%%^\n[%%^ROOM_EXIT%%^%s%%^RESET%%^]\n", short(), show_exits()));
    }
 }
 

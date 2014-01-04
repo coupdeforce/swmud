@@ -7,6 +7,7 @@ void assign_flag(int, int);
 private int durability = 1;
 private int max_durability = 1;
 private int chance_to_be_damaged = 2;
+private nosave int acid_exposure_time = 0;
 private nosave string repair_skill = "melee repair";
 private nosave string learn_requirement = "";
 private nosave string array repair_guilds = ({ "engineer" });
@@ -139,6 +140,37 @@ void do_adjust_durability(int amount)
    }
 
    max_durability += ceil(max_durability * amount / 10.0);
+}
+
+void do_acid_exposure()
+{
+   object owner = owner(this_object());
+   acid_exposure_time = time();
+
+   if (owner && !test_flag(F_ACID_EXPOSURE))
+   {
+      assign_flag(F_ACID_EXPOSURE, 1);
+
+      tell(owner, "%^ITEM_DAMAGE%^You notice your " + this_object()->short() + "%^RESET%^%^ITEM_DAMAGE%^ has been exposed to acid.%^RESET%^\n");
+   }
+}
+
+int query_acid_exposure_time()
+{
+   return acid_exposure_time;
+}
+
+int is_damaged_by_acid()
+{
+   if (test_flag(F_ACID_EXPOSURE))
+   {
+      if ((time() - acid_exposure_time) >= 300)
+      {
+         return 1;
+      }
+   }
+
+   return 0;
 }
 
 void do_repair()

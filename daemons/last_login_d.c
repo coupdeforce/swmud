@@ -63,7 +63,10 @@ nomask mixed * query_times(int skip_sort)
 
 nomask void remove_user(string userid, int skip_save)
 {
-   this_body()->check_wizard_set("remove " + userid + " from last_login_d", previous_object(-1));
+   if (this_body() && sizeof(previous_object(-1)))
+   {
+      this_body()->check_wizard_set("remove " + userid + " from last_login_d", previous_object(-1)[<1]);
+   }
 
    map_delete(lastdata, userid);
 

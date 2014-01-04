@@ -3,7 +3,10 @@ inherit M_LIGHT_SOURCE;
 
 #include <lightsaber.h>
 
-string color = choice(({ "blue", "green", "yellow", "red" }));
+string color_crystal = choice(({ "blue", "green", "yellow", "red" }));
+string lens_name = "lens_1";
+string emitter_name = "emitter_1";
+string ecell_name = "ecell_1";
 int deflection_bonus = 0;
 int alignment = 0;
 string name_crystal = "";
@@ -18,7 +21,42 @@ void mudlib_setup()
    set_repair_learn_requirement("lightsaber repair");
    set_repair_guilds(({"jedi"}));
    set_parts_type("lightsaber");
-   add_save(({ "color", "deflection_bonus", "alignment", "name_crystal" }));
+   add_save(({ "color_crystal", "lens_name", "emitter_name", "ecell_name", "deflection_bonus", "alignment", "name_crystal" }));
+
+   // Give time for saved inventory to be loaded first, or to add a specific color at creation
+   call_out("check_if_lightsaber_has_components", 5);
+}
+
+void check_if_lightsaber_has_components()
+{
+   if (this_object())
+   {
+      if (strlen(color_crystal)
+         && !sizeof(filter_array(all_inventory(this_object()), (: $1->id("lightsaber_color_crystal") :))))
+      {
+         new("/d/com/saber/crystal_color", color_crystal)->move(this_object());
+      }
+
+      if (strlen(lens_name)
+         && !sizeof(filter_array(all_inventory(this_object()), (: $1->id("lightsaber_lens") :))))
+      {
+         new("/d/com/saber/" + lens_name)->move(this_object());
+      }
+
+      if (strlen(emitter_name)
+         && !sizeof(filter_array(all_inventory(this_object()), (: $1->id("lightsaber_emitter") :))))
+      {
+         new("/d/com/saber/" + emitter_name)->move(this_object());
+      }
+
+      if (strlen(ecell_name)
+         && !sizeof(filter_array(all_inventory(this_object()), (: $1->id("lightsaber_ecell") :))))
+      {
+         new("/d/com/saber/" + ecell_name)->move(this_object());
+      }
+
+      this_object()->assemble();
+   }
 }
 
 int is_lightsaber() { return 1; }
@@ -28,23 +66,58 @@ string query_wield_message()
    call_out("activate_light_source", 1);
 
    clear_adj();
-   call_out("add_adj", 2, get_lightsaber_color_code(color) + "%^RESET%^");
+   call_out("add_adj", 2, get_lightsaber_color_code(color_crystal) + "%^RESET%^");
 
-   return "$N $vactivate $p $o, which produces a glowing " + get_lightsaber_color_code(color) + "%^RESET%^ blade.";
+   return "$N $vactivate $p $o, which produces a glowing " + get_lightsaber_color_code(color_crystal) + "%^RESET%^ blade.";
 }
 
 string query_unwield_message()
 {
    deactivate_light_source();
 
-   remove_adj(get_lightsaber_color_code(color) + "%^RESET%^");
+   remove_adj(get_lightsaber_color_code(color_crystal) + "%^RESET%^");
 
    return "$N $vshut down $p $o.";
 }
 
 void set_lightsaber_color(string lightsaber_color)
 {
-   color = lightsaber_color;
+   color_crystal = lightsaber_color;
+}
+
+string query_lightsaber_color()
+{
+   return color_crystal;
+}
+
+void set_lightsaber_lens(string lens)
+{
+   lens_name = lens;
+}
+
+string query_lightsaber_lens()
+{
+   return lens_name;
+}
+
+void set_lightsaber_emitter(string emitter)
+{
+   emitter_name = emitter;
+}
+
+string query_lightsaber_emitter()
+{
+   return emitter_name;
+}
+
+void set_lightsaber_ecell(string ecell)
+{
+   ecell_name = ecell;
+}
+
+string query_lightsaber_ecell()
+{
+   return ecell_name;
 }
 
 void add_deflection_bonus(int amount)
@@ -79,9 +152,27 @@ mixed direct_unholster_obj_from_obj() { return 0; }
 
 int valid_wield()
 {
-   if (!strlen(color))
+   if (!strlen(color_crystal))
    {
       tell(owner(this_object()), "You are unable to wield your " + this_object()->short() + " while it has no color crystal.\n");
+
+      return 0;
+   }
+   else if (!strlen(lens_name))
+   {
+      tell(owner(this_object()), "You are unable to wield your " + this_object()->short() + " while it has no lens.\n");
+
+      return 0;
+   }
+   else if (!strlen(emitter_name))
+   {
+      tell(owner(this_object()), "You are unable to wield your " + this_object()->short() + " while it has no emitter.\n");
+
+      return 0;
+   }
+   else if (!strlen(ecell_name))
+   {
+      tell(owner(this_object()), "You are unable to wield your " + this_object()->short() + " while it has no energy cell.\n");
 
       return 0;
    }
@@ -143,10 +234,10 @@ class event_info source_modify_event(class event_info evt)
 
 //      tell(this_body, sprintf("Damage: %i\n", damage));
 
-      if (this_body->has_learned_skill("combat sense") && this_body->test_skill("combat_sense"))
+      if (this_body->has_learned_skill("combat sense") && this_body->test_skill("combat sense"))
       {
          int force = this_body->query_for();
-         rank += this_body->query_skill("combat_sense") / 100;
+         rank += this_body->query_skill("combat sense") / 100;
 
          if (spec <= 0) { spec = this_body->query_guild_specialization_rank("jedi", "sense"); }
 

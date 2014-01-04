@@ -8,6 +8,12 @@ void do_merge_obj_with_obj(object ob1, object ob2)
       return;
    }
 
+   if (!ob1 || !ob2)
+   {
+      write("One of the objects for the merge does not exist.\n");
+      return;
+   }
+
    if (ob1->is_medpac() && ob2->is_medpac())
    {
       int bacta1 = ob1->query_bacta_left();
@@ -77,6 +83,64 @@ void do_merge_obj(object ob)
    write("Merge " + ob->short() + " with what?\n");
 }
 
+void do_merge_obs(array info)
+{
+   if (sizeof(info) > 1)
+   {
+      object array groups = ({ });
+
+      while (sizeof(info))
+      {
+         object array group = ({ });
+         string base = base_name(info[0]);
+
+         foreach (object thing in info)
+         {
+            if (base_name(thing) == base)
+            {
+               group += ({ thing });
+               info -= ({ thing });
+            }
+         }
+
+         if (sizeof(group) > 1)
+         {
+            groups += ({ group });
+         }
+      }
+
+      foreach (object array group in groups)
+      {
+         if (sizeof(group) > 1)
+         {
+            while (sizeof(group) > 1)
+            {
+               if (!group[1])
+               {
+                  group -= ({ group[1] });
+               }
+
+               if (!group[0])
+               {
+                  group -= ({ group[0] });
+               }
+
+               if (sizeof(group) > 1)
+               {
+                  do_merge_obj_with_obj(group[0], group[1]);
+
+                  group -= ({ group[0] });
+               }
+            }
+         }
+      }
+
+      return;
+   }
+
+   write("You appear to have only one " + info[0]->short() + ".\n");
+}
+
 void do_merge()
 {
    write("Merge what with what?\n");
@@ -84,5 +148,5 @@ void do_merge()
 
 void create()
 {
-   add_rules( ({ "", "OBJ", "OBJ with OBJ" }) );
+   add_rules( ({ "", "OBJ", "OBJ with OBJ", "OBS" }) );
 }

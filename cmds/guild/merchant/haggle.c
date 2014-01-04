@@ -1,11 +1,10 @@
-// Last edited by deforce on 02-23-2010
 inherit CMD;
 
 void main(string arg)
 {
    object this_body = this_body();
 
-   if (this_body->query_guild_level("merchant"))
+   if (this_body->query_guild_level("merchant") || this_body->query_guild_level("smuggler"))
    {
       if (!this_body->has_learned_skill("haggling"))
       {
@@ -50,6 +49,6 @@ void main(string arg)
    }
    else
    {
-      write("Only merchants know how to haggle.\n");
+      write("Only merchants and smugglers know how to haggle.\n");
    }
 }
