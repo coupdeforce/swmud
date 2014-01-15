@@ -153,6 +153,7 @@
 #define WATER_ROOM              "/std/water_room"
 #define GRID_SERVER             "/std/grid_server"
 #define GARDEN                  "/std/room/garden"
+#define VEHICLE_ROOM            "/std/vehicle/modules/vehicle_room"
 
 //### temporary
 #define ROOM                    INDOOR_ROOM
@@ -267,7 +268,12 @@
 #define M_MOUNTABLE             "/std/modules/m_mountable"
 #define M_OPENABLE              "/std/modules/m_openable"
 #define M_READABLE              "/std/modules/m_readable"
+#define M_SHUTTLE               "/std/modules/m_shuttle"
 #define M_SIBLING               "/std/modules/m_sibling"
+#define M_SPACE_DOCK            "/std/modules/m_space_dock"
+#define M_SPACE_OBJECT          "/std/modules/m_space_object"
+#define M_SPACE_TARGET          "/std/modules/m_space_target"
+#define M_SPACE_VEHICLE         "/std/modules/m_space_vehicle"
 #define M_SWITCHABLE            "/std/modules/m_switchable"
 #define M_THROWABLE             "/std/modules/m_throwable"
 #define M_TRIGGERS              "/std/modules/m_triggers"

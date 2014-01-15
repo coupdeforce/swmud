@@ -310,7 +310,7 @@ private string eval_dest(mixed arg)
 
 //:FUNCTION query_exit_destination
 //Return the destination path of the given exit.
-varargs string query_exit_destination(string arg)
+varargs mixed query_exit_destination(string arg)
 {
    object which,cont;
    string res, tmp;
@@ -321,8 +321,13 @@ varargs string query_exit_destination(string arg)
       if (which->is_exit()) { return which->query_method_destination("go"); }
    }
 
-   res = eval_dest(arg);
+   if (find_object(arg))
+   {
+      return find_object(arg);
+   }
 
+   res = eval_dest(arg);
+/*
    // See if this room has a container, and if so, if this exit evaluates to an instanced ID #.
    cont = environment(this_object());
 
@@ -331,7 +336,7 @@ varargs string query_exit_destination(string arg)
       ROOMLOG(sprintf("roomcontainer: %O %s", cont, res));
       return cont->query_room(res);
    }
-
+*/
    return res;
 }
 
@@ -411,11 +416,13 @@ void delete_exit(mixed direction)
 // The value should be a filename or a more complex structure as described in the exits doc.
 varargs void add_exit(mixed direction, mixed destination)
 {
-#ifdef USE_COMPLEX_EXITS
+   // USE_COMPLEX_EXITS
+/*
    object exit_ob = new(COMPLEX_EXIT_OBJ);
    exit_ob->add_method(direction, destination);
    return;
-#else
+*/
+   // Basic exits
    class move_data new_exit = new(class move_data);
    new_exit->description = default_desc;
    new_exit->enter_messages = ({ });
@@ -435,7 +442,6 @@ varargs void add_exit(mixed direction, mixed destination)
    else { new_exit->checks = 1; }
 
    exits[direction] = new_exit;
-#endif
 }
 
 //:FUNCTION set_exits
@@ -518,7 +524,7 @@ mixed can_go_str(string arg)
 
 void do_go_str(string dir)
 {
-   class move_data exit=new(class move_data);
+   class move_data exit = new(class move_data);
 
    if (call_hooks("block_" + dir, HOOK_LOR, 0, dir) || call_hooks("block_all", HOOK_LOR, 0, dir))
    {

@@ -2,13 +2,19 @@ inherit VERB_OB;
 
 void do_class_obj(object thing)
 {
-   if (thing->is_armor() || thing->is_weapon())
+   if (thing->is_adversary() || thing->is_armor() || thing->is_weapon())
    {
       string array required_learned_skills = thing->query_required_learned_skills();
       mapping required_skills = thing->query_required_skills();
       mapping required_guilds = thing->query_required_guilds();
 
       write(thing->short() + " has the following properties:\n");
+
+      if (thing->is_adversary())
+      {
+         write(sprintf("\n%16s: %i", "Health", thing->query_health()));
+         write(sprintf("\n%16s: %i\n", "Max Health", thing->query_max_health()));
+      }
 
       if (thing->is_weapon())
       {

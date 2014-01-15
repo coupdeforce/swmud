@@ -196,7 +196,11 @@ void switch_to(object who)
 
    other_targets -= ({ who });
    target = who;
-   this_object()->set_follow(target);
+
+   if (!this_object()->is_body())
+   {
+      this_object()->set_follow(target);
+   }
 }
 
 //:FUNCTION stop_hitting_me

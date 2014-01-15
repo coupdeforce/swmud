@@ -321,24 +321,15 @@ void buy_object_from(object ob, object seller)
       && seller->has_learned_skill("haggling") && (seller->query_toggle("haggle") == "on"))
    {
       int level = seller->query_guild_level("merchant") + seller->query_guild_level("smuggler");
-      int rank = seller->query_skill("haggle") / 100;
-
-      if (!seller->test_skill("haggle", (level * 10) - ((this_object()->query_cha() - seller->query_cha()) * 10)))
-      {
-         value_adjustment += (level + (rank * 5.0));
-      }
-      else
-      {
-         value_adjustment -= random(80 - level + 1);
-
-         if (this_object()->query_cha() > seller->query_cha())
-         {
-            value_adjustment -= random(this_object()->query_cha() - seller->query_cha() + 1);
-         }
-      }
+      value_adjustment += (level + (level * seller->query_cha() / 100.0));
    }
 
    value_adjustment += (seller->query_cha() / 2.0);
+
+   if (value_adjustment > 200.0)
+   {
+      value_adjustment = 200.0;
+   }
 
    value += (value * value_adjustment) / 100.0;
 
@@ -507,24 +498,15 @@ protected int sell_object_to(object ob, object buyer)
       && buyer->has_learned_skill("haggling") && (buyer->query_toggle("haggle") == "on"))
    {
       int level = buyer->query_guild_level("merchant") + buyer->query_guild_level("smuggler");
-      int rank = buyer->query_skill("haggle") / 100;
-
-      if (!buyer->test_skill("haggle", (level * 10) - ((this_object()->query_cha() - buyer->query_cha()) * 10)))
-      {
-         cost_adjustment += (level + (rank * 5.0));
-      }
-      else
-      {
-         cost_adjustment -= random(80 - level + 1);
-
-         if (this_object()->query_cha() > buyer->query_cha())
-         {
-            cost_adjustment -= random(this_object()->query_cha() - buyer->query_cha() + 1);
-         }
-      }
+      cost_adjustment += (level + (level * buyer->query_cha() / 100.0));
    }
 
    cost_adjustment += (buyer->query_cha() / 2.0);
+
+   if (cost_adjustment > 200.0)
+   {
+      cost_adjustment = 200.0;
+   }
 
    cost -= (cost * cost_adjustment) / 100.0;
 

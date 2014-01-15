@@ -62,7 +62,22 @@ string get_base_long()
    res = evaluate(long);
    if (!res) { return "You see nothing special about " + the_short() + ".\n"; }
 
-   return res + "  " + get_extra_description() + "\n";
+   if (strlen(get_extra_description()))
+   {
+      if (strlen(res))
+      {
+         res += "  ";
+      }
+
+      res += get_extra_description();
+   }
+
+   if (strlen(res))
+   {
+      return res + "\n";
+   }
+
+   return res;
 }
 
 string get_extra_long()

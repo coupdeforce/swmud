@@ -24,7 +24,7 @@ string query_base()
 mixed can_go_somewhere(string dir)
 {
    mixed value;
-   value = ::can_go_somewhere(dir);
+//   value = ::can_go_somewhere(dir);
 
    if (!stringp(value) && (value != 1) && is_normal_direction(dir))
    {
@@ -105,6 +105,7 @@ void do_go_somewhere(string dir)
    else
    {
       environment(this_body())->move_to(query_exit_destination(dir, base), dir, query_exit_msg(dir), query_enter_msg(dir));
+   }
 }
 
 mixed query_exit_destination(string arg, string unused)
@@ -126,9 +127,9 @@ string show_exits()
    exit_names = query_exit_directions(0);
    exit_str = ((sizeof(exit_names)) ? implode(exit_names,", ") : "none");
 
-   if (wizardp(this_user()) && sizeof(hidden_exits))
+   if (wizardp(this_user()) && sizeof(query_hidden_exits()))
    {
-      exit_str += ", *" + implode(hidden_exits, ", *");
+      exit_str += ", *" + implode(query_hidden_exits(), ", *");
    }
 
    return exit_str;

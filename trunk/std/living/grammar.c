@@ -1,30 +1,52 @@
-// Last edited by deforce on 11-20-2007
 // An attempt to put all the grammar/gender related stuff in one file.  -Beek
-
 // 0 = neuter, 1 = male, 2 = female.  Anything else, you're weird.
 
 int gender;
 
-//:FUNCTION set_gender
-//Set the object's gender.  0 == neuter, 1 == male, 2 == female
-void set_gender(int x)
+//:FUNCTION set_sex
+//Set the object's sex.  0 == neuter, 1 == male, 2 == female
+void set_sex(int sex)
 {
 /*
    if (this_body() && (this_body() != this_object()) && (wizardp(this_body()->query_userid()) < 3))
    {
-      error("Invalid attempt to set " + this_object()->short() + "'s gender from " + gender + " to " + x + ".\n");
+      error("Invalid attempt to set " + this_object()->short() + "'s sex from " + gender + " to " + sex + ".\n");
    }
 */
 
-   gender = x;
+   gender = sex;
 }
 
+//:FUNCTION set_gender
+//Set the object's sex.  0 == neuter, 1 == male, 2 == female
+void set_gender(int sex)
+{
+   set_sex(sex);
+//   error("Use set_sex instead!");
+}
+
+//:FUNCTION query_sex
+//Query an object's sex
+int query_sex() { return gender; }
+
 //:FUNCTION query_gender
-//Query an object's gender
+//Query an object's sex
 int query_gender() { return gender; }
 
+//:FUNCTION query_sex_string
+//Query the string representation of an objects sex
+string query_sex_string()
+{
+   switch(gender)
+   {
+      case 1: return "male";
+      case 2: return "female";
+      default: return "neuter";
+   }
+}
+
 //:FUNCTION query_gender_string
-//Query the string representation of an objects gender
+//Query the string representation of an objects sex
 string query_gender_string()
 {
    switch(gender)
