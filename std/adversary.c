@@ -1,9 +1,9 @@
-// Last edited by deforce on 04-24-2010
 // ADVERSARY: Beek, April 7, 1997.  Loosely based on the old monster.c
 // Lots of work done by Iizuka to get this working.
 inherit LIVING;
 inherit M_ACTIONS;
 inherit M_SMARTMOVE;
+inherit M_FOLLOW;
 inherit "/std/modules/m_damage_source_body";
 inherit "/std/modules/m_damage_sink_body";
 inherit M_BODY_STATS;
@@ -36,6 +36,7 @@ void set_follow(object who);
 void mudlib_setup(mixed array args...)
 {
    living::mudlib_setup(args...);
+   m_follow::mudlib_setup();
    // Please read the headers in /std/adversary/mod_config.c before
    // removing this line.
    check_combat_config();

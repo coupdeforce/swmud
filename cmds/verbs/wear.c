@@ -37,7 +37,7 @@ void do_wear_obj(object ob)
       return 0;
    }
 
-   if (ob->query_body_size() > 0)
+   if ((this_body()->query_body_size() > 0) && (ob->query_body_size() > 0))
    {
       if ((this_body()->query_body_size() - ob->query_body_size()) > 1)
       {

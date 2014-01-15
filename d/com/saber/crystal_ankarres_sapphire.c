@@ -7,8 +7,10 @@ void setup()
    set_component_name("ankarres sapphire");
    set_component_type("focusing");
    set_attribute_bonuses(([ "str" : 10, "dex" : 5 ]));
+   set_skill_bonuses(([ "force healing" : 200, "superhealing" : 200 ]));
    set_heal_bonus(2);
    set_critical_chance_bonus(10);
+   set_alignment_restriction(1);
    set_mass(50);
    set_value(7500);
 }

@@ -20,7 +20,6 @@ int query_agi();
 int test_skill(string skill);
 void target_is_asleep();
 void handle_events();
-int is_body();
 int has_skill_delay();
 void perform_combat_action();
 int start_fight(object who);

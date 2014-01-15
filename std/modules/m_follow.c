@@ -19,7 +19,7 @@ void follow_hook(string whichway);
 void arrive_hook(object what);
 void acquire_follow();
 void call_hooks(string, int);
-void respond(string str);
+void do_game_command(string str);
 void add_hook(string tag, function hook);
 
 private nosave function f_follow= (: follow_hook :);
@@ -179,7 +179,7 @@ void follow_hook(string whichway)
    if (follow == this_body())
    {
       set_this_user(this_object());
-      respond("go " + whichway);
+      do_game_command("go " + whichway);
       set_this_user(follow->query_link());
    }
 }
@@ -237,12 +237,12 @@ void do_follow_obj(object ob)
    {
       remove_follow_search(ob);
       clear_follow();
-      this_body()->my_action("You stop following " + ob->short() + ".");
+      this_object()->my_action("You stop following " + ob->short() + ".");
    }
    else
    {
       add_follow_search(ob);
-      this_body()->my_action("You begin following " + ob->short() + ".");
+      this_object()->my_action("You begin following " + ob->short() + ".");
       acquire_follow();
       did_move();
    }
