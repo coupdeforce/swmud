@@ -14,6 +14,7 @@ void mudlib_setup()
 
 string query_wield_message()
 {
+   string color = query_lightsaber_color();
 //   light();
 
    clear_adj();

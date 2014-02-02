@@ -61,9 +61,6 @@ void setup(object set_owner, int level, string race, int sex)
       set_guild_level("assassin", level - 20);
    }
 
-   set_team_alignment(0);
-   set_jedi_alignment(0);
-
    set_skill("unarmed", 1000);
    set_skill("pistol combat", 1000);
    set_skill("rifle combat", 1000);

@@ -120,7 +120,30 @@ int query_guild_rank(string guild_name)
 {
    if (guild_name == primary_guild)
    {
-      if (guild_ranks[guild_name] && (guild_ranks[guild_name] >= 1))
+      if (guild_levels[guild_name] > 20)
+      {
+         if (guild_ranks[guild_name] > 2)
+         {
+            if (guild_ranks[guild_name] >= 4)
+            {
+               if ((guild_name == "jedi") && this_object()->is_body())
+               {
+                  if (!JEDI_RANK_D->is_highest_rank(this_object()->query_userid(), this_object()->query_jedi_alignment()))
+                  {
+                     return 3;
+                  }
+               }
+
+               return 4;
+            }
+
+            return guild_ranks[guild_name];
+         }
+
+         return 2;
+      }
+
+      if (guild_ranks[guild_name] >= 1)
       {
          return guild_ranks[guild_name];
       }
@@ -164,251 +187,20 @@ void set_guild_level(string guild_name, int guild_level)
 //Parameters are guild name, guild rank
 void set_guild_rank(string guild_name, int guild_rank)
 {
-   if (strlen(guild_name) && (member_array(guild_name, keys(guild_levels)) > -1) && (guild_rank > 0) && (guild_rank <= 4))
+   if (strlen(guild_name) && (member_array(guild_name, keys(guild_levels)) > -1))
    {
+      if (guild_rank < 1)
+      {
+         guild_rank = 1;
+      }
+      else if (guild_rank > 4)
+      {
+         guild_rank = 4;
+      }
+
       guild_name = lower_case(guild_name);
       guild_ranks[guild_name] = guild_rank;
    }
-}
-
-//:FUNCTION can_advance_guild_level
-//Parameter is guild name
-//Returns required exp for yes and 0 for no
-int can_advance_guild_level(string guild_name)
-{
-   int level_total = 0;
-   int primary_level = 0;
-   int secondary_level_total = 0;
-   int guild_level = 0;
-
-   if (guild_levels[guild_name])
-   {
-      guild_level = guild_levels[guild_name];
-   }
-
-   if (strlen(primary_guild) && guild_levels[primary_guild])
-   {
-      primary_level = guild_levels[primary_guild];
-   }
-
-   foreach (string name in keys(guild_levels))
-   {
-      level_total += guild_levels[name];
-   }
-
-   secondary_level_total = level_total - primary_level;
-
-   if (!strlen(guild_name)) { return 0; }
-   else if (!strlen(primary_guild) && (guild_level >= 5)) { return 0; }
-   else if ((member_array(guild_name, keys(guild_levels)) == -1) && (sizeof(guild_levels) >= 4)) { return 0; }
-
-   if (guild_name == primary_guild)
-   {
-      if (primary_level < 50)
-      {
-         int next_level = primary_level + 1;
-         int required_experience;
-         string experience_type = "primary";
-
-         if (primary_guild == "jedi")
-         {
-            if (primary_level < 20) { experience_type = "ronin jedi"; }
-            else { experience_type = "secondary"; }
-         }
-
-         required_experience = EXP_D->get_required_exp(experience_type, next_level);
-
-         if (query_experience() < required_experience)
-         {
-            return 0;
-         }
-      }
-      else
-      {
-         return 0;
-      }
-   }
-   else if ((guild_name == "jedi") && (guild_name != primary_guild))
-   {
-      // Jedi sponsor check goes here
-      return 0;
-   }
-   else if ((primary_level <= guild_level) || (guild_level >= 30))
-   {
-      return 0;
-   }
-   else if ((member_array(guild_name, keys(guild_levels)) == -1) && (sizeof(guild_levels) == 3) && (secondary_level_total < 50))
-   {
-      return 0;
-   }
-   else if ((guild_level < 10) && ((secondary_level_total - guild_level) >= 50))
-   {
-      int next_level = guild_level + 1;
-      string experience_type = "quaternary";
-      int required_experience;
-
-      if (guild_name == "jedi") { experience_type = "jedi quaternary"; }
-
-      required_experience = EXP_D->get_required_exp(experience_type, next_level);
-
-      if (query_experience() < required_experience)
-      {
-         return 0;
-      }
-   }
-   else if ((guild_level == 10) && (secondary_level_total >= 60))
-   {
-      return 0;
-   }
-   else if ((guild_level == 20) && (secondary_level_total > 40))
-   {
-      return 0;
-   }
-   else if ((guild_level > 20) && (secondary_level_total > 40) && (guild_level < 30))
-   {
-      int next_level = guild_level + 1;
-      string experience_type = "secondary";
-      int required_experience;
-
-      if (guild_name == "jedi") { experience_type = "jedi"; }
-
-      required_experience = EXP_D->get_required_exp(experience_type, next_level);
-
-      if (query_experience() < required_experience)
-      {
-         return 0;
-      }
-   }
-   else if (guild_level >= 30)
-   {
-      return 0;
-   }
-   else
-   {
-      int next_level = guild_level + 1;
-      string experience_type = "secondary";
-      int required_experience;
-
-      if (guild_name == "jedi") { experience_type = "jedi"; }
-
-      required_experience = EXP_D->get_required_exp(experience_type, next_level);
-
-      if (query_experience() < required_experience)
-      {
-         return 0;
-      }
-   }
-
-   return 1;
-}
-
-//:FUNCTION get_experience_to_advance_guild
-//Parameter is guild name
-//Returns the required amount of experience to advance in guild name
-int get_experience_to_advance_guild(string guild_name)
-{
-   int level_total = 0;
-   int primary_level = 0;
-   int secondary_level_total = 0;
-   int guild_level = 0;
-
-   if (guild_levels[guild_name])
-   {
-      guild_level = guild_levels[guild_name];
-   }
-
-   if (strlen(primary_guild) && guild_levels[primary_guild])
-   {
-      primary_level = guild_levels[primary_guild];
-   }
-
-   foreach (string name in keys(guild_levels))
-   {
-      level_total += guild_levels[name];
-   }
-
-   secondary_level_total = level_total - primary_level;
-
-   if (!strlen(guild_name)) { return 0; }
-   else if (!strlen(primary_guild) && (guild_level >= 5)) { return 0; }
-   else if ((member_array(guild_name, keys(guild_levels)) == -1) && (sizeof(guild_levels) >= 4)) { return 0; }
-   else if (guild_name == primary_guild)
-   {
-      if (primary_level < 50)
-      {
-         int next_level = primary_level + 1;
-         int required_experience;
-         string experience_type = "primary";
-
-         if (primary_guild == "jedi")
-         {
-            if (primary_level < 20) { experience_type = "ronin jedi"; }
-            else { experience_type = "secondary"; }
-         }
-
-         return EXP_D->get_required_exp(experience_type, next_level);
-      }
-      else
-      {
-         return 0;
-      }
-   }
-   else if ((primary_level > 0) && (guild_name != primary_guild) && (primary_level <= guild_level))
-   {
-      return 0;
-   }
-   else if (strlen(primary_guild) && (primary_level <= guild_level) || (guild_level >= 30))
-   {
-      return 0;
-   }
-   else if ((member_array(guild_name, keys(guild_levels)) == -1) && (sizeof(guild_levels) == 3) && (secondary_level_total < 50))
-   {
-      return 0;
-   }
-   else if ((guild_level < 10) && ((secondary_level_total - guild_level) >= 50))
-   {
-      int next_level = guild_level + 1;
-      string experience_type = "quaternary";
-      int required_experience;
-
-      if (guild_name == "jedi") { experience_type = "jedi quaternary"; }
-
-      return EXP_D->get_required_exp(experience_type, next_level);
-   }
-   else if ((guild_level == 10) && (secondary_level_total >= 60))
-   {
-      return 0;
-   }
-   else if ((guild_level == 20) && (secondary_level_total > 40))
-   {
-      return 0;
-   }
-   else if ((guild_level > 20) && (secondary_level_total > 40) && (guild_level < 30))
-   {
-      int next_level = guild_level + 1;
-      string experience_type = "secondary";
-      int required_experience;
-
-      if (guild_name == "jedi") { experience_type = "jedi"; }
-
-      return EXP_D->get_required_exp(experience_type, next_level);
-   }
-   else if (guild_level == 30)
-   {
-      return 0;
-   }
-   else if (guild_name != primary_guild)
-   {
-      int next_level = guild_level + 1;
-      string experience_type = "secondary";
-      int required_experience;
-
-      if (guild_name == "jedi") { experience_type = "jedi"; }
-
-      return EXP_D->get_required_exp(experience_type, next_level);
-   }
-
-   return 0;
 }
 
 //:FUNCTION advance_guild_level

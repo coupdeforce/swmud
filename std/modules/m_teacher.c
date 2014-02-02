@@ -13,11 +13,15 @@ void train(string ability);
 void teach_construction(string construction);
 void teach_manufacture(string manufacture);
 varargs void advance(string guild);
-int guild_check();
 int query_jedi_alignment();
 void set_not_guild_member(string text);
 void set_got_stuff_to_teach(string text);
 void set_nothing_to_teach(string text);
+void add_guild_options(object player);
+void add_specialization_options(object player);
+string array add_trainable_abilities(object player);
+string array add_trainable_constructions(object player);
+string array add_trainable_manufactures(object player);
 
 array trainable_guilds = ({ });
 mapping trainable_abilities = ([ ]);
@@ -30,201 +34,20 @@ string got_stuff_to_teach = "Here's what I can teach you with your current abili
 string nothing_to_teach = "There is nothing more I can teach you.";
 string need_more_skill = "Let me know when you're better at %s.";
 
-array get_trainable_guilds()
-{
-   return trainable_guilds;
-}
-
-mapping get_trainable_abilities()
-{
-   return trainable_abilities;
-}
-
-mapping get_trainable_constructions()
-{
-   return trainable_constructions;
-}
-
-mapping get_trainable_manufactures()
-{
-   return trainable_manufactures;
-}
-
-mapping get_trainable_specializations()
-{
-   return trainable_specializations;
-}
-
-mapping get_specialization_guilds()
-{
-   return specialization_guilds;
-}
-
 void generate_training_options()
 {
    object player = get_current_player();
-   string array guild_options = ({ });
-   string array ability_options = ({ });
-   string array construction_options = ({ });
-   string array manufacture_options = ({ });
-   string array begin_specialization_options = ({ });
+   string array ability_options;
+   string array construction_options;
+   string array manufacture_options;
 
    if (!player) { return; }
 
-   if ((player->query_primary_guild() == "") && (player->query_primary_level() == 0))
-   {
-      foreach (string guild in trainable_guilds)
-      {
-         int guild_level = player->query_guild_level(guild);
-
-         if (guild == "jedi")
-         {
-            if (sizeof(player->query_guild_levels()) == 0)
-            {
-               string join_text = "I would like to join the Jedi Order.";
-
-               if (query_jedi_alignment() < 1)
-               {
-                  join_text = "I pledge myself to the Dark Side of the Force.";
-               }
-
-               if (player->query_experience() >= player->get_experience_to_advance_guild(guild))
-               {
-                  guild_options += ({ guild });
-                  add_options(([ "$join$" + guild : join_text ]));
-                  add_responses(([ "$join$" + guild : "$join$" + guild + "@@@@$clear$" ]));
-               }
-            }
-         }
-         else if (((sizeof(player->query_guild_levels()) == 0) && player->can_advance_guild_level(guild))
-            || ((guild_level > 0) && (guild_level >= sort_array(player->query_guild_levels(), -1)[0])))
-         {
-            guild_options += ({ guild });
-            add_options(([ "$join$" + guild : "I would like to join the " + title_capitalize(guild) + " guild." ]));
-            add_responses(([ "$join$" + guild : "$join$" + guild + "@@@@$clear$" ]));
-         }
-      }
-
-      if (sizeof(guild_options))
-      {
-         add_start(explode("$join$" + implode(guild_options, ",$join$"), ","));
-      }
-   }
-
-   guild_options = ({ });
-
-   foreach (string guild in trainable_guilds)
-   {
-      if (player->can_advance_guild_level(guild))
-      {
-         guild_options += ({ guild });
-         add_options(([ "$advance$" + guild : "I would like to advance in the " + title_capitalize(guild) + " guild." ]));
-         add_responses(([ "$advance$" + guild : "$advance$" + guild + "@@$advance$" + guild + "@@$clear$" ]));
-      }
-   }
-
-   if (sizeof(guild_options))
-   {
-      add_start(explode("$advance$" + implode(guild_options, ",$advance$"), ","));
-   }
-
-   if (!guild_check()) { return; }
-
-   foreach (string ability in sort_array(keys(trainable_abilities), 1))
-   {
-      if (member_array(ability, player->query_learned_skills()) == -1)
-      {
-         if (sizeof(trainable_abilities[ability]))
-         {
-            int check = 1;
-
-            foreach (string prereq in keys(trainable_abilities[ability]))
-            {
-               if (player->query_skill(prereq) < trainable_abilities[ability][prereq])
-               {
-                  check = 0;
-               }
-            }
-
-            if (check)
-            {
-               ability_options += ({ ability });
-               add_options(([ "$train$" + ability : "I would like to learn " + title_capitalize(ability) + "." ]));
-               add_responses(([ "$train$" + ability : "$train$" + ability + "@@@@" + "$train$" + ability ]));
-            }
-         }
-         else
-         {
-            ability_options += ({ ability });
-            add_options(([ "$train$" + ability : "I would like to learn " + title_capitalize(ability) + "." ]));
-            add_responses(([ "$train$" + ability : "$train$" + ability + "@@@@" + "$train$" + ability ]));
-         }
-      }
-   }
-
-   foreach (string construction in sort_array(keys(trainable_constructions), 1))
-   {
-      if (member_array(construction, player->query_learned_constructions()) == -1)
-      {
-         if (sizeof(trainable_constructions[construction]))
-         {
-            int check = 1;
-
-            foreach (string prereq in keys(trainable_constructions[construction]))
-            {
-               if (player->query_skill(prereq) < trainable_constructions[construction][prereq])
-               {
-                  check = 0;
-               }
-            }
-
-            if (check)
-            {
-               construction_options += ({ construction });
-               add_options(([ "$learn construction$" + construction : "I would like to learn how to construct " + add_article(construction) + "." ]));
-               add_responses(([ "$learn construction$" + construction : "$learn construction$" + construction + "@@@@" + "$learn construction$" + construction ]));
-            }
-         }
-         else
-         {
-            construction_options += ({ construction });
-            add_options(([ "$learn construction$" + construction : "I would like to learn how to construct " + add_article(construction) + "." ]));
-            add_responses(([ "$learn construction$" + construction : "$learn construction$" + construction + "@@@@" + "$learn construction$" + construction ]));
-         }
-      }
-   }
-
-   foreach (string manufacture in sort_array(keys(trainable_manufactures), 1))
-   {
-      if (member_array(manufacture, player->query_learned_manufactures()) == -1)
-      {
-         if (sizeof(trainable_manufactures[manufacture]))
-         {
-            int check = 1;
-
-            foreach (string prereq in keys(trainable_manufactures[manufacture]))
-            {
-               if (player->query_skill(prereq) < trainable_manufactures[manufacture][prereq])
-               {
-                  check = 0;
-               }
-            }
-
-            if (check)
-            {
-               manufacture_options += ({ manufacture });
-               add_options(([ "$learn manufacture$" + manufacture : "I would like to learn how to manufacture " + add_article(manufacture) + "." ]));
-               add_responses(([ "$learn manufacture$" + manufacture : "$learn manufacture$" + manufacture + "@@@@" + "$learn manufacture$" + manufacture ]));
-            }
-         }
-         else
-         {
-            manufacture_options += ({ manufacture });
-            add_options(([ "$learn manufacture$" + manufacture : "I would like to learn how to manufacture " + add_article(manufacture) + "." ]));
-            add_responses(([ "$learn manufacture$" + manufacture : "$learn manufacture$" + manufacture + "@@@@" + "$learn manufacture$" + manufacture ]));
-         }
-      }
-   }
+   add_guild_options(player);
+   add_specialization_options(player);
+   ability_options = add_trainable_abilities(player);
+   construction_options = add_trainable_constructions(player);
+   manufacture_options = add_trainable_manufactures(player);
 
    add_options(([ "$ask_learn$" : "Is there anything you can teach me?" ]));
 
@@ -259,6 +82,71 @@ void generate_training_options()
    }
 
    add_start(({ "$ask_learn$" }));
+}
+
+void add_guild_options(object player)
+{
+   string array guild_options = ({ });
+
+   // Check if player can still join a primary guild
+   if ((player->query_primary_guild() == "") && (player->query_primary_level() == 0))
+   {
+      foreach (string guild in trainable_guilds)
+      {
+         int required_experience = can_advance_guild_level(guild, player->query_primary_guild(), player->query_guilds());
+
+         if ((player->query_guild_level(guild) > 0) || (required_experience > 0))
+         {
+            string join_text = "I would like to join the " + title_capitalize(guild) + " guild.";
+
+            if (guild == "jedi")
+            {
+               join_text = "I would like to join the Jedi Order.";
+
+               if (query_jedi_alignment() < 1)
+               {
+                  join_text = "I pledge myself to the Dark Side of the Force.";
+               }
+            }
+
+            if (player->query_experience() >= required_experience)
+            {
+               guild_options += ({ guild });
+               add_options(([ "$join$" + guild : join_text ]));
+               add_responses(([ "$join$" + guild : "$join$" + guild + "@@@@$clear$" ]));
+            }
+         }
+      }
+
+      if (sizeof(guild_options))
+      {
+         add_start(explode("$join$" + implode(guild_options, ",$join$"), ","));
+      }
+   }
+
+   guild_options = ({ });
+
+   foreach (string guild in trainable_guilds)
+   {
+      int required_exp = can_advance_guild_level(guild, player->query_primary_guild(), player->query_guilds());
+
+      if ((required_exp > 0) && (player->query_experience() >= required_exp))
+      {
+         guild_options += ({ guild });
+         add_options(([ "$advance$" + guild : "I would like to advance in the " + title_capitalize(guild) + " guild." ]));
+         add_responses(([ "$advance$" + guild : "$advance$" + guild + "@@$advance$" + guild + "@@$clear$" ]));
+      }
+   }
+
+   if (sizeof(guild_options))
+   {
+      add_start(explode("$advance$" + implode(guild_options, ",$advance$"), ","));
+   }
+}
+
+void add_specialization_options(object player)
+{
+   string array begin_specialization_options = ({ });
 
    foreach (string specialization in sort_array(keys(trainable_specializations), 1))
    {
@@ -300,6 +188,123 @@ void generate_training_options()
 
       add_start(({ "can specialize" }));
    }
+}
+
+string array add_trainable_abilities(object player)
+{
+   string array ability_options = ({ });
+
+   foreach (string ability in sort_array(keys(trainable_abilities), 1))
+   {
+      if (member_array(ability, player->query_learned_skills()) == -1)
+      {
+         if (sizeof(trainable_abilities[ability]))
+         {
+            int check = 1;
+
+            foreach (string prereq in keys(trainable_abilities[ability]))
+            {
+               if (player->query_skill(prereq) < trainable_abilities[ability][prereq])
+               {
+                  check = 0;
+               }
+            }
+
+            if (check)
+            {
+               ability_options += ({ ability });
+               add_options(([ "$train$" + ability : "I would like to learn " + title_capitalize(ability) + "." ]));
+               add_responses(([ "$train$" + ability : "$train$" + ability + "@@@@" + "$train$" + ability ]));
+            }
+         }
+         else
+         {
+            ability_options += ({ ability });
+            add_options(([ "$train$" + ability : "I would like to learn " + title_capitalize(ability) + "." ]));
+            add_responses(([ "$train$" + ability : "$train$" + ability + "@@@@" + "$train$" + ability ]));
+         }
+      }
+   }
+
+   return ability_options;
+}
+
+string array add_trainable_constructions(object player)
+{
+   string array construction_options = ({ });
+
+   foreach (string construction in sort_array(keys(trainable_constructions), 1))
+   {
+      if (member_array(construction, player->query_learned_constructions()) == -1)
+      {
+         if (sizeof(trainable_constructions[construction]))
+         {
+            int check = 1;
+
+            foreach (string prereq in keys(trainable_constructions[construction]))
+            {
+               if (player->query_skill(prereq) < trainable_constructions[construction][prereq])
+               {
+                  check = 0;
+               }
+            }
+
+            if (check)
+            {
+               construction_options += ({ construction });
+               add_options(([ "$learn construction$" + construction : "I would like to learn how to construct " + add_article(construction) + "." ]));
+               add_responses(([ "$learn construction$" + construction : "$learn construction$" + construction + "@@@@" + "$learn construction$" + construction ]));
+            }
+         }
+         else
+         {
+            construction_options += ({ construction });
+            add_options(([ "$learn construction$" + construction : "I would like to learn how to construct " + add_article(construction) + "." ]));
+            add_responses(([ "$learn construction$" + construction : "$learn construction$" + construction + "@@@@" + "$learn construction$" + construction ]));
+         }
+      }
+   }
+
+   return construction_options;
+}
+
+string array add_trainable_manufactures(object player)
+{
+   string array manufacture_options = ({ });
+
+   foreach (string manufacture in sort_array(keys(trainable_manufactures), 1))
+   {
+      if (member_array(manufacture, player->query_learned_manufactures()) == -1)
+      {
+         if (sizeof(trainable_manufactures[manufacture]))
+         {
+            int check = 1;
+
+            foreach (string prereq in keys(trainable_manufactures[manufacture]))
+            {
+               if (player->query_skill(prereq) < trainable_manufactures[manufacture][prereq])
+               {
+                  check = 0;
+               }
+            }
+
+            if (check)
+            {
+               manufacture_options += ({ manufacture });
+               add_options(([ "$learn manufacture$" + manufacture : "I would like to learn how to manufacture " + add_article(manufacture) + "." ]));
+               add_responses(([ "$learn manufacture$" + manufacture : "$learn manufacture$" + manufacture + "@@@@" + "$learn manufacture$" + manufacture ]));
+            }
+         }
+         else
+         {
+            manufacture_options += ({ manufacture });
+            add_options(([ "$learn manufacture$" + manufacture : "I would like to learn how to manufacture " + add_article(manufacture) + "." ]));
+            add_responses(([ "$learn manufacture$" + manufacture : "$learn manufacture$" + manufacture + "@@@@" + "$learn manufacture$" + manufacture ]));
+         }
+      }
+   }
+
+   return manufacture_options;
 }
 
 void specialize(string specialization)
@@ -367,51 +372,14 @@ void teach_manufacture(string manufacture)
 void advance(string guild)
 {
    object player = get_current_player();
-   int required_experience = player->get_experience_to_advance_guild(guild);
    string primary_guild = player->query_primary_guild();
+   int required_experience = can_advance_guild_level(guild, player->query_primary_guild(), player->query_guilds());
 
    if ((player->query_guild_level(guild) >= 20) && (player->query_guild_rank(guild) < 2))
    {
       tell(player, "You require additional training to advance to level " + (player->query_guild_level(guild) + 1) + " in " + title_capitalize(guild) + ".\n");
 
       return;
-   }
-
-   if (required_experience == 0)
-   {
-      if (guild == primary_guild)
-      {
-         if (guild == "jedi")
-         {
-            required_experience = EXP_D->get_required_exp("ronin jedi", 1);
-         }
-         else
-         {
-            required_experience = EXP_D->get_required_exp("primary", 1);
-         }
-      }
-      else if (sizeof(player->query_guild_names()) < 3)
-      {
-         if (guild == "jedi")
-         {
-            required_experience = EXP_D->get_required_exp("jedi", 1);
-         }
-         else
-         {
-            required_experience = EXP_D->get_required_exp("secondary", 1);
-         }
-      }
-      else
-      {
-         if (guild == "jedi")
-         {
-            required_experience = EXP_D->get_required_exp("jedi quaternary", 1);
-         }
-         else
-         {
-            required_experience = EXP_D->get_required_exp("quaternary", 1);
-         }
-      }
    }
 
    player->advance_guild_level(guild);
@@ -429,7 +397,7 @@ void join(string guild)
    object player = get_current_player();
    player->set_primary_guild(guild);
 
-   if (sizeof(player->query_guild_levels()) == 0)
+   if (player->query_guild_level(guild) < 1)
    {
       advance(guild);
    }
@@ -508,25 +476,34 @@ varargs void set_trainable_specialization(string guild, string specialization, m
    }
 }
 
-int guild_check()
+string array get_trainable_guilds()
 {
-   string array guild_names = get_current_player()->query_guild_names();
+   return trainable_guilds;
+}
 
-   foreach (string guild in trainable_guilds)
-   {
-      int member_guild = member_array(guild, guild_names);
+mapping get_trainable_abilities()
+{
+   return trainable_abilities;
+}
 
-      if (member_guild == -1)
-      {
-         return 0;
-      }
-      else if (get_current_player()->query_guild_level(guild_names[member_guild]) < 1)
-      {
-         return 0;
-      }
-   }
+mapping get_trainable_constructions()
+{
+   return trainable_constructions;
+}
 
-   return 1;
+mapping get_trainable_manufactures()
+{
+   return trainable_manufactures;
+}
+
+mapping get_trainable_specializations()
+{
+   return trainable_specializations;
+}
+
+mapping get_trainable_specialization_guilds()
+{
+   return specialization_guilds;
 }
 
 void set_not_guild_member(string text)

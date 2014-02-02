@@ -18,6 +18,160 @@ int is_normal_direction(string dir)
    return 0;
 }
 
+//:FUNCTION can_advance_guild_level
+//Parameter is guild name
+//Returns required exp for yes and 0 for no
+int can_advance_guild_level(string guild_name, string primary_guild_name, mapping current_guilds)
+{
+   int primary_guild_level = 0;
+   int current_guild_level = 0;
+   string second_guild_name = "";
+   int second_guild_level = 0;
+   string third_guild_name = "";
+   int third_guild_level = 0;
+   string fourth_guild_name = "";
+   int fourth_guild_level = 0;
+
+   if (current_guilds[guild_name])
+   {
+      current_guild_level = current_guilds[guild_name];
+   }
+
+   if (strlen(primary_guild_name) && current_guilds[primary_guild_name])
+   {
+      primary_guild_level = current_guilds[primary_guild_name];
+
+      // No guild can be higher than the primary guild
+      if ((guild_name != primary_guild_name) && (current_guild_level >= primary_guild_level))
+      {
+//         write("No guild can be higher than your primary guild.\n");
+         return 0;
+      }
+      else if (guild_name == primary_guild_name)
+      {
+//         write("Checking primary guild...\n");
+         if (primary_guild_level < 50)
+         {
+            if (guild_name == "jedi")
+            {
+               return EXP_D->get_required_exp("secondary", primary_guild_level + 1);
+            }
+
+            return EXP_D->get_required_exp("primary", primary_guild_level + 1);
+         }
+
+         return 0;
+      }
+
+      foreach (string guild in keys(current_guilds))
+      {
+         if ((guild != primary_guild_name) && (current_guilds[guild] > second_guild_level))
+         {
+//            write("Second guild is " + guild + "\n");
+            second_guild_name = guild;
+            second_guild_level = current_guilds[guild];
+         }
+      }
+
+      foreach (string guild in keys(current_guilds))
+      {
+         if ((guild != primary_guild_name) && (guild != second_guild_name) && (current_guilds[guild] > third_guild_level))
+         {
+//            write("Third guild is " + guild + "\n");
+            third_guild_name = guild;
+            third_guild_level = current_guilds[guild];
+         }
+      }
+
+      foreach (string guild in keys(current_guilds))
+      {
+         if ((guild != primary_guild_name) && (guild != second_guild_name) && (guild != third_guild_name) && (current_guilds[guild] > fourth_guild_level))
+         {
+//            write("Fourth guild is " + guild + "\n");
+            fourth_guild_name = guild;
+            fourth_guild_level = current_guilds[guild];
+         }
+      }
+   }
+   else if (current_guild_level < 10)
+   {
+      if (guild_name == "jedi")
+      {
+         return EXP_D->get_required_exp("jedi", current_guild_level + 1);
+      }
+
+      return EXP_D->get_required_exp("secondary", current_guild_level + 1);
+   }
+
+   // Second guild can be 30
+   if (guild_name == second_guild_name)
+   {
+//      write("Checking second guild...\n");
+      if (second_guild_level < 30)
+      {
+         if (guild_name == "jedi")
+         {
+            return EXP_D->get_required_exp("jedi", second_guild_level + 1);
+         }
+
+         return EXP_D->get_required_exp("secondary", second_guild_level + 1);
+      }
+
+      return 0;
+   }
+
+   // Third guild can be 20
+   if (guild_name == third_guild_name)
+   {
+//      write("Checking third guild...\n");
+      if (third_guild_level < 20)
+      {
+         if (guild_name == "jedi")
+         {
+            return EXP_D->get_required_exp("jedi", third_guild_level + 1);
+         }
+
+         return EXP_D->get_required_exp("secondary", third_guild_level + 1);
+      }
+
+      return 0;
+   }
+
+   // Fourth guild can be 10
+   if (guild_name == fourth_guild_name)
+   {
+//      write("Checking fourth guild...\n");
+      if ((fourth_guild_level < 10) && (guild_name != "jedi"))
+      {
+         return EXP_D->get_required_exp("quaternary", fourth_guild_level + 1);
+      }
+
+      return 0;
+   }
+
+   if (sizeof(keys(current_guilds)) < 4)
+   {
+//      write("You have less than 4 guilds.\n");
+      if (sizeof(keys(current_guilds)) < 3)
+      {
+//         write("You have less than 3 guilds.\n");
+         if (guild_name == "jedi")
+         {
+            return EXP_D->get_required_exp("jedi", 1);
+         }
+
+         return EXP_D->get_required_exp("secondary", 1);
+      }
+
+      if (guild_name != "jedi")
+      {
+         return EXP_D->get_required_exp("quaternary", 1);
+      }
+   }
+
+   return 0;
+}
+
 //:FUNCTION call_trace
 //returns the stack of objects and functions
 string call_trace()

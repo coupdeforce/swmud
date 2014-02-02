@@ -33,7 +33,7 @@ inherit __DIR__ "body/cmd";
 inherit __DIR__ "body/deaths";
 inherit __DIR__ "body/guild_specializations";
 inherit __DIR__ "body/help";
-//inherit __DIR__ "body/jedi";
+inherit __DIR__ "body/jedi";
 inherit __DIR__ "body/money";
 inherit __DIR__ "body/naming";
 inherit __DIR__ "body/quests";

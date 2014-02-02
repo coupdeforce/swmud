@@ -32,7 +32,6 @@ string a_short();
 string query_title();
 string sex_race();
 string get_health_description();
-string team_description(int alignment);
 string health_description(int percent);
 string size_description(int size);
 string customize_description(string type, string name);
@@ -333,25 +332,6 @@ string query_in_room_desc()
    return (string)evaluate(in_room_desc);
 }
 
-string team_health()
-{
-   object this_object = this_object();
-
-   if (this_object->is_living() && !wizardp(this_object))
-   {
-      string output = capitalize(this_object->query_pronoun()) + " " + team_description(this_object->query_team_alignment()) + ".\n";
-
-      if (this_object->is_adversary())
-      {      
-         output += capitalize(this_object->query_pronoun()) + " is " + health_description((this_object->query_health() * 100) / this_object->query_max_health()) + ".\n";
-      }
-
-      return output;
-   }
-
-   return "";
-}
-
 private string get_health_description()
 {
    object this_object = this_object();
@@ -362,34 +342,6 @@ private string get_health_description()
    }
 
    return "";
-}
-
-string team_description(int alignment)
-{
-   switch (alignment)
-   {
-      case 100: return "is a hero of the Rebel Alliance";
-      case 86..99: return "is dedicated to the Rebel Alliance";
-      case 71..85: return "has very strong ties with the Rebel Alliance";
-      case 56..70: return "has strong ties with the Rebel Alliance";
-      case 41..55: return "is associated with the Rebel Alliance";
-      case 26..40: return "is linked to the Rebel Alliance";
-      case 21..25: return "is strongly influenced by the Rebel Alliance";
-      case 16..20: return "is somewhat influenced by the Rebel Alliance";
-      case 1..15: return "has no significant political affiliation";
-      case 0: return "is committed to neutrality";
-      case -15..-1: return "has no significant political affiliation";
-      case -20..-16: return "is somewhat influenced by the Empire";
-      case -25..-21: return "is strongly influenced by the Empire";
-      case -40..-26: return "is linked to the Empire";
-      case -55..-41: return "is associated with the Empire";
-      case -70..-56: return "has strong ties with the Empire";
-      case -85..-71: return "has very strong ties with the Empire";
-      case -99..-86: return "is loyal to the Empire";
-      case -100: return "is a hero of the Empire";
-   }
-
-   return "is in an odd state of team alignment";
 }
 
 string health_description(int percent)
