@@ -1,4 +1,4 @@
-void construct_object(object body)
+int construct_object(object body)
 {
    int damage = 0;
    int durability = 0;
@@ -16,7 +16,7 @@ void construct_object(object body)
    if (!blade1 || !blade2 || !hilt || !product)
    {
       write("Unable to construct double-sword, please tell a wizard.\n");
-      return;
+      return 0;
    }
 
    mass += blade1->query_mass() + blade2->query_mass() + hilt->query_mass();
@@ -70,7 +70,7 @@ void construct_object(object body)
    product->set_mass(mass);
    product->set_value(value);
    product->set_cortosis_weave(cortosis_weave);
-   product->set_customize_record("constructed", body->short());
+   product->set_customize_record("constructed", body->query_userid());
    product->set_autoload();
    product->move(body);
 
@@ -82,4 +82,6 @@ void construct_object(object body)
    {
       body->simple_action("$N carefully $vconstruct a double-sword with " + add_article(blade1_desc) + " blade and " + add_article(blade2_desc) + " blade, and " + add_article(hilt_desc) + " hilt.");
    }
+
+   return 1;
 }

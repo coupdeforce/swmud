@@ -97,6 +97,8 @@ int do_verb_rule(string verb,string rule,mixed args...)
 mixed direct_compare_obj_to_obj(object ob1, object ob2) { return 1; }
 mixed indirect_compare_obj_to_obj(object ob1, object ob2) { return 1; }
 
+mixed direct_descend_obj(object ob) { return 1; }
+
 //:FUNCTION direct_get_obj
 //Do some checks for the parser when we are the OBJ of the "get OBJ" rule
 mixed direct_get_obj(object ob)

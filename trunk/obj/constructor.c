@@ -175,6 +175,15 @@ void generate_list(object player, string product_name)
          }
       }
 
+      foreach (string requirement in learn_requirements)
+      {
+         if (!player->has_learned_construction(requirement))
+         {
+            has_required = 0;
+            break;
+         }
+      }
+
       if (has_required && arrayp(skill_requirements) && sizeof(skill_requirements) && arrayp(skill_requirements[0]) && sizeof(skill_requirements[0][0]))
       {
          has_required = 0;
@@ -183,14 +192,10 @@ void generate_list(object player, string product_name)
          {
             has_required = meets_skill_requirements(player, skill_requirements[set_count]);
          }
-      }
 
-      foreach (string requirement in learn_requirements)
-      {
-         if (!player->has_learned_construction(requirement))
+         if (!has_required)
          {
-            has_required = 0;
-            break;
+            product_list[name] = CONSTRUCT_D->query_product_name(name) + "%^YELLOW%^*%^RESET%^";
          }
       }
 
@@ -318,7 +323,10 @@ int construct_object(object player, string product_name, string verb_used)
 
             foreach (mixed requirement in skill_requirements[set_count])
             {
-               write("  " + SKILL_D->query_skill(requirement[0])[0] + "\n");
+               if (player->query_skill(requirement[0]) < requirement[1])
+               {
+                  write("  " + SKILL_D->query_skill(requirement[0])[0] + "\n");
+               }
             }
          }
 
@@ -379,9 +387,14 @@ int construct_object(object player, string product_name, string verb_used)
    {
       if (load_object(file_name))
       {
-         find_object(file_name)->construct_object(this_body());
-
-         destroy_ingredients(item_list);
+         if (find_object(file_name)->construct_object(this_body()))
+         {
+            destroy_ingredients(item_list);
+         }
+         else
+         {
+            return 0;
+         }
       }
       else
       {
