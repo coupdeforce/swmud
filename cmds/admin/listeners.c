@@ -1,4 +1,3 @@
-// Last edited by deforce on 11-20-2007
 // Created by Deathblade 07-27-1995
 
 //:COMMAND
@@ -90,7 +89,7 @@ private void main(mixed *argv)
 {
    if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 3))
    {
-      out("Sorry, this command is only available to moffs.\n");
+      out("Sorry, this command is only available to admins.\n");
 
       return;
    }

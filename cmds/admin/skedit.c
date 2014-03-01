@@ -1,4 +1,3 @@
-// Last edited by deforce on 06-03-2008
 #include <mudlib.h>
 
 inherit CMD;
@@ -16,7 +15,7 @@ private void main(string arg)
 
    if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 3))
    {
-      out("You need to be a moff in order to edit skills.\n");
+      out("You need to be an admin in order to edit skills.\n");
 
       return;
    }

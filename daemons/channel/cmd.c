@@ -1,4 +1,3 @@
-// Last edited by deforce on 02-11-2008
 // Part of the CHANNEL_D to handle channel command processing.
 #include <classes.h>
 #include <channel.h>
@@ -89,18 +88,18 @@ varargs nomask void cmd_channel(string channel_name, string arg, int channel_typ
          case "admin":
             if (!adminp(user) && (SECURE_D->query_is_wizard(user->query_userid()) < 3))
             {
-               printf("Only moffs can create admin channels.\n");
+               printf("Only admins can create admin channels.\n");
                return;
             }
             set_flags(channel_name, CHANNEL_ADMIN_ONLY);
-            printf("  --> only moffs may tune in\n");
+            printf("  --> only admins may tune in to admin channels\n");
             break;
          case "wiz":
          case "wizard":
             if ((ci->flags & CHANNEL_ADMIN_ONLY) && !adminp(user)
                && (SECURE_D->query_is_wizard(user->query_userid()) < 3))
             {
-               printf("Only moffs can turn off admin-only.\n");
+               printf("Only admins can turn off admin-only.\n");
                return;
             }
             else if (!wizardp(user))
@@ -114,7 +113,7 @@ varargs nomask void cmd_channel(string channel_name, string arg, int channel_typ
          case "team":
             if (!adminp(user) && (SECURE_D->query_is_wizard(user->query_userid()) < 3))
             {
-               printf("Only moffs can create team channels.\n");
+               printf("Only admins can create team channels.\n");
                return;
             }
             set_flags(channel_name, CHANNEL_TEAM_ONLY);
@@ -123,7 +122,7 @@ varargs nomask void cmd_channel(string channel_name, string arg, int channel_typ
          case "guild":
             if (!adminp(user) && (SECURE_D->query_is_wizard(user->query_userid()) < 3))
             {
-               printf("Only moffs can create guild channels.\n");
+               printf("Only admins can create guild channels.\n");
                return;
             }
             set_flags(channel_name, CHANNEL_GUILD_ONLY);
@@ -132,7 +131,7 @@ varargs nomask void cmd_channel(string channel_name, string arg, int channel_typ
          case "race":
             if (!adminp(user) && (SECURE_D->query_is_wizard(user->query_userid()) < 3))
             {
-               printf("Only moffs can create race channels.\n");
+               printf("Only admins can create race channels.\n");
                return;
             }
             set_flags(channel_name, CHANNEL_RACE_ONLY);
@@ -141,7 +140,7 @@ varargs nomask void cmd_channel(string channel_name, string arg, int channel_typ
          case "pk":
             if (!adminp(user) && (SECURE_D->query_is_wizard(user->query_userid()) < 3))
             {
-               printf("Only moffs can create pk channels.\n");
+               printf("Only admins can create pk channels.\n");
                return;
             }
             set_flags(channel_name, CHANNEL_PK_ONLY);
@@ -150,7 +149,7 @@ varargs nomask void cmd_channel(string channel_name, string arg, int channel_typ
          case "permanent":
             if (!adminp(user) && (SECURE_D->query_is_wizard(user->query_userid()) < 3))
             {
-               printf("Only moffs can tweak permanent channels.\n");
+               printf("Only admins can modify permanent channels.\n");
                return;
             }
             set_permanent(channel_name, 1);
@@ -160,7 +159,7 @@ varargs nomask void cmd_channel(string channel_name, string arg, int channel_typ
          case "goaway":
             if (!adminp(user) && (SECURE_D->query_is_wizard(user->query_userid()) < 3))
             {
-               printf("Only moffs can tweak permanent channels.\n");
+               printf("Only admins can modify permanent channels.\n");
                return;
             }
             set_permanent(channel_name, 0);
@@ -170,7 +169,7 @@ varargs nomask void cmd_channel(string channel_name, string arg, int channel_typ
          case "playersilent":
             if (!adminp(user) && (SECURE_D->query_is_wizard(user->query_userid()) < 3))
             {
-               printf("Only moffs can set channels to be player-silent.\n");
+               printf("Only admins can set channels to be player-silent.\n");
                return;
             }
             set_flags(channel_name, PLAYER_SILENT);
@@ -206,7 +205,7 @@ varargs nomask void cmd_channel(string channel_name, string arg, int channel_typ
             && (SECURE_D->query_is_wizard(user->query_userid()) < 3)
             && member_array(user->query_userid(), SECURE_D->query_domain_members("admin-channels")) == -1)
          {
-//            printf("Sorry, but '%s' is for moffs only.\n", user_channel_name);
+//            printf("Sorry, but '%s' is for admins only.\n", user_channel_name);
             return;
          }
          else if ((ci->flags & CHANNEL_TEAM_ONLY) && !wizardp(user)

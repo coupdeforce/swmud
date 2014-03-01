@@ -1,4 +1,3 @@
-// Last edited by deforce on 12-19-2007
 inherit CMD;
 
 private nomask void main(string arg)
@@ -15,7 +14,7 @@ private nomask void main(string arg)
 
    if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 4))
    {
-      out("You need to be a grand moff in order to remove wizards.\n");
+      out("You need to be an admin in order to remove wizards.\n");
 
       return;
    }
