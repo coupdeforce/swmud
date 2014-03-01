@@ -1,4 +1,3 @@
-// Last edited by deforce on 11-20-2007
 inherit CMD;
 inherit M_INPUT;
 
@@ -61,7 +60,7 @@ private nomask void main(string arg)
 
    if (!check_privilege(1) && (SECURE_D->query_is_wizard(this_body()->query_userid()) < 3))
    {
-      out("You need to be a moff in order to delete characters.\n");
+      out("You need to be an admin in order to delete characters.\n");
 
       return;
    }
