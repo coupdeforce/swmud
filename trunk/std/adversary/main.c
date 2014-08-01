@@ -40,7 +40,7 @@ void take_a_swing(object target)
    int slowed = this_body()->query_slowed() && (this_body()->query_agi() * 100 / 200 < random(100)) ? 1 : 0;
    int speed_bonus = 0;
 
-tell(this_object(), "Taking a swing at " + target->short() + ".\n");
+//tell(this_object(), "Taking a swing at " + target->short() + ".\n");
 
 //   if ((environment() != environment(target)) || check_wimpy() || this_object()->query_stunned())
    if (check_wimpy())
@@ -81,13 +81,13 @@ tell(this_object(), "Taking a swing at " + target->short() + ".\n");
             continue;
          }
 
-         if (!test_skill(weapon->query_skill_used()) && (random(200) > (weapon->query_to_hit_bonus(target) + call_hooks("to_hit_bonus", HOOK_SUM))))
+         if (!test_skill(weapon->query_skill_used()) && (random(200) > (weapon->query_to_hit_bonus() + call_hooks("to_hit_bonus", HOOK_SUM))))
          {
             add_event(target, weapon, target->query_random_limb(), "miss", this_object());
          }
          else if (this_object()->is_unjustified_ithorian_target(target))
          {
-            if (random(this_object()->query_skill(weapon->query_skill_used()) + weapon->query_to_hit_bonus(target) + call_hooks("to_hit_bonus", HOOK_SUM)) > random(2000 - weapon->query_to_hit_bonus(target) - call_hooks("to_hit_bonus", HOOK_SUM)))
+            if (random(this_object()->query_skill(weapon->query_skill_used()) + weapon->query_to_hit_bonus() + call_hooks("to_hit_bonus", HOOK_SUM)) > random(2000 - weapon->query_to_hit_bonus() - call_hooks("to_hit_bonus", HOOK_SUM)))
             {
                add_event(target, weapon, target->query_random_limb(), randomize_damage(weapon->query_damage_types()), this_object());
             }

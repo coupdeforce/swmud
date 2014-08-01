@@ -944,6 +944,13 @@ string convert_time(int sec, int type)
    return ret;
 }
 
+//:FUNCTION dice_roll
+//dice_roll(int number_of_dice, int sides)
+// Returns a number composed of separate random numbers, as if rolling dice
+// Examples:
+// dice_roll(1, 6) will return 1-6
+// dice_roll(2, 8) will return 2-16
+// dice_roll(3, 10) will return 3-30
 int dice_roll(int number_of_dice, int sides)
 {
    int result = 0;

@@ -1,4 +1,5 @@
 #include <medpac.h>
+#include <move.h>
 
 void manufacture_object(object body)
 {
@@ -47,7 +48,11 @@ void manufacture_object(object body)
       object product = clone_object("/d/obj/transdermal_patch", "bacta", heal_capacity, heal_rate);
       product->set_customize_record("manufactured", body->short());
       product->set_autoload();
-      product->move(body);
+
+      if (product->move(body) == MOVE_NO_ROOM)
+      {
+         product->move(environment(body));
+      }
 
       body->my_action("$N $vmanufacture a bacta patch from " + bacta_count + " vials of bacta, at " + heal_rate + "% of standard potency.");
       body->other_action("$N $vmanufacture a bacta patch.");

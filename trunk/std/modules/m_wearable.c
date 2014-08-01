@@ -297,7 +297,7 @@ void add_to_hit_bonus(int x)
    to_hit_bonus += x;
 }
 
-int query_to_hit_bonus(object target)
+int query_to_hit_bonus()
 {
    return to_hit_bonus;
 }

@@ -48,7 +48,7 @@ void fill_with(object thing)
 
       clear_id();
       set_id("syringe filled with " + format_liquid_color(type) + " liquid", "syringe");
-      set_long("A syringe that you can use to inject something into a living thing.  It is filled with " + format_liquid_color(type) + " liquid");
+      set_long("A syringe that you can use to inject something into a living thing.\nIt is filled with " + format_liquid_color(type) + " liquid.");
    }
    else
    {

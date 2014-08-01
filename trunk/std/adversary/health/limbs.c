@@ -610,7 +610,19 @@ varargs int heal_us(int x, string limb, int silent)
    }
    else
    {
-      heal_limb(limb, x);
+      if (limb == "all")
+      {
+         heal_us(x, "none", silent);
+
+         foreach (string limb_name in keys(health))
+         {
+            heal_limb(limb_name, x, silent);
+         }
+      }
+      else
+      {
+         heal_limb(limb, x, silent);
+      }
    }
 
    return 0;

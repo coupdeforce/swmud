@@ -1,3 +1,5 @@
+#include <move.h>
+
 int construct_object(object body)
 {
    int damage = 0;
@@ -46,7 +48,11 @@ int construct_object(object body)
    product->set_cortosis_weave(cortosis_weave);
    product->set_customize_record("constructed", body->query_userid());
    product->set_autoload();
-   product->move(body);
+
+   if (product->move(body) == MOVE_NO_ROOM)
+   {
+      product->move(environment(body));
+   }
 
    body->simple_action("$N carefully $vconstruct " + add_article(blade_desc) + " axe with " + add_article(hilt_desc) + " handle.");
 

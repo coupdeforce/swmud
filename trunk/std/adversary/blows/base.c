@@ -147,27 +147,84 @@ class event_info modify_event(class event_info evt)
 {
    if (mapp(evt->data))
    {
-      if (evt->weapon->is_blaster() && evt->data["energy"]
-         && sizeof(filter_array(evt->target->query_weapons(), (: $1->is_lightsaber() :) ))
-         && evt->target->query_guild_level("jedi") && evt->target->has_learned_skill("lightsaber defense"))
+      if (evt->weapon->is_blaster() && evt->data["energy"] && evt->target->query_guild_level("jedi"))
       {
          int jedi_alignment = evt->target->query_jedi_alignment();
+         int level = evt->target->query_guild_level("jedi");
+         int force = evt->target->query_for();
+         int attacker_advantage;
+         int roll;
+         int attacker_roll;
 
-         if (evt->target->test_skill("saber defense", jedi_alignment * (jedi_alignment < 0 ? -10 : 10)))
+         if (sizeof(filter_array(evt->target->query_weapons(), (: $1->is_lightsaber() :) ))
+            && evt->target->has_learned_skill("lightsaber defense"))
          {
-            int level = evt->target->query_guild_level("jedi");
-            int force = evt->target->query_for();
-            int rank = (evt->target->query_skill("jedi defense") / 100) + (evt->target->query_skill("saber defense") / 100);
-            int spec = evt->target->query_guild_specialization_rank("jedi", "defense");
-            int rank_spec;
-            int attacker_advantage = 100;
-            int roll;
-            int attacker_roll = random(attacker_advantage / 2);
+            if (evt->target->test_skill("saber defense", jedi_alignment * (jedi_alignment < 0 ? -10 : 10)))
+            {
+               int rank = (evt->target->query_skill("jedi defense") / 100) + (evt->target->query_skill("saber defense") / 100);
+               int spec = evt->target->query_guild_specialization_rank("jedi", "defense");
+               int rank_spec;
+               attacker_advantage = 100;
+               attacker_roll = random(attacker_advantage / 2);
 
-            if (spec <= 0) { spec = evt->target->query_guild_specialization_rank("jedi", "lightsaber"); }
+               if (spec <= 0) { spec = evt->target->query_guild_specialization_rank("jedi", "lightsaber"); }
 
-            rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
-            roll = random(array_sum(evt->target->query_weapons()->query_deflection_bonus()) + (level / 2) + (force / 5) + rank_spec + 1);
+               rank_spec = (rank + spec) < 0 ? 0 : (rank + spec);
+               roll = random(array_sum(evt->target->query_weapons()->query_deflection_bonus()) + (level / 2) + (force / 5) + rank_spec + 1);
+
+               tell(evt->target, "Your deflection roll is " + roll + " against " + attacker_roll + ".\n");
+
+               if (roll > attacker_roll)
+               {
+                  mapping energy_damage = filter_array(evt->data, (: $1 == "energy" :) );
+                  object this_ob = this_object();
+                  evt->data = filter_array(evt->data, (: ($1 != "energy") && ($1 != "ion") && ($1 != "electrical") :) );
+                  attacker_roll += random(attacker_advantage);
+
+                  tell(evt->target, "Your reflection roll is " + roll + " against " + attacker_roll + ".\n");
+
+                  if (sizeof(this_ob->query_targets()) && (roll > attacker_roll))
+                  {
+                     object reflect_target = evt->attacker;
+                     string limb;
+
+                     if (!reflect_target) { reflect_target = this_ob; }
+
+                     limb = reflect_target->query_random_armor_slot();
+
+                     if (!present("lightsaber_blaster_reflect", evt->target))
+                     {
+                        load_object("/d/obj/spec_damage");
+                        new("/d/obj/spec_damage", "reflected blaster bolt", "lightsaber_blaster_reflect")->move(evt->target);
+                        present("lightsaber_blaster_reflect", evt->target)->set_combat_messages("combat-blaster-reflect");
+                        present("lightsaber_blaster_reflect", evt->target)->set_death_message("$N was killed by a blaster bolt reflected from $P1 lightsaber at $o1.");
+                     }
+
+                     evt->target->add_event(evt->attacker, present("lightsaber_blaster_reflect", evt->target), limb, energy_damage, evt->target);
+                  }
+                  else
+                  {
+                     if (event_damage(evt))
+                     {
+                        evt->data = ({ "deflect", evt->data });
+                     }
+                     else
+                     {
+                        evt->data = "deflect";
+                     }
+
+                     return evt;
+                  }
+               }
+            }
+         }
+         else if (sizeof(filter_array(evt->target->query_weapons(), (: $1->is_sith_alchemy_weapon() :) ))
+            && (evt->target->query_jedi_alignment() < 0))
+         {
+            jedi_alignment *= -1;
+            attacker_advantage = 100;
+            attacker_roll = random(attacker_advantage / 2);
+            roll = random(array_sum(evt->target->query_weapons()->query_deflection_bonus()) + (level / 2) + (force / 5) + 1);
 
             tell(evt->target, "Your deflection roll is " + roll + " against " + attacker_roll + ".\n");
 
@@ -189,15 +246,15 @@ class event_info modify_event(class event_info evt)
 
                   limb = reflect_target->query_random_armor_slot();
 
-                  if (!present("lightsaber_blaster_reflect", evt->target))
+                  if (!present("sith_weapon_blaster_reflect", evt->target))
                   {
                      load_object("/d/obj/spec_damage");
-                     new("/d/obj/spec_damage", "reflected blaster bolt", "lightsaber_blaster_reflect")->move(evt->target);
-                     present("lightsaber_blaster_reflect", evt->target)->set_combat_messages("combat-blaster-reflect");
-                     present("lightsaber_blaster_reflect", evt->target)->set_death_message("$N was killed by a blaster bolt reflected from $P1 lightsaber at $o1.");
+                     new("/d/obj/spec_damage", "reflected blaster bolt", "sith_weapon_blaster_reflect")->move(evt->target);
+                     present("sith_weapon_blaster_reflect", evt->target)->set_combat_messages("combat-blaster-reflect");
+                     present("sith_weapon_blaster_reflect", evt->target)->set_death_message("$N was killed by a blaster bolt reflected by $N1 at $o1.");
                   }
 
-                  evt->target->add_event(evt->attacker, present("lightsaber_blaster_reflect", evt->target), limb, energy_damage, evt->target);
+                  evt->target->add_event(evt->attacker, present("sith_weapon_blaster_reflect", evt->target), limb, energy_damage, evt->target);
                }
                else
                {
