@@ -461,7 +461,7 @@ string long()
 
       foreach (object thing in data->contents)
       {
-         if (thing->is_attached()) { continue; }
+         if (!thing || thing->is_attached()) { continue; }
 
          if (thing->test_flag(F_WIELDED))
          {

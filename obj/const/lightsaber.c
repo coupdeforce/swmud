@@ -1,4 +1,5 @@
 #include <jedi_ranks.h>
+#include <move.h>
 
 int construct_object(object body)
 {
@@ -76,7 +77,11 @@ int construct_object(object body)
    product->set_value(value);
    product->set_customize_record("constructed", body->query_userid());
    product->set_autoload();
-   product->move(body);
+
+   if (product->move(body) == MOVE_NO_ROOM)
+   {
+      product->move(environment(body));
+   }
 
    body->simple_action("$N carefully $vconstruct a lightsaber.");
 

@@ -1,3 +1,4 @@
+#include <move.h>
 #include <toolbox.h>
 
 void destroy_quantity(object body, string ingredient, int amount)
@@ -407,7 +408,11 @@ int construct_object(object player, string product_name, string verb_used)
    {
       product = clone_object(file_name);
       product->set_customize_record("constructed", player->short());
-      product->move(player);
+
+      if (product->move(player) == MOVE_NO_ROOM)
+      {
+         product->move(environment(player));
+      }
 
       destroy_ingredients(item_list);
 

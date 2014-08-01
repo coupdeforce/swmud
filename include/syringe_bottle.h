@@ -1,8 +1,8 @@
 // Last edited by deforce on 03-25-2010
 mapping liquid_color = ([
-   "black" : "%^BLACK%^black%^RESET%^",
+   "black" : "%^BOLD%^%^BLACK%^black%^RESET%^",
    "blue" : "%^BLUE%^blue%^RESET%^",
-   "blueblack" : "%^BLUE%^blue%^BLACK%^black%^RESET%^",
+   "blueblack" : "%^BLUE%^blue%^RESET%^-%^BOLD%^%^BLACK%^black%^RESET%^",
 ]);
 
 mapping liquid_fills = ([

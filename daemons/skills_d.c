@@ -108,11 +108,15 @@ mixed query_skill(string skill_name)
 void set_skill_advance_guild_requirements(string skill, string array requirements)
 {
    skill_advance_guild_requirements[skill] = requirements;
+
+   save_me();
 }
 
 void set_skill_advance_learn_requirements(string skill, string array requirements)
 {
    skill_advance_learn_requirements[skill] = requirements;
+
+   save_me();
 }
 
 string array query_skill_advance_guild_requirements(string skill_name)
@@ -157,6 +161,8 @@ void remove_skill_from_category(string category, string skill_name)
 void remove_category(string category)
 {
    map_delete(skill_categories, category);
+
+   save_me();
 }
 
 string* query_skills_in_category(string category)
@@ -167,6 +173,16 @@ string* query_skills_in_category(string category)
 string* query_skill_categories()
 {
    return keys(skill_categories);
+}
+
+mapping get_skill_advance_guild_requirements()
+{
+   return skill_advance_guild_requirements;
+}
+
+mapping get_skill_advance_learn_requirements()
+{
+   return skill_advance_learn_requirements;
 }
 
 string list_skill_categories()

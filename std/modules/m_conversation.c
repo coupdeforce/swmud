@@ -219,7 +219,7 @@ void do_action(object ob, mixed action)
          }
 
          if (action[0] == '!') { do_game_command(action[1..]); }
-         else if (action[0] == '&') { call_other(this_object(), action[1..]); }
+         else if (action[0] == '&') { call_other(this_object(), explode(action[1..], ",")); }
          else if (action[0..11] == "$specialize$") { call_other(this_object(), "specialize", action[12..]); }
          else if (action[0..6] == "$train$") { call_other(this_object(), "train", action[7..]); }
          else if (action[0..19] == "$learn construction$") { call_other(this_object(), "teach_construction", action[20..]); }

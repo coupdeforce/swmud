@@ -17,10 +17,15 @@ void assign_flag(int, int);
 private int weapon_speed = 1;
 private int to_hit_base = 0;
 private int to_hit_bonus = 0;
+private int stun_base = 0;
 private int stun_bonus = 0;
+private int slow_base = 0;
 private int slow_bonus = 0;
+private int tear_base = 0;
 private int tear_bonus = 0;
+private int critical_chance_base = 0;
 private int critical_chance_bonus = 0;
+private int critical_multiplier_base = 0;
 private int critical_multiplier_bonus = 0;
 private nosave string skill_used = "";
 private mapping damage_types = ([ ]);
@@ -32,7 +37,7 @@ private mapping combat_messages = ([]);
 
 void mudlib_setup()
 {
-   this_object()->add_save( ({ "damage_types", "damage_bonuses", "critical_chance_bonus", "critical_multiplier_bonus", "weapon_speed", "to_hit_base", "to_hit_bonus", "stun_bonus", "slow_bonus", "tear_bonus" }) );
+   this_object()->add_save( ({ "damage_types", "damage_bonuses", "critical_chance_base", "critical_chance_bonus", "critical_multiplier_base", "critical_multiplier_bonus", "weapon_speed", "to_hit_base", "to_hit_bonus", "stun_base", "stun_bonus", "slow_base", "slow_bonus", "tear_base", "tear_bonus" }) );
 }
 
 int can_swing()
@@ -65,7 +70,7 @@ void add_to_hit_bonus(int x)
    to_hit_bonus += x;
 }
 
-int query_to_hit_bonus(object target)
+int query_to_hit_bonus()
 {
    return to_hit_bonus;
 }
@@ -73,6 +78,16 @@ int query_to_hit_bonus(object target)
 void reset_to_hit_bonus()
 {
    to_hit_bonus = 0;
+}
+
+void set_stun_base(int x)
+{
+   stun_base = x;
+}
+
+int query_stun_base()
+{
+   return stun_base;
 }
 
 void add_stun_bonus(int x)
@@ -90,6 +105,16 @@ void reset_stun_bonus()
    stun_bonus = 0;
 }
 
+void set_slow_base(int x)
+{
+   slow_base = x;
+}
+
+int query_slow_base()
+{
+   return slow_base;
+}
+
 void add_slow_bonus(int x)
 {
    slow_bonus += x;
@@ -103,6 +128,16 @@ int query_slow_bonus()
 void reset_slow_bonus()
 {
    slow_bonus = 0;
+}
+
+void set_tear_base(int x)
+{
+   tear_base = x;
+}
+
+int query_tear_base()
+{
+   return tear_base;
 }
 
 void add_tear_bonus(int x)
@@ -120,6 +155,16 @@ void reset_tear_bonus()
    tear_bonus = 0;
 }
 
+void set_critical_chance_base(int x)
+{
+   critical_chance_base = x;
+}
+
+int query_critical_chance_base()
+{
+   return critical_chance_base;
+}
+
 void add_critical_chance_bonus(int x)
 {
    critical_chance_bonus += x;
@@ -133,6 +178,16 @@ int query_critical_chance_bonus()
 void reset_critical_chance_bonus()
 {
    critical_chance_bonus = 0;
+}
+
+void set_critical_multiplier_base(int x)
+{
+   critical_multiplier_base = x;
+}
+
+int query_critical_multiplier_base()
+{
+   return critical_multiplier_base;
 }
 
 void add_critical_multiplier_bonus(int x)
