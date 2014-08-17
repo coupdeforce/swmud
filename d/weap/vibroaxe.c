@@ -1,4 +1,4 @@
-inherit BLADE_BASE;
+inherit VIBRO_BLADE_BASE;
 inherit BLADE_CUSTOM;
 
 void setup()
@@ -11,9 +11,6 @@ void setup()
    set_durability(14);
    set_skill_used("slash 2h");
    set("two_hands", 1);
-   set_weapon_speed(1);
    set_mass(9250);
    set_value(4800);
 }
-
-int can_use_blade_energy_cell() { return 1; }

@@ -9,7 +9,6 @@ void setup()
    set_damage_type("slashing", 8);
    set_durability(8);
    set_skill_used("slash 1h");
-   set_weapon_speed(1);
    set_mass(660);
    set_value(200);
 }

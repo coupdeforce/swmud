@@ -147,7 +147,7 @@ void set_max_velocity(int amount)
 
       if (velocity > max_velocity)
       {
-         adjust_velocity(max_velocity - max_velocity);
+         adjust_velocity(max_velocity - velocity);
       }
    }
 }

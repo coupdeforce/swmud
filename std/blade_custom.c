@@ -19,6 +19,8 @@ void assemble()
    this_ob->reset_armor_bonus();
    this_ob->reset_critical_chance_bonus();
    this_ob->reset_critical_multiplier_bonus();
+   this_ob->reset_vibro_critical_chance_bonus();
+   this_ob->reset_vibro_critical_amount_bonus();
 
    foreach (object thing in all_inventory(this_ob))
    {
@@ -97,8 +99,9 @@ void process_component(object thing)
    this_ob->add_heal_bonus(thing->query_heal_bonus());
    this_ob->add_armor_bonus(thing->query_armor_bonus());
    this_ob->add_critical_chance_bonus(thing->query_critical_chance_bonus());
-
    this_ob->add_critical_multiplier_bonus(thing->query_critical_multiplier_bonus());
+   this_ob->add_vibro_critical_chance_bonus(thing->query_vibro_critical_chance_bonus());
+   this_ob->add_vibro_critical_amount_bonus(thing->query_vibro_critical_amount_bonus());
 }
 
 int indirect_install_obj_in_obj() { return 1; }

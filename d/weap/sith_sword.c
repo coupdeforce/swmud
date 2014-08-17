@@ -9,7 +9,6 @@ void setup()
    set_damage_type("slashing", 24);
    set_durability(24);
    set_skill_used("slash 1h");
-   set_weapon_speed(1);
    set_deflection_base(20);
    set_steal_life_chance_base(20);
    set_steal_life_amount_base(20);

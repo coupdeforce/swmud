@@ -1,4 +1,4 @@
-inherit BLADE_BASE;
+inherit BLADE_DOUBLE_BASE;
 
 void setup()
 {
@@ -9,9 +9,6 @@ void setup()
    set_durability(5);
    set_chance_to_be_damaged(5);
    set_skill_used("slash 2h");
-   set("two_hands", 1);
-   set_weapon_speed(2);
-   set_to_hit_base(-25);
    set_mass(3000);
    set_value(3000);
 }
