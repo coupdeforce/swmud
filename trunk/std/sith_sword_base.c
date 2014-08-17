@@ -10,7 +10,7 @@ int steal_life_amount_bonus = 0;
 void mudlib_setup()
 {
    blade_base::mudlib_setup();
-   add_save(({ "deflection_bonus", "steal_life_chance_base", "steal_life_chance_bonus", "steal_life_amount_base", "steal_life_amount_bonus" }));
+   add_save(({ "deflection_base", "deflection_bonus", "steal_life_chance_base", "steal_life_chance_bonus", "steal_life_amount_base", "steal_life_amount_bonus" }));
 }
 
 int is_sith_alchemy_weapon() { return 1; }

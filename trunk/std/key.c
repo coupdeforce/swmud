@@ -3,6 +3,12 @@ inherit M_GETTABLE;
 
 string key_type;
 
+void mudlib_setup()
+{
+   object::mudlib_setup();
+   add_save( ({ "key_type" }) );
+}
+
 void set_key_type(string type)
 {
    if (strlen(type))

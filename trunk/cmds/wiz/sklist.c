@@ -109,7 +109,20 @@ private void main(string arg)
          }
          else
          {
-            output += "There are no skills in \"" + arg + "\" category.\n";
+            mixed data = SKILL_D->query_skill(arg);
+
+            if (sizeof(data))
+            {
+               output += sprintf("  %-14s  %-" + (WIDTH - 71) + "s  %-5s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s\n",
+                  "Skill", "Full Name", "Advnc", "Str", "Con", "Agi", "Dex", "Per", "Int", "Cha", "Luc", "For");
+               output += "  " + repeat_string("-", (WIDTH - 3)) + "\n";
+               output += sprintf("  %-14s  %-" + (WIDTH - 71) + "s  %-5d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d\n",
+                  arg[0..13], data[0][0..(WIDTH - 62)], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10]);
+            }
+            else
+            {
+               output += "There are no skills in \"" + arg + "\" category.\n";
+            }
          }
       }
       else

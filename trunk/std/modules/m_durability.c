@@ -6,6 +6,8 @@ void assign_flag(int, int);
 
 private int durability = 1;
 private int max_durability = 1;
+private int durability_points = 900;
+private int max_durability_points = 900;
 private int chance_to_be_damaged = 2;
 private nosave int acid_exposure_time = 0;
 private nosave string repair_skill = "melee repair";
@@ -15,34 +17,40 @@ private nosave string parts_type = "weapon";
 
 void mudlib_setup()
 {
-   this_object()->add_save(({ "durability", "max_durability", "chance_to_be_damaged" }));
+   this_object()->add_save(({ "durability", "max_durability", "durability_points", "max_durability_points", "chance_to_be_damaged" }));
 }
 
 void decrease_durability(int x)
 {
-   object owner = owner(this_object());
-   durability -= x;
+   durability_points -= x;
 
-   assign_flag(F_DAMAGED, 1);
-
-   if (durability <= 0)
+   if (durability_points <= 0)
    {
-      durability = 0;
+      object owner = owner(this_object());
+      durability--;
+      durability_points = max_durability_points;
 
-      assign_flag(F_BROKEN, 1);
-   }
+      assign_flag(F_DAMAGED, 1);
 
-   if (owner)
-   {
       if (durability <= 0)
       {
-         tell(owner, "%^ITEM_DAMAGE%^You notice your " + this_object()->short() + "%^RESET%^%^ITEM_DAMAGE%^ breaks from damage.%^RESET%^\n");
-         this_object()->do_remove();
-         this_object()->do_unwield();
+         durability = 0;
+
+         assign_flag(F_BROKEN, 1);
       }
-      else
+
+      if (owner)
       {
-         tell(owner, "%^ITEM_DAMAGE%^You notice your " + this_object()->short() + "%^RESET%^%^ITEM_DAMAGE%^ becomes damaged.%^RESET%^\n");
+         if (durability <= 0)
+         {
+            tell(owner, "%^ITEM_DAMAGE%^You notice your " + this_object()->short() + "%^RESET%^%^ITEM_DAMAGE%^ breaks from damage.%^RESET%^\n");
+            this_object()->do_remove();
+            this_object()->do_unwield();
+         }
+         else
+         {
+            tell(owner, "%^ITEM_DAMAGE%^You notice your " + this_object()->short() + "%^RESET%^%^ITEM_DAMAGE%^ becomes damaged.%^RESET%^\n");
+         }
       }
    }
 }
@@ -73,6 +81,36 @@ int query_durability()
 int query_max_durability()
 {
    return max_durability;
+}
+
+//:FUNCTION set_durability_points
+// Set the durability points an object has.
+void set_durability_points(int amount)
+{
+   durability_points = amount;
+
+   if (max_durability_points < durability_points) { max_durability_points = durability_points; }
+}
+
+//:FUNCTION set_max_durability_points
+// Set the maximum durability points an object has.
+void set_max_durability_points(int amount)
+{
+   max_durability_points = amount;
+}
+
+//:FUNCTION query_durability_points
+// Query the durability points left on an object.
+int query_durability_points()
+{
+   return durability_points;
+}
+
+//:FUNCTION query_max_durability_points
+// Query the maximum durability points an object has.
+int query_max_durability_points()
+{
+   return max_durability_points;
 }
 
 //:FUNCTION set_chance_to_be_damaged

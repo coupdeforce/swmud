@@ -11,7 +11,6 @@ void setup()
    set_durability(10);
    set_skill_used("slash 2h");
    set("two_hands", 1);
-   set_weapon_speed(1);
    set_mass(3080);
    set_value(1600);
 }

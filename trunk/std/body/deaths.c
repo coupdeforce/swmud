@@ -203,7 +203,7 @@ protected void death_penalty()
       {
          if (thing->query_durability() > 1)
          {
-            thing->decrease_durability(1);
+            thing->decrease_durability(thing->query_durability_points());
          }
       }
 
