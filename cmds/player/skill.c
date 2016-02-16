@@ -1,18 +1,17 @@
-// Last modified by deforce on 03-13-2010
 #include <mudlib.h>
 #include <config.h>
 #include <classes.h>
 
 inherit CMD;
+inherit CLASS_SKILL_DATA;
 
 object body;
 
 private void main(string arg)
 {
+   string skill_name;
    int skill_value;
    int pure_skill_value;
-   string array skills = ({ });
-   string array all_skills = ({ });
 
    if (!arg)
    {
@@ -21,22 +20,22 @@ private void main(string arg)
       return;
    }
 
-   arg = lower_case(arg);
+   skill_name = SKILL_D->query_internal_skill_name(lower_case(arg));
    body = this_body();
-   skill_value = body->query_skill(arg);
-   pure_skill_value = body->query_skill_pure(arg);
+   skill_value = body->query_skill(skill_name);
+   pure_skill_value = body->query_skill_pure(skill_name);
 
    if (pure_skill_value > 0)
    {
       int rank = to_int(floor(skill_value / 100));
       int to_next = skill_value - (rank * 100);
-      mixed data = SKILL_D->query_skill(arg);
-      string capname;
+      mixed data = SKILL_D->get_skill_data(skill_name);
       string output = sprintf("Rank %i", rank);
+      string capname = skill_name;
+
+      if (data) { capname = data->proper_name; }
 
       if (rank < 10) { output += sprintf(", %i%% to next rank", to_next); }
-
-      if (data) { capname = data[0]; }
 
       if (pure_skill_value > skill_value)
       {
@@ -54,30 +53,11 @@ private void main(string arg)
       return;
    }
 
-   skills = body->get_skills();
-
-   if (!sizeof(skills))
+   if (!sizeof(body->get_skills()))
    {
       out("You have no skills.\n");
 
       return;
-   }
-
-   all_skills = SKILL_D->query_skills();
-
-   foreach (string name in all_skills)
-   {
-      string capname;
-      mixed data = SKILL_D->query_skill(name);
-
-      if (data) { capname = lower_case(data[0]); }
-
-      if (capname == arg)
-      {
-         main(name);
-
-         return;
-      }
    }
 
    out("You have no skill in " + arg + ".\n");

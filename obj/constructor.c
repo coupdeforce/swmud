@@ -1,5 +1,8 @@
+#include <classes.h>
 #include <move.h>
 #include <toolbox.h>
+
+inherit CLASS_SKILL_DATA;
 
 void destroy_quantity(object body, string ingredient, int amount)
 {
@@ -326,7 +329,14 @@ int construct_object(object player, string product_name, string verb_used)
             {
                if (player->query_skill(requirement[0]) < requirement[1])
                {
-                  write("  " + SKILL_D->query_skill(requirement[0])[0] + "\n");
+                  if (SKILL_D->get_skill_data(requirement[0]))
+                  {
+                     write("  " + SKILL_D->get_skill_data(requirement[0])->proper_name + "\n");
+                  }
+                  else
+                  {
+                     write("  " + requirement[0] + "\n");
+                  }
                }
             }
          }

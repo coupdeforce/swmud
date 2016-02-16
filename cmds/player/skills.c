@@ -1,9 +1,10 @@
-// Last modified by deforce on 12-24-2007
 #include <mudlib.h>
 #include <config.h>
 #include <hooks.h>
+#include <classes.h>
 
 inherit CMD;
+inherit CLASS_SKILL_DATA;
 
 #define WIDTH this_user()->query_screen_width()
 
@@ -37,7 +38,7 @@ private void main(string arg)
       int skill_value;
       int pure_skill_value;
       int rank;
-      mixed data = SKILL_D->query_skill(name);
+      mixed data = SKILL_D->get_skill_data(name);
 
       if (!data)
       {
@@ -52,7 +53,7 @@ private void main(string arg)
       }
       else
       {
-         capname = data[0];
+         capname = data->proper_name;
       }
 
       if (sizeof(my_skill) != 2)

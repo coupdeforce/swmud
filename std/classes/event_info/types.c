@@ -1,4 +1,3 @@
-// Last edited by deforce on 05-03-2010
 #include <combat_modules.h>
 
 class event_info
@@ -8,6 +7,7 @@ class event_info
    object weapon;
    mixed data;
    object attacker;
+   string combat_messages;
 }
 
 int event_damage(class event_info evt)

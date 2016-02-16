@@ -12,6 +12,7 @@
 #define CLASS_NEWSMSG               "/std/classes/newsmsg"
 #define CLASS_PLAYER_GUILD_DATA     "/std/classes/player_guild_data"
 #define CLASS_SKILL                 "/std/classes/skill"
+#define CLASS_SKILL_DATA            "/std/classes/skill_data"
 #define CLASS_STATMODS              "/std/classes/statmods"
 #define CLASS_BODYSLOTS             "/std/classes/bodyslot"
 #define CLASS_MOVE                  "/std/classes/move"

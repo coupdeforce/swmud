@@ -1,14 +1,20 @@
-// Last edited by deforce on 10-12-2009
+#include <classes.h>
 #include <mudlib.h>
 #include <config.h>
 
 inherit CMD;
+inherit CLASS_SKILL_DATA;
 
 #define WIDTH this_user()->query_screen_width()
+
+string format_line(string internal_name, mixed data);
 
 private void main(string arg)
 {
    string array skills = sort_array(SKILL_D->query_skills(), 1);
+   string header = sprintf("%-14s  %-" + (WIDTH - 71) + "s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s\n",
+      "Skill", "Full Name", "AdR", "AdA", "Str", "Con", "Agi", "Dex", "Per", "Int", "Cha", "Luc", "For")
+      + repeat_string("-", (WIDTH - 1)) + "\n";
 
    if (sizeof(skills))
    {
@@ -30,9 +36,9 @@ private void main(string arg)
 
                foreach (string name in sort_array(SKILL_D->query_skills_in_category(category), 1))
                {
-                  mixed data = SKILL_D->query_skill(name);
+                  mixed data = SKILL_D->get_skill_data(name);
 
-                  output += sprintf("  %-14s  %s\n", name, data[0]);
+                  output += sprintf("  %-14s  %s\n", name, data->proper_name);
 
                   uncategorized -= ({ name });
                }
@@ -44,9 +50,9 @@ private void main(string arg)
 
                foreach (string name in uncategorized)
                {
-                  mixed data = SKILL_D->query_skill(name);
+                  mixed data = SKILL_D->get_skill_data(name);
 
-                  output += sprintf("  %-14s  %s\n", name, data[0]);
+                  output += sprintf("  %-14s  %s\n", name, data->proper_name);
                }
             }
          }
@@ -69,17 +75,11 @@ private void main(string arg)
 
             if (sizeof(uncategorized))
             {
-               output += "Uncategorized skills:\n";
-               output += sprintf("  %-14s  %-" + (WIDTH - 71) + "s  %-5s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s\n",
-                  "Skill", "Full Name", "Advnc", "Str", "Con", "Agi", "Dex", "Per", "Int", "Cha", "Luc", "For");
-               output += "  " + repeat_string("-", (WIDTH - 3)) + "\n";
+               output += "Uncategorized skills:\n" + header;
 
                foreach (string name in uncategorized)
                {
-                  mixed data = SKILL_D->query_skill(name);
-
-                  output += sprintf("  %-14s  %-" + (WIDTH - 71) + "s  %-5d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d\n",
-                     name[0..13], data[0][0..(WIDTH - 62)], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10]);
+                  output += format_line(name, SKILL_D->get_skill_data(name));
                }
             }
             else
@@ -94,53 +94,45 @@ private void main(string arg)
 
          if (sizeof(skills))
          {
-            output += capitalize(arg) + " skills:\n";
-            output += sprintf("  %-14s  %-" + (WIDTH - 71) + "s  %-5s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s\n",
-               "Skill", "Full Name", "Advnc", "Str", "Con", "Agi", "Dex", "Per", "Int", "Cha", "Luc", "For");
-            output += "  " + repeat_string("-", (WIDTH - 3)) + "\n";
+            output += title_capitalize(arg) + " skills:\n" + header;
 
-            foreach (string skill in sort_array(skills, 1))
+            foreach (string name in sort_array(skills, 1))
             {
-               mixed data = SKILL_D->query_skill(skill);
-
-               output += sprintf("  %-14s  %-" + (WIDTH - 71) + "s  %-5d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d\n",
-                  skill[0..13], data[0][0..(WIDTH - 62)], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10]);
+               output += format_line(name, SKILL_D->get_skill_data(name));
             }
          }
          else
          {
-            mixed data = SKILL_D->query_skill(arg);
-
-            if (sizeof(data))
+            if (SKILL_D->is_skill(arg))
             {
-               output += sprintf("  %-14s  %-" + (WIDTH - 71) + "s  %-5s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s\n",
-                  "Skill", "Full Name", "Advnc", "Str", "Con", "Agi", "Dex", "Per", "Int", "Cha", "Luc", "For");
-               output += "  " + repeat_string("-", (WIDTH - 3)) + "\n";
-               output += sprintf("  %-14s  %-" + (WIDTH - 71) + "s  %-5d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d\n",
-                  arg[0..13], data[0][0..(WIDTH - 62)], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10]);
+               output += header + format_line(arg, SKILL_D->get_skill_data(arg));
             }
             else
             {
-               output += "There are no skills in \"" + arg + "\" category.\n";
+               out("There is no \"" + arg + "\" skill registered.\n");
             }
          }
       }
       else
       {
-         output += sprintf("%-14s  %-" + (WIDTH - 71) + "s  %-7s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s  %-3s\n",
-            "Skill", "Full Name", "Advnc", "Str", "Con", "Agi", "Dex", "Per", "Int", "Cha", "Luc", "For");
-
-         output += repeat_string("-", (WIDTH - 1)) + "\n";
+         output += header;
 
          foreach (string name in skills)
          {
-            mixed data = SKILL_D->query_skill(name);
-
-            output += sprintf("%-14s  %-" + (WIDTH - 71) + "s  %-5d    %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d\n",
-               name[0..13], data[0][0..(WIDTH - 62)], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10]);
+            output += format_line(name, SKILL_D->get_skill_data(name));
          }
       }
 
       out(output);
    }
+   else
+   {
+      out("There are no skills registered.\n");
+   }
+}
+
+string format_line(string internal_name, mixed data)
+{
+   return sprintf("%-14s  %-" + (WIDTH - 71) + "s  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d  %-3d\n",
+      internal_name[0..13], data->proper_name, data->advance_rate, data->advance_amount, data->weight_str, data->weight_con, data->weight_agi, data->weight_dex, data->weight_per, data->weight_int, data->weight_cha, data->weight_luc, data->weight_for);
 }

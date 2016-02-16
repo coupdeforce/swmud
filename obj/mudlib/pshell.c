@@ -104,12 +104,6 @@ protected void execute_command(string original_input)
 
    // END OF EXPANSION
 
-   if (is_file("/cmds/guild/jedi/" + argv[0] + ".c") && !this_body()->can_feel_force())
-   {
-      write("You are unable to feel the Force.\n");
-      return;
-   }
-
    winner = CMD_D->find_cmd_in_path(argv[0], ({ "/trans/cmds", "/cmds/player", "/cmds/race", "/cmds/guild/assassin", "/cmds/guild/bounty_hunter", "/cmds/guild/diplomat", "/cmds/guild/engineer", "/cmds/guild/jedi", "/cmds/guild/mercenary", "/cmds/guild/merchant", "/cmds/guild/physician", "/cmds/guild/pilot", "/cmds/guild/slicer", "/cmds/guild/smuggler" }) + query_path());
 
    if (!arrayp(winner))

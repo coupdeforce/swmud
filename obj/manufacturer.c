@@ -1,3 +1,7 @@
+#include <classes.h>
+
+inherit CLASS_SKILL_DATA;
+
 mapping check_tools(mixed tools)
 {
    mapping missing = ([ ]);
@@ -221,7 +225,14 @@ int manufacture_object(object player, string product_name, string verb_used)
 
             foreach (mixed requirement in skill_requirements[set_count])
             {
-               write("  " + SKILL_D->query_skill(requirement[0])[0] + "\n");
+               if (SKILL_D->get_skill_data(requirement[0]))
+               {
+                  write("  " + SKILL_D->get_skill_data(requirement[0])->proper_name + "\n");
+               }
+               else
+               {
+                  write("  " + requirement[0] + "\n");
+               }
             }
          }
 
